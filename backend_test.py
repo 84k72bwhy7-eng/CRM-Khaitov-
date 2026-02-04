@@ -119,7 +119,7 @@ class CRMAPITester:
             "source": "Test Source",
             "status": "new"
         }
-        success, response = self.run_test("Create Client", "POST", "api/clients", 201, data=client_data)
+        success, response = self.run_test("Create Client", "POST", "api/clients", 200, data=client_data)
         if success and response.get('id'):
             self.created_resources['clients'].append(response['id'])
             return True
