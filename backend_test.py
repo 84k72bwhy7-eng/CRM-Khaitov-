@@ -251,9 +251,10 @@ class CRMAPITester:
 
     def test_create_user(self):
         """Test user creation (admin only)"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         user_data = {
             "name": "Test Manager",
-            "email": "test.manager@crm.local",
+            "email": f"test.manager.{timestamp}@crm.local",
             "phone": "+998901111111",
             "password": "testpass123",
             "role": "manager"
