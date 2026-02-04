@@ -11,7 +11,8 @@ import {
   UserCog,
   Menu,
   X,
-  Globe
+  Globe,
+  History
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -29,7 +30,10 @@ const Layout = ({ children }) => {
     { to: '/', icon: LayoutDashboard, label: t.nav.dashboard },
     { to: '/clients', icon: Users, label: t.nav.clients },
     { to: '/payments', icon: CreditCard, label: t.nav.payments },
-    ...(isAdmin ? [{ to: '/users', icon: UserCog, label: t.nav.users }] : []),
+    ...(isAdmin ? [
+      { to: '/users', icon: UserCog, label: t.nav.users },
+      { to: '/activity-log', icon: History, label: t.nav.activityLog }
+    ] : []),
     { to: '/settings', icon: Settings, label: t.nav.settings }
   ];
 
@@ -38,7 +42,7 @@ const Layout = ({ children }) => {
       {/* Mobile menu button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-secondary text-white rounded-lg"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-secondary text-white rounded-lg shadow-lg"
         data-testid="mobile-menu-button"
       >
         {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -60,7 +64,7 @@ const Layout = ({ children }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -104,15 +108,15 @@ const Layout = ({ children }) => {
       )}
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen w-full lg:w-auto">
         {/* Header */}
-        <header className="bg-white border-b border-border px-6 py-4 flex items-center justify-end gap-4" data-testid="header">
+        <header className="bg-white border-b border-border px-4 lg:px-6 py-4 flex items-center justify-end gap-4" data-testid="header">
           {/* Language switcher */}
           <div className="flex items-center gap-2">
-            <Globe size={18} className="text-text-secondary" />
+            <Globe size={18} className="text-text-secondary hidden sm:block" />
             <button
               onClick={() => switchLanguage('uz')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 language === 'uz'
                   ? 'bg-primary text-black'
                   : 'text-text-secondary hover:bg-gray-100'
@@ -123,7 +127,7 @@ const Layout = ({ children }) => {
             </button>
             <button
               onClick={() => switchLanguage('ru')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 language === 'ru'
                   ? 'bg-primary text-black'
                   : 'text-text-secondary hover:bg-gray-100'
@@ -136,7 +140,7 @@ const Layout = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <div className="flex-1 p-6 lg:p-8 overflow-auto">
+        <div className="flex-1 p-4 lg:p-8 overflow-auto">
           {children}
         </div>
       </main>
