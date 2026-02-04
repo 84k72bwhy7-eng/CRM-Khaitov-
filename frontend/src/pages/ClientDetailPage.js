@@ -438,7 +438,7 @@ export default function ClientDetailPage() {
                 <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-outline flex-1">
                   {t.common.cancel}
                 </button>
-                <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2" data-testid="save-payment-button">
                   {loading && <Loader2 size={18} className="animate-spin" />}
                   {t.common.save}
                 </button>
