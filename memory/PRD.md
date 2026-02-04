@@ -1,86 +1,106 @@
 # CourseCRM - Product Requirements Document
 
 ## Original Problem Statement
-Build a lightweight CRM system for managing course students and leads. Simple, fast, usable by 5 internal users. Core features: authentication, client management, lead status tracking, manager assignment, notes, payment tracking, dashboard, search & filters.
+Build a lightweight CRM system for managing course students and leads. Simple, fast, usable by 5 internal users. Extended with 11 new feature modules.
 
 ## Architecture
 - **Frontend**: React 18 with Tailwind CSS, React Router v6
 - **Backend**: FastAPI (Python) with JWT authentication
 - **Database**: MongoDB
-- **Proxy**: Nginx (routes /api to backend on 8001, frontend on 3000)
+- **File Storage**: Local (/app/uploads for audio files)
+- **Proxy**: React dev server proxy to backend
 
 ## User Personas
-1. **Admin**: Full access - manages users, sees all clients, all features
-2. **Manager**: Limited access - sees only assigned clients, can add notes/payments
+1. **Admin**: Full access - manages users, statuses, sees all clients, activity log
+2. **Manager**: Limited access - sees only assigned clients, can add notes/payments/reminders
 
 ## Core Requirements (Static)
 - JWT-based authentication (admin/manager roles)
-- Client CRUD with status management (New, Contacted, Sold)
+- Client CRUD with status management
 - Manager assignment per client
-- Notes system per client
-- Payment tracking (paid/pending)
+- Notes/Comments system per client
+- Payment tracking with USD currency
 - Dashboard with stats
 - Search & filter clients
 - Bilingual support (Uzbek/Russian)
 - Premium SaaS UI (Black & Yellow branding)
 
-## What's Been Implemented (2026-02-04)
-### ✅ Completed Features
-- [x] JWT Authentication system with login/logout
-- [x] Role-based access control (admin/manager)
-- [x] Default admin account (admin@crm.local / admin123)
-- [x] Dashboard with stats: today's leads, total clients, sales count, payments
-- [x] Client management: add, edit, delete, view details
-- [x] Client status management (new, contacted, sold)
-- [x] Notes system: add/delete notes per client
-- [x] Payment tracking: add payments, view all payments, filter by status
-- [x] User management (admin only): add, edit, delete users
-- [x] Settings page: update profile, change password
-- [x] Search clients by phone/name
-- [x] Filter clients by status
-- [x] Language switcher (Uzbek/Russian)
-- [x] Premium UI with Black sidebar, Yellow accents, White background
-- [x] Mobile responsive layout
-- [x] All API endpoints with proper error handling
+## What's Been Implemented
+
+### Phase 1 - MVP (2026-02-04)
+- [x] JWT Authentication with login/logout
+- [x] Role-based access control
+- [x] Dashboard with basic stats
+- [x] Client CRUD operations
+- [x] Notes system
+- [x] Payment tracking
+- [x] User management (admin)
+- [x] Language switcher (UZ/RU)
+
+### Phase 2 - Extended Features (2026-02-04)
+- [x] **Lead Comments**: Notes system enhanced with author, timestamp, sorted newest first
+- [x] **USD Currency Support**: Payments stored with currency field, default USD, $ display
+- [x] **Reminder System**: Create reminders with date/time, overdue alerts on dashboard, mark complete
+- [x] **Custom Status Management**: Admin can add/edit/delete statuses with colors
+- [x] **Archive Sold Leads**: Archive/restore functionality with archived view toggle
+- [x] **Export All Contacts**: CSV export of clients
+- [x] **Activity History / Audit Log**: Track who made changes, what, when (admin only)
+- [x] **Manager Sales Statistics**: Dashboard shows per-manager deals and revenue
+- [x] **Audio File Upload**: Upload call recordings, play in browser, stored in /app/uploads
+- [x] **Full Mobile Optimization**: Responsive UI, hamburger menu, touch-friendly
 
 ### Database Schema
-- **users**: id, name, email, phone, password, role, created_at
-- **clients**: id, name, phone, source, manager_id, status, created_at
-- **notes**: id, client_id, text, author_id, author_name, created_at
-- **payments**: id, client_id, amount, status, date, created_at
+**Collections:**
+- `users`: id, name, email, phone, password, role, created_at
+- `clients`: id, name, phone, source, manager_id, status, is_lead, is_archived, archived_at, created_at
+- `notes`: id, client_id, text, author_id, author_name, created_at
+- `payments`: id, client_id, amount, currency, status, date, created_at
+- `reminders`: id, client_id, user_id, text, remind_at, is_completed, created_at
+- `statuses`: id, name, color, order, is_default, created_at
+- `activity_log`: id, user_id, user_name, action, entity_type, entity_id, details, created_at
+- `audio_files`: id, client_id, filename, original_name, content_type, size, uploader_id, uploader_name, created_at
 
 ## Testing Status
-- Backend: 100% pass (23/23 API tests)
-- Frontend: 95% pass (all features working)
+- Backend: 100% pass (all API endpoints)
+- Frontend: 98% pass (minor modal automation issue)
+- Extended Features: 100% pass
 
 ## Prioritized Backlog
 
-### P0 (Critical) - None remaining
-All core MVP features completed
+### P0 (Critical) - COMPLETED
+All 11 requested features implemented
 
-### P1 (High Priority)
+### P1 (High Priority) - Future
 - [ ] Bulk client import (CSV upload)
-- [ ] Client export to Excel/PDF
-- [ ] Manager assignment in client list view
-- [ ] Payment history per client with totals
+- [ ] Excel export (in addition to CSV)
+- [ ] Push notifications for reminders
+- [ ] Advanced date range filters
 
-### P2 (Medium Priority)
-- [ ] Dashboard charts/graphs
-- [ ] Date range filters for clients
-- [ ] Email/SMS notifications for managers
-- [ ] Activity log for client interactions
+### P2 (Medium Priority) - Future
+- [ ] Dashboard charts/graphs visualization
+- [ ] Email/SMS integration for notifications
+- [ ] Client tags/categories
+- [ ] Report generation (PDF)
 
 ### Future Enhancements
 - WhatsApp/Telegram integration for lead capture
 - Course enrollment tracking
 - Automated lead assignment rules
-- Report generation and analytics
+- Multi-tenant support
 
-## Next Tasks
-1. Add bulk import feature for clients
-2. Implement export functionality
-3. Add activity logging
-4. Consider notification system for new leads
+## API Endpoints
+- Auth: POST /api/auth/login, GET /api/auth/me, PUT /api/auth/profile
+- Users: GET/POST /api/users, PUT/DELETE /api/users/{id}
+- Clients: GET/POST /api/clients, GET/PUT/DELETE /api/clients/{id}
+- Archive: POST /api/clients/{id}/archive, POST /api/clients/{id}/restore
+- Notes: GET /api/notes/{client_id}, POST /api/notes, DELETE /api/notes/{id}
+- Payments: GET /api/payments, GET /api/payments/client/{id}, POST/PUT/DELETE /api/payments/{id}
+- Reminders: GET /api/reminders, GET /api/reminders/overdue, POST/PUT/DELETE /api/reminders/{id}
+- Statuses: GET/POST /api/statuses, PUT/DELETE /api/statuses/{id}
+- Activity: GET /api/activity-log
+- Audio: GET /api/audio/{client_id}, POST /api/audio/upload, GET /api/audio/file/{id}, DELETE /api/audio/{id}
+- Export: GET /api/export/clients
+- Dashboard: GET /api/dashboard/stats, GET /api/dashboard/recent-clients, GET /api/dashboard/recent-notes, GET /api/dashboard/manager-stats
 
 ## Credentials
 - Admin: admin@crm.local / admin123
