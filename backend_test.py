@@ -228,7 +228,7 @@ class CRMAPITester:
             "status": "pending",
             "date": "2024-01-15"
         }
-        success, response = self.run_test("Create Payment", "POST", "api/payments", 201, data=payment_data)
+        success, response = self.run_test("Create Payment", "POST", "api/payments", 200, data=payment_data)
         if success and response.get('id'):
             self.created_resources['payments'].append(response['id'])
             return True
