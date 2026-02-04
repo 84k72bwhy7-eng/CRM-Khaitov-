@@ -8,7 +8,9 @@
     "payments": "Платежи",
     "users": "Пользователи",
     "settings": "Настройки",
-    "logout": "Выход"
+    "logout": "Выход",
+    "archive": "Архив",
+    "activityLog": "История действий"
   },
   "auth": {
     "login": "Вход",
@@ -29,7 +31,11 @@
     "recentNotes": "Последние заметки",
     "newLeads": "Новые",
     "contacted": "Связались",
-    "sold": "Продано"
+    "sold": "Продано",
+    "overdueReminders": "Просроченные напоминания",
+    "managerStats": "Статистика менеджеров",
+    "revenue": "Выручка",
+    "deals": "Сделки"
   },
   "clients": {
     "title": "Клиенты",
@@ -50,25 +56,57 @@
     "confirmDelete": "Вы уверены, что хотите удалить этого клиента?",
     "clientDeleted": "Клиент удален",
     "clientCreated": "Клиент создан",
-    "clientUpdated": "Клиент обновлен"
+    "clientUpdated": "Клиент обновлен",
+    "archive": "Архивировать",
+    "restore": "Восстановить",
+    "archived": "Архивированные",
+    "convertToLead": "Преобразовать в лид",
+    "isLead": "Лид",
+    "exportClients": "Экспорт"
   },
   "statuses": {
     "new": "Новый",
     "contacted": "Связались",
-    "sold": "Продано"
+    "sold": "Продано",
+    "title": "Статусы",
+    "addStatus": "Добавить статус",
+    "editStatus": "Редактировать статус",
+    "statusName": "Название статуса",
+    "statusColor": "Цвет",
+    "statusOrder": "Порядок",
+    "statusCreated": "Статус создан",
+    "statusUpdated": "Статус обновлен",
+    "statusDeleted": "Статус удален",
+    "cannotDeleteDefault": "Нельзя удалить стандартный статус",
+    "statusInUse": "Этот статус используется клиентами"
   },
   "notes": {
-    "title": "Заметки",
-    "addNote": "Добавить заметку",
-    "placeholder": "Введите текст заметки...",
-    "noNotes": "Заметок нет",
-    "noteAdded": "Заметка добавлена",
-    "noteDeleted": "Заметка удалена"
+    "title": "Комментарии",
+    "addNote": "Добавить комментарий",
+    "placeholder": "Введите текст комментария...",
+    "noNotes": "Комментариев нет",
+    "noteAdded": "Комментарий добавлен",
+    "noteDeleted": "Комментарий удален"
+  },
+  "reminders": {
+    "title": "Напоминания",
+    "addReminder": "Добавить напоминание",
+    "editReminder": "Редактировать напоминание",
+    "reminderText": "Текст напоминания",
+    "remindAt": "Время напоминания",
+    "noReminders": "Напоминаний нет",
+    "reminderCreated": "Напоминание создано",
+    "reminderUpdated": "Напоминание обновлено",
+    "reminderDeleted": "Напоминание удалено",
+    "markComplete": "Выполнено",
+    "overdue": "Просрочено",
+    "upcoming": "Предстоящие"
   },
   "payments": {
     "title": "Платежи",
     "addPayment": "Добавить платеж",
     "amount": "Сумма",
+    "currency": "Валюта",
     "status": "Статус",
     "date": "Дата",
     "client": "Клиент",
@@ -105,7 +143,41 @@
     "changePassword": "Изменить пароль",
     "newPassword": "Новый пароль",
     "profileUpdated": "Профиль обновлен",
-    "language": "Язык"
+    "language": "Язык",
+    "statusManagement": "Управление статусами"
+  },
+  "audio": {
+    "title": "Аудио файлы",
+    "upload": "Загрузить аудио",
+    "noFiles": "Аудио файлов нет",
+    "uploadSuccess": "Аудио загружено",
+    "deleteSuccess": "Аудио удалено",
+    "play": "Воспроизвести",
+    "uploadedBy": "Загрузил",
+    "invalidType": "Неверный тип файла. Разрешено: mp3, wav, ogg"
+  },
+  "activityLog": {
+    "title": "История действий",
+    "action": "Действие",
+    "user": "Пользователь",
+    "entity": "Объект",
+    "time": "Время",
+    "details": "Детали",
+    "actions": {
+      "create": "Создано",
+      "update": "Обновлено",
+      "delete": "Удалено",
+      "archive": "Архивировано",
+      "restore": "Восстановлено",
+      "upload": "Загружено",
+      "convert_to_lead": "Преобразовано в лид"
+    }
+  },
+  "export": {
+    "title": "Экспорт",
+    "exportCSV": "В формате CSV",
+    "exportExcel": "В формате Excel",
+    "exporting": "Экспорт..."
   },
   "common": {
     "save": "Сохранить",
@@ -121,6 +193,9 @@
     "confirm": "Подтвердить",
     "back": "Назад",
     "view": "Просмотр",
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "all": "Все",
+    "yes": "Да",
+    "no": "Нет"
   }
 }
