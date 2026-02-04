@@ -8,7 +8,9 @@
     "payments": "To'lovlar",
     "users": "Foydalanuvchilar",
     "settings": "Sozlamalar",
-    "logout": "Chiqish"
+    "logout": "Chiqish",
+    "archive": "Arxiv",
+    "activityLog": "Faoliyat tarixi"
   },
   "auth": {
     "login": "Kirish",
@@ -29,7 +31,11 @@
     "recentNotes": "So'nggi eslatmalar",
     "newLeads": "Yangi",
     "contacted": "Bog'lanildi",
-    "sold": "Sotildi"
+    "sold": "Sotildi",
+    "overdueReminders": "Muddati o'tgan eslatmalar",
+    "managerStats": "Menejerlar statistikasi",
+    "revenue": "Daromad",
+    "deals": "Bitimlar"
   },
   "clients": {
     "title": "Mijozlar",
@@ -50,25 +56,57 @@
     "confirmDelete": "Rostdan ham bu mijozni o'chirmoqchimisiz?",
     "clientDeleted": "Mijoz o'chirildi",
     "clientCreated": "Mijoz yaratildi",
-    "clientUpdated": "Mijoz yangilandi"
+    "clientUpdated": "Mijoz yangilandi",
+    "archive": "Arxivlash",
+    "restore": "Qaytarish",
+    "archived": "Arxivlangan",
+    "convertToLead": "Lidga aylantirish",
+    "isLead": "Lid",
+    "exportClients": "Eksport qilish"
   },
   "statuses": {
     "new": "Yangi",
     "contacted": "Bog'lanildi",
-    "sold": "Sotildi"
+    "sold": "Sotildi",
+    "title": "Holatlar",
+    "addStatus": "Holat qo'shish",
+    "editStatus": "Holatni tahrirlash",
+    "statusName": "Holat nomi",
+    "statusColor": "Rang",
+    "statusOrder": "Tartib",
+    "statusCreated": "Holat yaratildi",
+    "statusUpdated": "Holat yangilandi",
+    "statusDeleted": "Holat o'chirildi",
+    "cannotDeleteDefault": "Standart holatni o'chirib bo'lmaydi",
+    "statusInUse": "Bu holat mijozlarda ishlatilmoqda"
   },
   "notes": {
+    "title": "Izohlar",
+    "addNote": "Izoh qo'shish",
+    "placeholder": "Izoh matnini kiriting...",
+    "noNotes": "Izohlar yo'q",
+    "noteAdded": "Izoh qo'shildi",
+    "noteDeleted": "Izoh o'chirildi"
+  },
+  "reminders": {
     "title": "Eslatmalar",
-    "addNote": "Eslatma qo'shish",
-    "placeholder": "Eslatma matnini kiriting...",
-    "noNotes": "Eslatmalar yo'q",
-    "noteAdded": "Eslatma qo'shildi",
-    "noteDeleted": "Eslatma o'chirildi"
+    "addReminder": "Eslatma qo'shish",
+    "editReminder": "Eslatmani tahrirlash",
+    "reminderText": "Eslatma matni",
+    "remindAt": "Eslatish vaqti",
+    "noReminders": "Eslatmalar yo'q",
+    "reminderCreated": "Eslatma yaratildi",
+    "reminderUpdated": "Eslatma yangilandi",
+    "reminderDeleted": "Eslatma o'chirildi",
+    "markComplete": "Bajarildi",
+    "overdue": "Muddati o'tgan",
+    "upcoming": "Kutilmoqda"
   },
   "payments": {
     "title": "To'lovlar",
     "addPayment": "To'lov qo'shish",
     "amount": "Summa",
+    "currency": "Valyuta",
     "status": "Holat",
     "date": "Sana",
     "client": "Mijoz",
@@ -105,7 +143,41 @@
     "changePassword": "Parolni o'zgartirish",
     "newPassword": "Yangi parol",
     "profileUpdated": "Profil yangilandi",
-    "language": "Til"
+    "language": "Til",
+    "statusManagement": "Holatlarni boshqarish"
+  },
+  "audio": {
+    "title": "Audio fayllar",
+    "upload": "Audio yuklash",
+    "noFiles": "Audio fayllar yo'q",
+    "uploadSuccess": "Audio yuklandi",
+    "deleteSuccess": "Audio o'chirildi",
+    "play": "Ijro etish",
+    "uploadedBy": "Yuklagan",
+    "invalidType": "Noto'g'ri fayl turi. Ruxsat: mp3, wav, ogg"
+  },
+  "activityLog": {
+    "title": "Faoliyat tarixi",
+    "action": "Amal",
+    "user": "Foydalanuvchi",
+    "entity": "Ob'ekt",
+    "time": "Vaqt",
+    "details": "Tafsilotlar",
+    "actions": {
+      "create": "Yaratildi",
+      "update": "Yangilandi",
+      "delete": "O'chirildi",
+      "archive": "Arxivlandi",
+      "restore": "Qaytarildi",
+      "upload": "Yuklandi",
+      "convert_to_lead": "Lidga aylantirildi"
+    }
+  },
+  "export": {
+    "title": "Eksport",
+    "exportCSV": "CSV formatida",
+    "exportExcel": "Excel formatida",
+    "exporting": "Eksport qilinmoqda..."
   },
   "common": {
     "save": "Saqlash",
@@ -121,6 +193,9 @@
     "confirm": "Tasdiqlash",
     "back": "Orqaga",
     "view": "Ko'rish",
-    "close": "Yopish"
+    "close": "Yopish",
+    "all": "Barchasi",
+    "yes": "Ha",
+    "no": "Yo'q"
   }
 }
