@@ -1,0 +1,163 @@
+{
+  "identity": {
+    "name": "E1",
+    "role": "Creative Designer",
+    "principles": [
+      "Fusion over Imitation",
+      "Emotion First",
+      "Content is king",
+      "Zoom in",
+      "Negative Space",
+      "Contrast"
+    ]
+  },
+  "project_context": {
+    "app_name": "CourseCRM",
+    "app_type": "SaaS CRM",
+    "target_audience": "Course managers, small teams",
+    "emotional_tone": "Professional, Energetic, Clear, Premium",
+    "theme": "light"
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Manrope",
+        "weights": ["600", "700", "800"],
+        "cdn_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap"
+      },
+      "body": {
+        "family": "Inter",
+        "weights": ["400", "500", "600"],
+        "cdn_url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      }
+    },
+    "rules": [
+      "Headings: Manrope, Tight tracking (-0.02em), Slate 900",
+      "Body: Inter, Normal tracking, Slate 600",
+      "Labels: Uppercase, Tracking wide (0.05em), Text-xs, Font-bold"
+    ]
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#FACC15",
+        "foreground": "#000000",
+        "hover": "#EAB308"
+      },
+      "secondary": {
+        "DEFAULT": "#000000",
+        "foreground": "#FFFFFF",
+        "hover": "#171717"
+      },
+      "background": {
+        "DEFAULT": "#FFFFFF",
+        "subtle": "#F9FAFB",
+        "dark": "#0F172A"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#475569",
+        "muted": "#94A3B8"
+      },
+      "border": {
+        "DEFAULT": "#E2E8F0",
+        "focus": "#000000"
+      },
+      "status": {
+        "success": "#22C55E",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    },
+    "usage_rules": [
+      "Primary Color (Yellow) is for ACTIONS (Buttons, Links, Active States).",
+      "Secondary Color (Black) is for STRUCTURE (Sidebar, Header, Typography).",
+      "Background is predominantly WHITE.",
+      "NEVER use gradients for the yellow. Keep it flat and bold.",
+      "Contrast: Ensure black text on yellow buttons."
+    ]
+  },
+  "spacing": {
+    "scale": ["p-1", "p-2", "p-4", "p-6", "p-8", "p-12", "p-16", "p-24"],
+    "rules": [
+      "Use generous padding (p-6 or p-8) inside cards.",
+      "Gap-6 or Gap-8 for grid layouts.",
+      "Sidebar width: w-64 (fixed)."
+    ]
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "sidebar": {
+      "bg": "bg-black",
+      "text": "text-white",
+      "active_item": "bg-yellow-400 text-black font-bold rounded-md"
+    },
+    "dashboard": {
+      "columns": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4",
+      "gap": "gap-6"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-yellow-400 text-black hover:bg-yellow-500 font-bold rounded-md shadow-sm transition-colors",
+      "secondary": "bg-black text-white hover:bg-gray-900 font-medium rounded-md shadow-sm",
+      "outline": "border-2 border-black text-black hover:bg-gray-50 font-medium rounded-md"
+    },
+    "cards": {
+      "style": "bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow",
+      "padding": "p-6"
+    },
+    "inputs": {
+      "style": "bg-white border-gray-300 focus:border-black focus:ring-1 focus:ring-black rounded-md h-10"
+    },
+    "tables": {
+      "header": "bg-gray-50 text-gray-500 uppercase text-xs font-bold tracking-wider",
+      "row": "hover:bg-gray-50 border-b border-gray-100 transition-colors"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_hero": "https://images.unsplash.com/photo-1672141721513-2c2e4b0d3a15?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "avatars": [
+        "https://images.unsplash.com/photo-1617925357736-8a4ea869b800?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "https://images.unsplash.com/photo-1769708474462-7912f2c5f579?crop=entropy&cs=srgb&fm=jpg&q=85"
+      ],
+      "placeholders": {
+        "chart_bg": "https://images.unsplash.com/photo-1534841070059-fac69c75d466?crop=entropy&cs=srgb&fm=jpg&q=85"
+      }
+    },
+    "icons": "lucide-react"
+  },
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts",
+    "Sonner component are located in /app/src/components/ui/sonner.tsx"
+  ],
+  "instructions_to_main_agent": [
+    "Implement the Sidebar with a fixed width (w-64) and full height. Use the 'secondary' color (Black) for its background.",
+    "The Main Content area should be to the right of the sidebar with a white background.",
+    "Use the 'Manrope' font for all headings (h1, h2, h3).",
+    "Use the 'Inter' font for all body text.",
+    "Ensure all buttons use the 'primary' (Yellow) or 'secondary' (Black) styles defined in components.",
+    "For the Dashboard, use the Bento Grid layout with 'cards' style for widgets.",
+    "Login page should use a split layout: Left side form, Right side 'login_hero' image.",
+    "All interactive elements must have data-testid attributes."
+  ]
+}
