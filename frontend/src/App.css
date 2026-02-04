@@ -75,5 +75,6 @@
 }
 
 .modal-content {
-  @apply bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-slideIn;
+  @apply bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto;
+  animation: slideIn 0.3s ease-out;
 }
