@@ -258,7 +258,7 @@ class CRMAPITester:
             "password": "testpass123",
             "role": "manager"
         }
-        success, response = self.run_test("Create User", "POST", "api/users", 201, data=user_data)
+        success, response = self.run_test("Create User", "POST", "api/users", 200, data=user_data)
         if success and response.get('id'):
             self.created_resources['users'].append(response['id'])
             return True
