@@ -13,6 +13,7 @@ import ClientDetailPage from './pages/ClientDetailPage';
 import PaymentsPage from './pages/PaymentsPage';
 import UsersPage from './pages/UsersPage';
 import SettingsPage from './pages/SettingsPage';
+import ActivityLogPage from './pages/ActivityLogPage';
 
 // Layout
 import Layout from './components/Layout';
@@ -36,7 +37,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AdminRoute = ({ children }) => {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   
   if (!isAdmin) {
     return <Navigate to="/" replace />;
@@ -84,6 +85,15 @@ function AppRoutes() {
           <AdminRoute>
             <Layout>
               <UsersPage />
+            </Layout>
+          </AdminRoute>
+        </ProtectedRoute>
+      } />
+      <Route path="/activity-log" element={
+        <ProtectedRoute>
+          <AdminRoute>
+            <Layout>
+              <ActivityLogPage />
             </Layout>
           </AdminRoute>
         </ProtectedRoute>
