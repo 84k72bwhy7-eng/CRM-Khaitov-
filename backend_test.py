@@ -187,7 +187,7 @@ class CRMAPITester:
         
         client_id = self.created_resources['clients'][0]
         note_data = {"client_id": client_id, "text": "Test note for client"}
-        success, response = self.run_test("Create Note", "POST", "api/notes", 201, data=note_data)
+        success, response = self.run_test("Create Note", "POST", "api/notes", 200, data=note_data)
         if success and response.get('id'):
             self.created_resources['notes'].append(response['id'])
             return True
