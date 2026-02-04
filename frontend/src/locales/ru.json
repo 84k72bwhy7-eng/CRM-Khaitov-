@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "CourseCRM"
+  },
+  "nav": {
+    "dashboard": "Главная",
+    "clients": "Клиенты",
+    "payments": "Платежи",
+    "users": "Пользователи",
+    "settings": "Настройки",
+    "logout": "Выход"
+  },
+  "auth": {
+    "login": "Вход",
+    "email": "Email",
+    "password": "Пароль",
+    "loginButton": "Войти в систему",
+    "loginError": "Неверный email или пароль",
+    "welcome": "Добро пожаловать"
+  },
+  "dashboard": {
+    "title": "Главная",
+    "todaysLeads": "Лиды за сегодня",
+    "totalClients": "Всего клиентов",
+    "salesCount": "Продажи",
+    "totalPaid": "Всего оплачено",
+    "totalPending": "Ожидает оплаты",
+    "recentClients": "Последние клиенты",
+    "recentNotes": "Последние заметки",
+    "newLeads": "Новые",
+    "contacted": "Связались",
+    "sold": "Продано"
+  },
+  "clients": {
+    "title": "Клиенты",
+    "addClient": "Добавить клиента",
+    "editClient": "Редактировать клиента",
+    "deleteClient": "Удалить клиента",
+    "name": "Имя",
+    "phone": "Телефон",
+    "source": "Источник",
+    "status": "Статус",
+    "manager": "Менеджер",
+    "createdAt": "Создан",
+    "actions": "Действия",
+    "searchPlaceholder": "Поиск по телефону или имени...",
+    "filterByStatus": "Фильтр по статусу",
+    "allStatuses": "Все статусы",
+    "noClients": "Клиенты не найдены",
+    "confirmDelete": "Вы уверены, что хотите удалить этого клиента?",
+    "clientDeleted": "Клиент удален",
+    "clientCreated": "Клиент создан",
+    "clientUpdated": "Клиент обновлен"
+  },
+  "statuses": {
+    "new": "Новый",
+    "contacted": "Связались",
+    "sold": "Продано"
+  },
+  "notes": {
+    "title": "Заметки",
+    "addNote": "Добавить заметку",
+    "placeholder": "Введите текст заметки...",
+    "noNotes": "Заметок нет",
+    "noteAdded": "Заметка добавлена",
+    "noteDeleted": "Заметка удалена"
+  },
+  "payments": {
+    "title": "Платежи",
+    "addPayment": "Добавить платеж",
+    "amount": "Сумма",
+    "status": "Статус",
+    "date": "Дата",
+    "client": "Клиент",
+    "paid": "Оплачено",
+    "pending": "Ожидает",
+    "noPayments": "Платежи не найдены",
+    "paymentAdded": "Платеж добавлен",
+    "paymentUpdated": "Платеж обновлен",
+    "paymentDeleted": "Платеж удален",
+    "debtors": "Должники",
+    "paidClients": "Оплатившие клиенты"
+  },
+  "users": {
+    "title": "Пользователи",
+    "addUser": "Добавить пользователя",
+    "editUser": "Редактировать пользователя",
+    "name": "Имя",
+    "email": "Email",
+    "phone": "Телефон",
+    "role": "Роль",
+    "admin": "Администратор",
+    "manager": "Менеджер",
+    "password": "Пароль",
+    "noUsers": "Пользователи не найдены",
+    "userCreated": "Пользователь создан",
+    "userUpdated": "Пользователь обновлен",
+    "userDeleted": "Пользователь удален",
+    "confirmDelete": "Вы уверены, что хотите удалить этого пользователя?"
+  },
+  "settings": {
+    "title": "Настройки",
+    "profile": "Профиль",
+    "updateProfile": "Обновить профиль",
+    "changePassword": "Изменить пароль",
+    "newPassword": "Новый пароль",
+    "profileUpdated": "Профиль обновлен",
+    "language": "Язык"
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "add": "Добавить",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка",
+    "success": "Успешно",
+    "confirm": "Подтвердить",
+    "back": "Назад",
+    "view": "Просмотр",
+    "close": "Закрыть"
+  }
+}

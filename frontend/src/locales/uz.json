@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "CourseCRM"
+  },
+  "nav": {
+    "dashboard": "Bosh sahifa",
+    "clients": "Mijozlar",
+    "payments": "To'lovlar",
+    "users": "Foydalanuvchilar",
+    "settings": "Sozlamalar",
+    "logout": "Chiqish"
+  },
+  "auth": {
+    "login": "Kirish",
+    "email": "Email",
+    "password": "Parol",
+    "loginButton": "Tizimga kirish",
+    "loginError": "Email yoki parol noto'g'ri",
+    "welcome": "Xush kelibsiz"
+  },
+  "dashboard": {
+    "title": "Bosh sahifa",
+    "todaysLeads": "Bugungi lidlar",
+    "totalClients": "Jami mijozlar",
+    "salesCount": "Sotuvlar",
+    "totalPaid": "Jami to'langan",
+    "totalPending": "Kutilayotgan to'lov",
+    "recentClients": "So'nggi mijozlar",
+    "recentNotes": "So'nggi eslatmalar",
+    "newLeads": "Yangi",
+    "contacted": "Bog'lanildi",
+    "sold": "Sotildi"
+  },
+  "clients": {
+    "title": "Mijozlar",
+    "addClient": "Mijoz qo'shish",
+    "editClient": "Mijozni tahrirlash",
+    "deleteClient": "Mijozni o'chirish",
+    "name": "Ism",
+    "phone": "Telefon",
+    "source": "Manba",
+    "status": "Holat",
+    "manager": "Menejer",
+    "createdAt": "Yaratilgan",
+    "actions": "Amallar",
+    "searchPlaceholder": "Telefon yoki ism bo'yicha qidirish...",
+    "filterByStatus": "Holat bo'yicha",
+    "allStatuses": "Barcha holatlar",
+    "noClients": "Mijozlar topilmadi",
+    "confirmDelete": "Rostdan ham bu mijozni o'chirmoqchimisiz?",
+    "clientDeleted": "Mijoz o'chirildi",
+    "clientCreated": "Mijoz yaratildi",
+    "clientUpdated": "Mijoz yangilandi"
+  },
+  "statuses": {
+    "new": "Yangi",
+    "contacted": "Bog'lanildi",
+    "sold": "Sotildi"
+  },
+  "notes": {
+    "title": "Eslatmalar",
+    "addNote": "Eslatma qo'shish",
+    "placeholder": "Eslatma matnini kiriting...",
+    "noNotes": "Eslatmalar yo'q",
+    "noteAdded": "Eslatma qo'shildi",
+    "noteDeleted": "Eslatma o'chirildi"
+  },
+  "payments": {
+    "title": "To'lovlar",
+    "addPayment": "To'lov qo'shish",
+    "amount": "Summa",
+    "status": "Holat",
+    "date": "Sana",
+    "client": "Mijoz",
+    "paid": "To'langan",
+    "pending": "Kutilmoqda",
+    "noPayments": "To'lovlar topilmadi",
+    "paymentAdded": "To'lov qo'shildi",
+    "paymentUpdated": "To'lov yangilandi",
+    "paymentDeleted": "To'lov o'chirildi",
+    "debtors": "Qarzdorlar",
+    "paidClients": "To'lagan mijozlar"
+  },
+  "users": {
+    "title": "Foydalanuvchilar",
+    "addUser": "Foydalanuvchi qo'shish",
+    "editUser": "Foydalanuvchini tahrirlash",
+    "name": "Ism",
+    "email": "Email",
+    "phone": "Telefon",
+    "role": "Rol",
+    "admin": "Administrator",
+    "manager": "Menejer",
+    "password": "Parol",
+    "noUsers": "Foydalanuvchilar topilmadi",
+    "userCreated": "Foydalanuvchi yaratildi",
+    "userUpdated": "Foydalanuvchi yangilandi",
+    "userDeleted": "Foydalanuvchi o'chirildi",
+    "confirmDelete": "Rostdan ham bu foydalanuvchini o'chirmoqchimisiz?"
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "profile": "Profil",
+    "updateProfile": "Profilni yangilash",
+    "changePassword": "Parolni o'zgartirish",
+    "newPassword": "Yangi parol",
+    "profileUpdated": "Profil yangilandi",
+    "language": "Til"
+  },
+  "common": {
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "add": "Qo'shish",
+    "search": "Qidirish",
+    "filter": "Filtr",
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik yuz berdi",
+    "success": "Muvaffaqiyatli",
+    "confirm": "Tasdiqlash",
+    "back": "Orqaga",
+    "view": "Ko'rish",
+    "close": "Yopish"
+  }
+}
