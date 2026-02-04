@@ -2,6 +2,7 @@
   "name": "course-crm",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:8001",
   "dependencies": {
     "autoprefixer": "^10.4.16",
     "axios": "^1.6.2",
