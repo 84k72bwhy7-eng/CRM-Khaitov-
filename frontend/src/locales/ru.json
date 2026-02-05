@@ -10,7 +10,8 @@
     "settings": "Настройки",
     "logout": "Выход",
     "archive": "Архив",
-    "activityLog": "История действий"
+    "activityLog": "История действий",
+    "import": "Импорт"
   },
   "auth": {
     "login": "Вход",
@@ -35,7 +36,13 @@
     "overdueReminders": "Просроченные напоминания",
     "managerStats": "Статистика менеджеров",
     "revenue": "Выручка",
-    "deals": "Сделки"
+    "deals": "Сделки",
+    "analytics": "Аналитика",
+    "monthlyStats": "Месячная статистика",
+    "tariffStats": "По тарифам",
+    "monthComparison": "Сравнение по месяцам",
+    "growth": "Рост",
+    "decline": "Снижение"
   },
   "clients": {
     "title": "Клиенты",
@@ -62,7 +69,25 @@
     "archived": "Архивированные",
     "convertToLead": "Преобразовать в лид",
     "isLead": "Лид",
-    "exportClients": "Экспорт"
+    "exportClients": "Экспорт",
+    "tariff": "Тариф",
+    "selectTariff": "Выберите тариф",
+    "initialComment": "Начальный комментарий",
+    "setReminder": "Добавить напоминание",
+    "duplicatePhone": "Этот номер телефона уже существует"
+  },
+  "tariffs": {
+    "title": "Тарифы",
+    "addTariff": "Добавить тариф",
+    "editTariff": "Редактировать тариф",
+    "tariffName": "Название тарифа",
+    "tariffPrice": "Цена",
+    "tariffDescription": "Описание",
+    "noTariffs": "Тарифы не найдены",
+    "tariffCreated": "Тариф создан",
+    "tariffUpdated": "Тариф обновлен",
+    "tariffDeleted": "Тариф удален",
+    "tariffInUse": "Этот тариф используется клиентами"
   },
   "statuses": {
     "new": "Новый",
@@ -144,7 +169,34 @@
     "newPassword": "Новый пароль",
     "profileUpdated": "Профиль обновлен",
     "language": "Язык",
-    "statusManagement": "Управление статусами"
+    "statusManagement": "Управление статусами",
+    "tariffManagement": "Управление тарифами",
+    "currencySettings": "Настройки валюты",
+    "selectCurrency": "Выберите валюту",
+    "currencyUpdated": "Валюта обновлена"
+  },
+  "import": {
+    "title": "Импорт",
+    "uploadFile": "Загрузите файл",
+    "selectFile": "Выберите CSV или Excel файл",
+    "preview": "Предпросмотр",
+    "importing": "Импорт...",
+    "importSuccess": "Импорт успешен",
+    "importFailed": "Ошибка импорта",
+    "totalRows": "Всего строк",
+    "validRows": "Корректные строки",
+    "duplicates": "Дубликаты",
+    "errors": "Ошибки",
+    "downloadFailed": "Скачать ошибочные строки",
+    "confirmImport": "Подтвердите импорт",
+    "skipDuplicates": "Пропустить дубликаты",
+    "columnMapping": "Сопоставление колонок"
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "noNotifications": "Нет уведомлений",
+    "markAllRead": "Отметить все как прочитанные",
+    "newNotification": "Новое уведомление"
   },
   "audio": {
     "title": "Аудио файлы",
@@ -170,7 +222,8 @@
       "archive": "Архивировано",
       "restore": "Восстановлено",
       "upload": "Загружено",
-      "convert_to_lead": "Преобразовано в лид"
+      "convert_to_lead": "Преобразовано в лид",
+      "import": "Импортировано"
     }
   },
   "export": {
@@ -196,6 +249,7 @@
     "close": "Закрыть",
     "all": "Все",
     "yes": "Да",
-    "no": "Нет"
+    "no": "Нет",
+    "optional": "Необязательно"
   }
 }
