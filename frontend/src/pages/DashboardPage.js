@@ -83,17 +83,43 @@ export default function DashboardPage() {
       {/* Overdue Reminders Alert */}
       {overdueReminders.length > 0 && (
         <div className="card p-4 bg-red-50 border-red-200" data-testid="overdue-reminders-alert">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-500" size={24} />
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="text-red-500 flex-shrink-0 mt-0.5" size={24} />
             <div className="flex-1">
               <p className="font-medium text-red-800">{t.dashboard.overdueReminders}: {overdueReminders.length}</p>
-              <div className="mt-2 space-y-1">
-                {overdueReminders.slice(0, 3).map((reminder) => (
-                  <p key={reminder.id} className="text-sm text-red-600">
-                    • {reminder.client_name}: {reminder.text}
-                  </p>
+              <div className="mt-3 space-y-2">
+                {overdueReminders.slice(0, 5).map((reminder) => (
+                  <div 
+                    key={reminder.id} 
+                    onClick={() => reminder.client_id && navigate(`/clients/${reminder.client_id}`)}
+                    className={`flex items-center justify-between p-3 bg-white rounded-lg border border-red-100 ${
+                      reminder.client_id ? 'cursor-pointer hover:bg-red-50 hover:border-red-300 transition-all group' : ''
+                    }`}
+                    data-testid={`reminder-item-${reminder.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-red-800 truncate">{reminder.client_name || t.common.unknown}</p>
+                      <p className="text-sm text-red-600 truncate">{reminder.text}</p>
+                      <p className="text-xs text-red-400 mt-1">
+                        {new Date(reminder.remind_at).toLocaleDateString()} {new Date(reminder.remind_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </p>
+                    </div>
+                    {reminder.client_id && (
+                      <div className="flex items-center gap-2 text-red-500 group-hover:text-red-700 transition-colors ml-3">
+                        <span className="text-xs hidden sm:inline">{t.dashboard.openClient}</span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
+              {overdueReminders.length > 5 && (
+                <p className="text-xs text-red-500 mt-2 text-center">
+                  +{overdueReminders.length - 5} {t.common.more}
+                </p>
+              )}
             </div>
           </div>
         </div>
