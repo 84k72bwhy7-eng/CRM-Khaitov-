@@ -100,16 +100,62 @@ export default function ClientDetailPage() {
   const handleAddPayment = async (e) => {
     e.preventDefault();
     try {
-      await post('/api/payments', {
-        client_id: id,
-        amount: parseFloat(paymentForm.amount),
-        currency: paymentForm.currency,
-        status: paymentForm.status,
-        date: paymentForm.date || undefined
-      });
-      toast.success(t.payments.paymentAdded);
+      const amount = parseFloat(paymentForm.amount);
+      if (amount < 0) {
+        toast.error(t.payments.invalidAmount);
+        return;
+      }
+      
+      if (editingPayment) {
+        // Update existing payment
+        await put(`/api/payments/${editingPayment.id}`, {
+          amount: amount,
+          currency: paymentForm.currency,
+          status: paymentForm.status,
+          date: paymentForm.date || undefined,
+          comment: paymentForm.comment || undefined
+        });
+        toast.success(t.payments.paymentUpdated);
+      } else {
+        // Create new payment
+        await post('/api/payments', {
+          client_id: id,
+          amount: amount,
+          currency: paymentForm.currency,
+          status: paymentForm.status,
+          date: paymentForm.date || undefined,
+          comment: paymentForm.comment || undefined
+        });
+        toast.success(t.payments.paymentAdded);
+      }
+      
       setShowPaymentModal(false);
-      setPaymentForm({ amount: '', currency: 'USD', status: 'pending', date: '' });
+      setEditingPayment(null);
+      setPaymentForm({ amount: '', currency: 'USD', status: 'pending', date: '', comment: '' });
+      const paymentsData = await get(`/api/payments/client/${id}`);
+      setPayments(paymentsData);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t.common.error);
+    }
+  };
+
+  const handleEditPayment = (payment) => {
+    setEditingPayment(payment);
+    setPaymentForm({
+      amount: payment.amount.toString(),
+      currency: payment.currency || 'USD',
+      status: payment.status || 'pending',
+      date: payment.date || '',
+      comment: payment.comment || ''
+    });
+    setShowPaymentModal(true);
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (!window.confirm(t.common.confirmDelete)) return;
+    try {
+      await del(`/api/payments/${paymentId}`);
+      toast.success(t.payments.paymentDeleted);
       const paymentsData = await get(`/api/payments/client/${id}`);
       setPayments(paymentsData);
     } catch (error) {
