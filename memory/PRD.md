@@ -63,6 +63,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Edit Payment Function**: Edit existing payments with activity logging (old/new values tracked)
 - [x] **Client Group Management**: Admin CRUD for groups, client assignment, filtering by group
 - [x] **Sold Client Management**: Dedicated page for sold clients with filtering, archive/restore functionality
+- [x] **Audio Playback Fix**: Fixed JWT token validation bug in `/api/audio/stream/{audio_id}` endpoint (2026-02-05)
 - [ ] **Reminder Push Notifications**: Browser notifications + in-app notification center
 
 ### Database Schema
