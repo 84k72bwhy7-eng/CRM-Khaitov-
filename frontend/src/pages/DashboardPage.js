@@ -38,6 +38,10 @@ export default function DashboardPage() {
       if (isAdmin) {
         const managerData = await get('/api/dashboard/manager-stats');
         setManagerStats(managerData);
+        
+        // Load analytics data
+        const analyticsData = await get('/api/dashboard/analytics');
+        setAnalytics(analyticsData);
       }
     } catch (error) {
       console.error('Failed to load dashboard:', error);
