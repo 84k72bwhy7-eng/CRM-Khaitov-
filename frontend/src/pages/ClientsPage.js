@@ -56,7 +56,7 @@ export default function ClientsPage() {
 
   const loadClients = async () => {
     try {
-      const params = { is_archived: showArchived };
+      const params = { is_archived: showArchived, exclude_sold: true };
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
