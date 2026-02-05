@@ -72,6 +72,15 @@ export default function ClientsPage() {
     }
   };
 
+  const loadTariffs = async () => {
+    try {
+      const data = await get('/api/tariffs');
+      setTariffs(data);
+    } catch (error) {
+      console.error('Failed to load tariffs:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
