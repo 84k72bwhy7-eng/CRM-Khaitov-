@@ -219,6 +219,194 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Analytics Section (Admin Only) */}
+      {isAdmin && analytics && (
+        <>
+          {/* Month-over-Month Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6" data-testid="analytics-summary">
+            <div className="card p-4 lg:p-6">
+              <p className="text-text-muted text-sm">{t.dashboard.revenue} ({analytics.currency})</p>
+              <p className="text-2xl font-bold text-text-primary">
+                {formatCurrency(analytics.summary?.total_revenue || 0, analytics.currency)}
+              </p>
+              <div className={`flex items-center gap-1 mt-2 text-sm ${analytics.summary?.revenue_change_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {analytics.summary?.revenue_change_pct >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                <span>{analytics.summary?.revenue_change_pct >= 0 ? '+' : ''}{analytics.summary?.revenue_change_pct?.toFixed(1)}%</span>
+                <span className="text-text-muted">{t.dashboard.monthComparison}</span>
+              </div>
+            </div>
+            <div className="card p-4 lg:p-6">
+              <p className="text-text-muted text-sm">{t.dashboard.deals}</p>
+              <p className="text-2xl font-bold text-text-primary">{analytics.summary?.total_deals || 0}</p>
+              <div className={`flex items-center gap-1 mt-2 text-sm ${analytics.summary?.deals_change_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {analytics.summary?.deals_change_pct >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                <span>{analytics.summary?.deals_change_pct >= 0 ? '+' : ''}{analytics.summary?.deals_change_pct?.toFixed(1)}%</span>
+                <span className="text-text-muted">{t.dashboard.monthComparison}</span>
+              </div>
+            </div>
+            <div className="card p-4 lg:p-6">
+              <p className="text-text-muted text-sm">{t.dashboard.newLeads}</p>
+              <p className="text-2xl font-bold text-text-primary">{analytics.summary?.total_leads || 0}</p>
+            </div>
+            <div className="card p-4 lg:p-6">
+              <p className="text-text-muted text-sm">{analytics.summary?.revenue_change_pct >= 0 ? t.dashboard.growth : t.dashboard.decline}</p>
+              <p className={`text-2xl font-bold ${analytics.summary?.revenue_change_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {analytics.summary?.revenue_change_pct >= 0 ? '+' : ''}{formatCurrency(analytics.summary?.revenue_change || 0, analytics.currency)}
+              </p>
+            </div>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+            {/* Monthly Sales Chart */}
+            <div className="card" data-testid="monthly-chart">
+              <div className="p-4 lg:p-6 border-b border-border">
+                <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                  <BarChart3 size={20} />
+                  {t.dashboard.monthlyStats}
+                </h2>
+              </div>
+              <div className="p-4 lg:p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={analytics.monthly_data || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis 
+                      dataKey="month_name" 
+                      tick={{ fontSize: 12, fill: '#6B7280' }}
+                      axisLine={{ stroke: '#E5E7EB' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6B7280' }}
+                      axisLine={{ stroke: '#E5E7EB' }}
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        name === 'revenue' ? formatCurrency(value, analytics.currency) : value,
+                        name === 'revenue' ? t.dashboard.revenue : name === 'sold_count' ? t.dashboard.deals : t.dashboard.newLeads
+                      ]}
+                      contentStyle={{ backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="sold_count" name={t.dashboard.deals} fill="#FACC15" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="new_leads" name={t.dashboard.newLeads} fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Revenue Trend Chart */}
+            <div className="card" data-testid="revenue-chart">
+              <div className="p-4 lg:p-6 border-b border-border">
+                <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                  <TrendingUp size={20} />
+                  {t.dashboard.revenue}
+                </h2>
+              </div>
+              <div className="p-4 lg:p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={analytics.monthly_data || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis 
+                      dataKey="month_name" 
+                      tick={{ fontSize: 12, fill: '#6B7280' }}
+                      axisLine={{ stroke: '#E5E7EB' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6B7280' }}
+                      axisLine={{ stroke: '#E5E7EB' }}
+                      tickFormatter={(value) => analytics.currency === 'USD' ? `$${value.toLocaleString()}` : value.toLocaleString()}
+                    />
+                    <Tooltip 
+                      formatter={(value) => [formatCurrency(value, analytics.currency), t.dashboard.revenue]}
+                      contentStyle={{ backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="#22C55E" 
+                      strokeWidth={3}
+                      dot={{ fill: '#22C55E', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Tariff Stats */}
+          {analytics.tariff_stats && analytics.tariff_stats.length > 0 && (
+            <div className="card" data-testid="tariff-stats">
+              <div className="p-4 lg:p-6 border-b border-border">
+                <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                  <PieChart size={20} />
+                  {t.dashboard.tariffStats}
+                </h2>
+              </div>
+              <div className="p-4 lg:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Pie Chart */}
+                  <div className="flex justify-center">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <RechartsPie>
+                        <Pie
+                          data={analytics.tariff_stats}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="sold_count"
+                          nameKey="name"
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                        >
+                          {analytics.tariff_stats.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={['#FACC15', '#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'][index % 6]} 
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value, name, props) => [
+                            `${value} ${t.dashboard.deals.toLowerCase()} (${formatCurrency(props.payload.revenue, analytics.currency)})`,
+                            props.payload.name
+                          ]}
+                        />
+                      </RechartsPie>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Stats Table */}
+                  <div className="space-y-3">
+                    {analytics.tariff_stats.map((tariff, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-background-subtle rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: ['#FACC15', '#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'][index % 6] }}
+                          />
+                          <div>
+                            <p className="font-medium text-text-primary">{tariff.name}</p>
+                            <p className="text-sm text-text-muted">{formatCurrency(tariff.price, analytics.currency)} / {t.clients.tariff.toLowerCase()}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-text-primary">{tariff.sold_count}</p>
+                          <p className="text-sm text-green-600">{formatCurrency(tariff.revenue, analytics.currency)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {/* Recent Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Recent Clients */}
