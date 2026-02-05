@@ -15,7 +15,7 @@ import csv
 import json
 
 # App initialization
-app = FastAPI(title="CourseCRM API", version="3.0.0")
+app = FastAPI(title="SchoolCRM API", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -284,7 +284,7 @@ seed_default_settings()
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "app": "CourseCRM", "version": "3.0.0"}
+    return {"status": "healthy", "app": "SchoolCRM", "version": "3.0.0"}
 
 # ==================== AUTH ENDPOINTS ====================
 
