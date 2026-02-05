@@ -4,7 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell } from 'lucide-react';
 
 export default function ClientsPage() {
   const { t } = useLanguage();
@@ -15,17 +15,30 @@ export default function ClientsPage() {
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [tariffs, setTariffs] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  const [formData, setFormData] = useState({ name: '', phone: '', source: '', status: 'new', manager_id: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    phone: '', 
+    source: '', 
+    status: 'new', 
+    manager_id: '',
+    tariff_id: '',
+    initial_comment: '',
+    reminder_text: '',
+    reminder_at: ''
+  });
   const [exporting, setExporting] = useState(false);
+  const [showReminderFields, setShowReminderFields] = useState(false);
 
   useEffect(() => {
     loadClients();
     loadStatuses();
+    loadTariffs();
     if (isAdmin) loadUsers();
   }, [search, statusFilter, showArchived]);
 
