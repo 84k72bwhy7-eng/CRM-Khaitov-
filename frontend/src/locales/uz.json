@@ -291,6 +291,10 @@
     "all": "Barchasi",
     "yes": "Ha",
     "no": "Yo'q",
-    "optional": "Ixtiyoriy"
+    "optional": "Ixtiyoriy",
+    "more": "yana",
+    "unknown": "Noma'lum",
+    "actions": "Amallar",
+    "confirmDelete": "Rostdan ham o'chirmoqchimisiz?"
   }
 }
