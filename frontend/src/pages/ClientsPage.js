@@ -315,6 +315,17 @@ export default function ClientsPage() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <h1 className="text-2xl lg:text-3xl font-bold text-text-primary">{t.clients.title}</h1>
         <div className="flex flex-wrap gap-2">
+          {/* Import Button - Admin Only */}
+          {isAdmin && (
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="btn-outline flex items-center gap-2 text-sm"
+              data-testid="import-button"
+            >
+              <Upload size={16} />
+              {t.nav.import}
+            </button>
+          )}
           <button
             onClick={handleExport}
             disabled={exporting}
