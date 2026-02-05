@@ -512,7 +512,11 @@ export default function ClientDetailPage() {
           {activeTab === 'payments' && (
             <div className="space-y-4" data-testid="payments-section">
               <button
-                onClick={() => setShowPaymentModal(true)}
+                onClick={() => {
+                  setEditingPayment(null);
+                  setPaymentForm({ amount: '', currency: 'USD', status: 'pending', date: '', comment: '' });
+                  setShowPaymentModal(true);
+                }}
                 className="btn-primary flex items-center gap-2"
                 data-testid="add-payment-button"
               >
@@ -523,12 +527,14 @@ export default function ClientDetailPage() {
                 <p className="text-text-muted text-center py-8">{t.payments.noPayments}</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[400px]">
+                  <table className="w-full min-w-[500px]">
                     <thead>
                       <tr className="table-header">
                         <th className="text-left p-3 lg:p-4">{t.payments.amount}</th>
                         <th className="text-left p-3 lg:p-4">{t.payments.status}</th>
                         <th className="text-left p-3 lg:p-4">{t.payments.date}</th>
+                        <th className="text-left p-3 lg:p-4">{t.payments.comment}</th>
+                        <th className="text-left p-3 lg:p-4">{t.common.actions}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -541,6 +547,29 @@ export default function ClientDetailPage() {
                             </span>
                           </td>
                           <td className="p-3 lg:p-4 text-text-muted">{payment.date}</td>
+                          <td className="p-3 lg:p-4 text-text-muted text-sm max-w-[150px] truncate">
+                            {payment.comment || '-'}
+                          </td>
+                          <td className="p-3 lg:p-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditPayment(payment)}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                title={t.common.edit}
+                                data-testid={`edit-payment-${payment.id}`}
+                              >
+                                <Edit size={16} className="text-text-secondary" />
+                              </button>
+                              <button
+                                onClick={() => handleDeletePayment(payment.id)}
+                                className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                                title={t.common.delete}
+                                data-testid={`delete-payment-${payment.id}`}
+                              >
+                                <Trash2 size={16} className="text-status-error" />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
