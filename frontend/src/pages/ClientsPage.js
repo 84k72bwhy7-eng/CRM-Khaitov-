@@ -127,6 +127,7 @@ export default function ClientsPage() {
           status: formData.status,
           manager_id: formData.manager_id || null,
           tariff_id: formData.tariff_id || null,
+          group_id: formData.group_id || null,
           initial_comment: formData.initial_comment || null,
           reminder_text: showReminderFields && formData.reminder_text ? formData.reminder_text : null,
           reminder_at: showReminderFields && formData.reminder_at ? formData.reminder_at : null
@@ -143,6 +144,7 @@ export default function ClientsPage() {
         status: 'new', 
         manager_id: '',
         tariff_id: '',
+        group_id: '',
         initial_comment: '',
         reminder_text: '',
         reminder_at: ''
@@ -167,6 +169,7 @@ export default function ClientsPage() {
       status: client.status,
       manager_id: client.manager_id || '',
       tariff_id: client.tariff_id || '',
+      group_id: client.group_id || '',
       initial_comment: '',
       reminder_text: '',
       reminder_at: ''
