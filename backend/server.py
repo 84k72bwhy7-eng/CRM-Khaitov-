@@ -109,12 +109,14 @@ class PaymentCreate(BaseModel):
     currency: str = "USD"
     status: str = "pending"
     date: Optional[str] = None
+    comment: Optional[str] = None
 
 class PaymentUpdate(BaseModel):
     amount: Optional[float] = None
     currency: Optional[str] = None
     status: Optional[str] = None
     date: Optional[str] = None
+    comment: Optional[str] = None
 
 class ReminderCreate(BaseModel):
     client_id: str
