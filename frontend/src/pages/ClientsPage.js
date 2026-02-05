@@ -143,8 +143,13 @@ export default function ClientsPage() {
       phone: client.phone,
       source: client.source || '',
       status: client.status,
-      manager_id: client.manager_id || ''
+      manager_id: client.manager_id || '',
+      tariff_id: client.tariff_id || '',
+      initial_comment: '',
+      reminder_text: '',
+      reminder_at: ''
     });
+    setShowReminderFields(false);
     setShowModal(true);
   };
 
