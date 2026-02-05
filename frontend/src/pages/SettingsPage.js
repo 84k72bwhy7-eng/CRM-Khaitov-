@@ -204,6 +204,46 @@ export default function SettingsPage() {
     }
   };
 
+  // Group handlers
+  const handleGroupSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingGroup) {
+        await put(`/api/groups/${editingGroup.id}`, groupForm);
+        toast.success(t.groups.groupUpdated);
+      } else {
+        await post('/api/groups', groupForm);
+        toast.success(t.groups.groupCreated);
+      }
+      setShowGroupModal(false);
+      setEditingGroup(null);
+      setGroupForm({ name: '', color: '#6B7280', description: '' });
+      loadGroups();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t.common.error);
+    }
+  };
+
+  const handleEditGroup = (group) => {
+    setEditingGroup(group);
+    setGroupForm({
+      name: group.name,
+      color: group.color || '#6B7280',
+      description: group.description || ''
+    });
+    setShowGroupModal(true);
+  };
+
+  const handleDeleteGroup = async (group) => {
+    try {
+      await del(`/api/groups/${group.id}`);
+      toast.success(t.groups.groupDeleted);
+      loadGroups();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t.groups.groupInUse);
+    }
+  };
+
   const colorOptions = [
     '#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', 
     '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
