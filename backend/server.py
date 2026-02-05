@@ -12,9 +12,10 @@ from bson import ObjectId
 import os
 import io
 import csv
+import json
 
 # App initialization
-app = FastAPI(title="CourseCRM API", version="2.0.0")
+app = FastAPI(title="CourseCRM API", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,12 +45,15 @@ reminders_collection = db["reminders"]
 statuses_collection = db["statuses"]
 activity_log_collection = db["activity_log"]
 audio_files_collection = db["audio_files"]
+tariffs_collection = db["tariffs"]
+settings_collection = db["settings"]
+notifications_collection = db["notifications"]
 
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
-# Upload directory for audio files
+# Upload directory for files
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -80,6 +84,10 @@ class ClientCreate(BaseModel):
     manager_id: Optional[str] = None
     status: str = "new"
     is_lead: bool = True
+    tariff_id: Optional[str] = None
+    initial_comment: Optional[str] = None
+    reminder_text: Optional[str] = None
+    reminder_at: Optional[str] = None
 
 class ClientUpdate(BaseModel):
     name: Optional[str] = None
@@ -89,6 +97,7 @@ class ClientUpdate(BaseModel):
     status: Optional[str] = None
     is_lead: Optional[bool] = None
     is_archived: Optional[bool] = None
+    tariff_id: Optional[str] = None
 
 class NoteCreate(BaseModel):
     client_id: str
@@ -110,7 +119,7 @@ class PaymentUpdate(BaseModel):
 class ReminderCreate(BaseModel):
     client_id: str
     text: str
-    remind_at: str  # ISO format datetime
+    remind_at: str
 
 class ReminderUpdate(BaseModel):
     text: Optional[str] = None
@@ -126,6 +135,28 @@ class StatusUpdate(BaseModel):
     name: Optional[str] = None
     color: Optional[str] = None
     order: Optional[int] = None
+
+class TariffCreate(BaseModel):
+    name: str
+    price: float
+    currency: str = "USD"
+    description: Optional[str] = ""
+
+class TariffUpdate(BaseModel):
+    name: Optional[str] = None
+    price: Optional[float] = None
+    currency: Optional[str] = None
+    description: Optional[str] = None
+
+class SettingsUpdate(BaseModel):
+    currency: Optional[str] = None
+
+class ImportRow(BaseModel):
+    name: str
+    phone: str
+    source: Optional[str] = ""
+    status: Optional[str] = "new"
+    manager_id: Optional[str] = None
 
 # ==================== HELPER FUNCTIONS ====================
 
@@ -175,6 +206,25 @@ def log_activity(user_id: str, user_name: str, action: str, entity_type: str, en
         "created_at": datetime.now(timezone.utc).isoformat()
     })
 
+def create_notification(user_id: str, title: str, message: str, notification_type: str = "reminder", entity_id: str = None):
+    """Create a notification for a user"""
+    notifications_collection.insert_one({
+        "user_id": user_id,
+        "title": title,
+        "message": message,
+        "type": notification_type,
+        "entity_id": entity_id,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+
+def get_system_currency():
+    """Get the system currency setting"""
+    settings = settings_collection.find_one({"key": "system"})
+    if settings:
+        return settings.get("currency", "USD")
+    return "USD"
+
 # ==================== SEED DATA ====================
 
 def seed_admin():
@@ -201,14 +251,25 @@ def seed_default_statuses():
         statuses_collection.insert_many(default_statuses)
         print("Default statuses created")
 
+def seed_default_settings():
+    """Seed default system settings"""
+    if not settings_collection.find_one({"key": "system"}):
+        settings_collection.insert_one({
+            "key": "system",
+            "currency": "USD",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        print("Default settings created")
+
 seed_admin()
 seed_default_statuses()
+seed_default_settings()
 
 # ==================== HEALTH CHECK ====================
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "app": "CourseCRM", "version": "2.0.0"}
+    return {"status": "healthy", "app": "CourseCRM", "version": "3.0.0"}
 
 # ==================== AUTH ENDPOINTS ====================
 
@@ -297,6 +358,86 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
     log_activity(current_user["id"], current_user["name"], "delete", "user", user_id, {})
     return {"message": "User deleted"}
 
+# ==================== TARIFFS ENDPOINTS ====================
+
+@app.get("/api/tariffs")
+async def get_tariffs(current_user: dict = Depends(get_current_user)):
+    tariffs = list(tariffs_collection.find().sort("created_at", -1))
+    return [serialize_doc(t) for t in tariffs]
+
+@app.post("/api/tariffs")
+async def create_tariff(data: TariffCreate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    tariff_doc = {
+        "name": data.name,
+        "price": data.price,
+        "currency": data.currency,
+        "description": data.description,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    result = tariffs_collection.insert_one(tariff_doc)
+    log_activity(current_user["id"], current_user["name"], "create", "tariff", str(result.inserted_id), {"name": data.name})
+    tariff = tariffs_collection.find_one({"_id": result.inserted_id})
+    return serialize_doc(tariff)
+
+@app.put("/api/tariffs/{tariff_id}")
+async def update_tariff(tariff_id: str, data: TariffUpdate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if update_data:
+        tariffs_collection.update_one({"_id": ObjectId(tariff_id)}, {"$set": update_data})
+        log_activity(current_user["id"], current_user["name"], "update", "tariff", tariff_id, update_data)
+    
+    tariff = tariffs_collection.find_one({"_id": ObjectId(tariff_id)})
+    if not tariff:
+        raise HTTPException(status_code=404, detail="Tariff not found")
+    return serialize_doc(tariff)
+
+@app.delete("/api/tariffs/{tariff_id}")
+async def delete_tariff(tariff_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if any clients use this tariff
+    if clients_collection.count_documents({"tariff_id": tariff_id}) > 0:
+        raise HTTPException(status_code=400, detail="Tariff is in use by clients")
+    
+    result = tariffs_collection.delete_one({"_id": ObjectId(tariff_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tariff not found")
+    log_activity(current_user["id"], current_user["name"], "delete", "tariff", tariff_id, {})
+    return {"message": "Tariff deleted"}
+
+# ==================== SETTINGS ENDPOINTS ====================
+
+@app.get("/api/settings")
+async def get_settings(current_user: dict = Depends(get_current_user)):
+    settings = settings_collection.find_one({"key": "system"})
+    if settings:
+        return serialize_doc(settings)
+    return {"currency": "USD"}
+
+@app.put("/api/settings")
+async def update_settings(data: SettingsUpdate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if update_data:
+        settings_collection.update_one(
+            {"key": "system"},
+            {"$set": update_data},
+            upsert=True
+        )
+        log_activity(current_user["id"], current_user["name"], "update", "settings", "system", update_data)
+    
+    settings = settings_collection.find_one({"key": "system"})
+    return serialize_doc(settings)
+
 # ==================== CLIENTS ENDPOINTS ====================
 
 @app.get("/api/clients")
@@ -336,7 +477,17 @@ async def get_clients(
             query["created_at"] = date_query
     
     clients = list(clients_collection.find(query).sort("created_at", -1))
-    return [serialize_doc(c) for c in clients]
+    result = []
+    for c in clients:
+        client = serialize_doc(c)
+        # Add tariff info
+        if client.get("tariff_id"):
+            tariff = tariffs_collection.find_one({"_id": ObjectId(client["tariff_id"])})
+            if tariff:
+                client["tariff_name"] = tariff["name"]
+                client["tariff_price"] = tariff["price"]
+        result.append(client)
+    return result
 
 @app.get("/api/clients/{client_id}")
 async def get_client(client_id: str, current_user: dict = Depends(get_current_user)):
@@ -348,10 +499,22 @@ async def get_client(client_id: str, current_user: dict = Depends(get_current_us
     if current_user["role"] != "admin" and client.get("manager_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    return serialize_doc(client)
+    result = serialize_doc(client)
+    # Add tariff info
+    if result.get("tariff_id"):
+        tariff = tariffs_collection.find_one({"_id": ObjectId(result["tariff_id"])})
+        if tariff:
+            result["tariff_name"] = tariff["name"]
+            result["tariff_price"] = tariff["price"]
+    return result
 
 @app.post("/api/clients")
 async def create_client(data: ClientCreate, current_user: dict = Depends(get_current_user)):
+    # Check for duplicate phone
+    existing = clients_collection.find_one({"phone": data.phone})
+    if existing:
+        raise HTTPException(status_code=400, detail="Phone number already exists")
+    
     client_doc = {
         "name": data.name,
         "phone": data.phone,
@@ -360,10 +523,35 @@ async def create_client(data: ClientCreate, current_user: dict = Depends(get_cur
         "status": data.status,
         "is_lead": data.is_lead,
         "is_archived": False,
+        "tariff_id": data.tariff_id,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     result = clients_collection.insert_one(client_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "client", str(result.inserted_id), {"name": data.name})
+    client_id = str(result.inserted_id)
+    
+    # Create initial comment if provided
+    if data.initial_comment:
+        notes_collection.insert_one({
+            "client_id": client_id,
+            "text": data.initial_comment,
+            "author_id": current_user["id"],
+            "author_name": current_user["name"],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    # Create reminder if provided
+    if data.reminder_text and data.reminder_at:
+        manager_id = data.manager_id or current_user["id"]
+        reminders_collection.insert_one({
+            "client_id": client_id,
+            "user_id": manager_id,
+            "text": data.reminder_text,
+            "remind_at": data.reminder_at,
+            "is_completed": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    log_activity(current_user["id"], current_user["name"], "create", "client", client_id, {"name": data.name})
     client = clients_collection.find_one({"_id": result.inserted_id})
     return serialize_doc(client)
 
@@ -447,6 +635,108 @@ async def convert_to_lead(client_id: str, current_user: dict = Depends(get_curre
     log_activity(current_user["id"], current_user["name"], "convert_to_lead", "client", client_id, {"name": client.get("name")})
     return {"message": "Client converted to lead"}
 
+# ==================== IMPORT ENDPOINTS ====================
+
+@app.post("/api/import/preview")
+async def import_preview(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Preview import data before saving"""
+    content = await file.read()
+    rows = []
+    errors = []
+    
+    try:
+        # Try CSV first
+        content_str = content.decode('utf-8')
+        reader = csv.DictReader(io.StringIO(content_str))
+        
+        for i, row in enumerate(reader):
+            try:
+                # Normalize column names (case-insensitive)
+                normalized = {}
+                for k, v in row.items():
+                    key = k.lower().strip() if k else ''
+                    normalized[key] = v.strip() if v else ''
+                
+                # Map to our fields
+                name = normalized.get('name', normalized.get('ism', ''))
+                phone = normalized.get('phone', normalized.get('telefon', normalized.get('tel', '')))
+                source = normalized.get('source', normalized.get('manba', ''))
+                status = normalized.get('status', normalized.get('holat', 'new'))
+                
+                if not name or not phone:
+                    errors.append({"row": i + 2, "error": "Name and phone are required"})
+                    continue
+                
+                # Check for duplicate
+                existing = clients_collection.find_one({"phone": phone})
+                is_duplicate = existing is not None
+                
+                rows.append({
+                    "row": i + 2,
+                    "name": name,
+                    "phone": phone,
+                    "source": source,
+                    "status": status if status in ['new', 'contacted', 'sold'] else 'new',
+                    "is_duplicate": is_duplicate,
+                    "valid": not is_duplicate
+                })
+            except Exception as e:
+                errors.append({"row": i + 2, "error": str(e)})
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
+    
+    return {
+        "total": len(rows) + len(errors),
+        "valid": len([r for r in rows if r["valid"]]),
+        "duplicates": len([r for r in rows if r["is_duplicate"]]),
+        "errors": len(errors),
+        "rows": rows,
+        "error_rows": errors
+    }
+
+@app.post("/api/import/save")
+async def import_save(
+    rows: List[ImportRow],
+    current_user: dict = Depends(get_current_user)
+):
+    """Save imported clients"""
+    success = 0
+    failed = []
+    
+    for i, row in enumerate(rows):
+        try:
+            # Skip duplicates
+            existing = clients_collection.find_one({"phone": row.phone})
+            if existing:
+                failed.append({"row": i + 1, "phone": row.phone, "error": "Duplicate phone"})
+                continue
+            
+            client_doc = {
+                "name": row.name,
+                "phone": row.phone,
+                "source": row.source,
+                "manager_id": row.manager_id or current_user["id"],
+                "status": row.status,
+                "is_lead": True,
+                "is_archived": False,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            clients_collection.insert_one(client_doc)
+            success += 1
+        except Exception as e:
+            failed.append({"row": i + 1, "phone": row.phone, "error": str(e)})
+    
+    log_activity(current_user["id"], current_user["name"], "import", "client", "", {"success": success, "failed": len(failed)})
+    
+    return {
+        "success": success,
+        "failed": len(failed),
+        "failed_rows": failed
+    }
+
 # ==================== NOTES/COMMENTS ENDPOINTS ====================
 
 @app.get("/api/notes/{client_id}")
@@ -511,17 +801,20 @@ async def get_client_payments(client_id: str, current_user: dict = Depends(get_c
 
 @app.post("/api/payments")
 async def create_payment(data: PaymentCreate, current_user: dict = Depends(get_current_user)):
+    # Use system currency if not specified
+    currency = data.currency or get_system_currency()
+    
     payment_doc = {
         "client_id": data.client_id,
         "amount": data.amount,
-        "currency": data.currency,
+        "currency": currency,
         "status": data.status,
         "date": data.date or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     result = payments_collection.insert_one(payment_doc)
     log_activity(current_user["id"], current_user["name"], "create", "payment", str(result.inserted_id), 
-                {"client_id": data.client_id, "amount": data.amount, "currency": data.currency})
+                {"client_id": data.client_id, "amount": data.amount, "currency": currency})
     payment = payments_collection.find_one({"_id": result.inserted_id})
     return serialize_doc(payment)
 
@@ -623,6 +916,85 @@ async def delete_reminder(reminder_id: str, current_user: dict = Depends(get_cur
     
     reminders_collection.delete_one({"_id": ObjectId(reminder_id)})
     return {"message": "Reminder deleted"}
+
+# ==================== NOTIFICATIONS ENDPOINTS ====================
+
+@app.get("/api/notifications")
+async def get_notifications(
+    unread_only: bool = False,
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {"user_id": current_user["id"]}
+    if unread_only:
+        query["is_read"] = False
+    
+    notifications = list(notifications_collection.find(query).sort("created_at", -1).limit(limit))
+    return [serialize_doc(n) for n in notifications]
+
+@app.get("/api/notifications/unread-count")
+async def get_unread_count(current_user: dict = Depends(get_current_user)):
+    count = notifications_collection.count_documents({
+        "user_id": current_user["id"],
+        "is_read": False
+    })
+    return {"count": count}
+
+@app.put("/api/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
+    notifications_collection.update_one(
+        {"_id": ObjectId(notification_id), "user_id": current_user["id"]},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "Notification marked as read"}
+
+@app.put("/api/notifications/read-all")
+async def mark_all_read(current_user: dict = Depends(get_current_user)):
+    notifications_collection.update_many(
+        {"user_id": current_user["id"], "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "All notifications marked as read"}
+
+@app.get("/api/notifications/check-reminders")
+async def check_reminders(current_user: dict = Depends(get_current_user)):
+    """Check for due reminders and create notifications"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Find due reminders that haven't been notified
+    due_reminders = list(reminders_collection.find({
+        "user_id": current_user["id"],
+        "remind_at": {"$lte": now},
+        "is_completed": {"$ne": True},
+        "notified": {"$ne": True}
+    }))
+    
+    new_notifications = []
+    for reminder in due_reminders:
+        client = clients_collection.find_one({"_id": ObjectId(reminder["client_id"])})
+        client_name = client["name"] if client else "Unknown"
+        
+        # Create notification
+        notification = {
+            "user_id": current_user["id"],
+            "title": f"Reminder: {client_name}",
+            "message": reminder["text"],
+            "type": "reminder",
+            "entity_id": str(reminder["_id"]),
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        result = notifications_collection.insert_one(notification)
+        notification["id"] = str(result.inserted_id)
+        new_notifications.append(notification)
+        
+        # Mark reminder as notified
+        reminders_collection.update_one(
+            {"_id": reminder["_id"]},
+            {"$set": {"notified": True}}
+        )
+    
+    return {"new_notifications": new_notifications}
 
 # ==================== STATUSES ENDPOINTS ====================
 
@@ -854,6 +1226,9 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "is_completed": {"$ne": True}
     })
     
+    # System currency
+    currency = get_system_currency()
+    
     return {
         "total_clients": total_clients,
         "todays_leads": todays_leads,
@@ -863,7 +1238,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "total_paid": total_paid,
         "total_pending": total_pending,
         "overdue_reminders": overdue_reminders,
-        "currency": "USD"
+        "currency": currency
     }
 
 @app.get("/api/dashboard/recent-clients")
@@ -926,6 +1301,102 @@ async def get_manager_stats(current_user: dict = Depends(get_current_user)):
         })
     
     return sorted(result, key=lambda x: x["total_revenue"], reverse=True)
+
+@app.get("/api/dashboard/analytics")
+async def get_analytics(
+    months: int = 6,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get monthly analytics data"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Calculate date range
+    end_date = datetime.now(timezone.utc)
+    start_date = end_date - timedelta(days=months * 30)
+    
+    # Monthly sales data
+    monthly_data = []
+    current = start_date
+    
+    while current <= end_date:
+        month_start = current.replace(day=1).strftime("%Y-%m")
+        next_month = (current.replace(day=28) + timedelta(days=4)).replace(day=1)
+        
+        # Count sold clients this month
+        sold_query = {
+            "status": "sold",
+            "created_at": {"$regex": f"^{month_start}"}
+        }
+        sold_count = clients_collection.count_documents(sold_query)
+        
+        # Revenue this month
+        revenue = sum(
+            p.get("amount", 0)
+            for p in payments_collection.find({
+                "status": "paid",
+                "date": {"$regex": f"^{month_start}"}
+            })
+        )
+        
+        # New leads this month
+        new_leads = clients_collection.count_documents({
+            "created_at": {"$regex": f"^{month_start}"}
+        })
+        
+        monthly_data.append({
+            "month": month_start,
+            "month_name": current.strftime("%b %Y"),
+            "sold_count": sold_count,
+            "revenue": revenue,
+            "new_leads": new_leads
+        })
+        
+        current = next_month
+    
+    # Sales by tariff
+    tariff_stats = []
+    tariffs = list(tariffs_collection.find())
+    for tariff in tariffs:
+        tariff_id = str(tariff["_id"])
+        count = clients_collection.count_documents({"tariff_id": tariff_id, "status": "sold"})
+        tariff_stats.append({
+            "name": tariff["name"],
+            "price": tariff["price"],
+            "sold_count": count,
+            "revenue": count * tariff["price"]
+        })
+    
+    # Calculate month-over-month changes
+    if len(monthly_data) >= 2:
+        current_month = monthly_data[-1]
+        prev_month = monthly_data[-2]
+        
+        revenue_change = current_month["revenue"] - prev_month["revenue"]
+        revenue_change_pct = ((current_month["revenue"] - prev_month["revenue"]) / prev_month["revenue"] * 100) if prev_month["revenue"] > 0 else 0
+        
+        deals_change = current_month["sold_count"] - prev_month["sold_count"]
+        deals_change_pct = ((current_month["sold_count"] - prev_month["sold_count"]) / prev_month["sold_count"] * 100) if prev_month["sold_count"] > 0 else 0
+    else:
+        revenue_change = 0
+        revenue_change_pct = 0
+        deals_change = 0
+        deals_change_pct = 0
+    
+    return {
+        "monthly_data": monthly_data,
+        "tariff_stats": tariff_stats,
+        "summary": {
+            "total_revenue": sum(m["revenue"] for m in monthly_data),
+            "total_deals": sum(m["sold_count"] for m in monthly_data),
+            "total_leads": sum(m["new_leads"] for m in monthly_data),
+            "revenue_change": revenue_change,
+            "revenue_change_pct": round(revenue_change_pct, 1),
+            "deals_change": deals_change,
+            "deals_change_pct": round(deals_change_pct, 1)
+        },
+        "currency": get_system_currency()
+    }
 
 if __name__ == "__main__":
     import uvicorn
