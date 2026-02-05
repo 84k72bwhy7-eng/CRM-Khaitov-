@@ -563,6 +563,82 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* Tariff Modal */}
+      {showTariffModal && (
+        <div className="modal-overlay" onClick={() => setShowTariffModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} data-testid="tariff-modal">
+            <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary">
+                {editingTariff ? t.tariffs.editTariff : t.tariffs.addTariff}
+              </h2>
+              <button onClick={() => setShowTariffModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleTariffSubmit} className="p-4 lg:p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">{t.tariffs.tariffName}</label>
+                <input
+                  type="text"
+                  value={tariffForm.name}
+                  onChange={(e) => setTariffForm({ ...tariffForm, name: e.target.value })}
+                  className="input-field"
+                  required
+                  data-testid="tariff-name-input"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">{t.tariffs.tariffPrice}</label>
+                  <input
+                    type="number"
+                    value={tariffForm.price}
+                    onChange={(e) => setTariffForm({ ...tariffForm, price: parseFloat(e.target.value) || 0 })}
+                    className="input-field"
+                    min="0"
+                    step="0.01"
+                    required
+                    data-testid="tariff-price-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">{t.payments.currency}</label>
+                  <select
+                    value={tariffForm.currency}
+                    onChange={(e) => setTariffForm({ ...tariffForm, currency: e.target.value })}
+                    className="input-field"
+                    data-testid="tariff-currency-select"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="UZS">UZS</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  {t.tariffs.tariffDescription} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                </label>
+                <textarea
+                  value={tariffForm.description}
+                  onChange={(e) => setTariffForm({ ...tariffForm, description: e.target.value })}
+                  className="input-field min-h-[80px] resize-y"
+                  data-testid="tariff-description-input"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setShowTariffModal(false)} className="btn-outline flex-1">
+                  {t.common.cancel}
+                </button>
+                <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  {loading && <Loader2 size={18} className="animate-spin" />}
+                  {t.common.save}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
