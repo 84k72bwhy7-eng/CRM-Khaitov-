@@ -1,7 +1,12 @@
-# CourseCRM - Product Requirements Document
+# SchoolCRM - Product Requirements Document
 
 ## Original Problem Statement
 Build a lightweight CRM system for managing course students and leads. Simple, fast, usable by 5 internal users. Extended with 11 new feature modules.
+
+## Branding
+- **System Name:** SchoolCRM (formerly CourseCRM)
+- **Logo:** KHAITOV SCHOOL clapperboard icon
+- **Color Scheme:** Black & Yellow (primary)
 
 ## Architecture
 - **Frontend**: React 18 with Tailwind CSS, React Router v6
