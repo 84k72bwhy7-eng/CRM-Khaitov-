@@ -114,7 +114,8 @@ export default function ClientsPage() {
           source: formData.source,
           status: formData.status,
           manager_id: formData.manager_id,
-          tariff_id: formData.tariff_id || null
+          tariff_id: formData.tariff_id || null,
+          group_id: formData.group_id || null
         };
         await put(`/api/clients/${editingClient.id}`, updateData);
         toast.success(t.clients.clientUpdated);
