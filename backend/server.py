@@ -518,6 +518,7 @@ async def update_settings(data: SettingsUpdate, current_user: dict = Depends(get
 async def get_clients(
     search: Optional[str] = None,
     status: Optional[str] = None,
+    group_id: Optional[str] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     is_archived: Optional[bool] = False,
@@ -540,6 +541,10 @@ async def get_clients(
     if status:
         query["status"] = status
     
+    # Filter by group
+    if group_id:
+        query["group_id"] = group_id
+    
     # Date filters
     if date_from or date_to:
         date_query = {}
@@ -560,6 +565,12 @@ async def get_clients(
             if tariff:
                 client["tariff_name"] = tariff["name"]
                 client["tariff_price"] = tariff["price"]
+        # Add group info
+        if client.get("group_id"):
+            group = groups_collection.find_one({"_id": ObjectId(client["group_id"])})
+            if group:
+                client["group_name"] = group["name"]
+                client["group_color"] = group["color"]
         result.append(client)
     return result
 
