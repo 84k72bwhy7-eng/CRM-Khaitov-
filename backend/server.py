@@ -598,6 +598,7 @@ async def create_client(data: ClientCreate, current_user: dict = Depends(get_cur
         "is_lead": data.is_lead,
         "is_archived": False,
         "tariff_id": data.tariff_id,
+        "group_id": data.group_id,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     result = clients_collection.insert_one(client_doc)
