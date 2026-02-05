@@ -823,13 +823,30 @@ async def create_payment(data: PaymentCreate, current_user: dict = Depends(get_c
 
 @app.put("/api/payments/{payment_id}")
 async def update_payment(payment_id: str, data: PaymentUpdate, current_user: dict = Depends(get_current_user)):
+    # Get the old payment for comparison
+    old_payment = payments_collection.find_one({"_id": ObjectId(payment_id)})
+    if not old_payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    # Validate amount is not negative
+    if data.amount is not None and data.amount < 0:
+        raise HTTPException(status_code=400, detail="Amount cannot be negative")
+    
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if update_data:
         payments_collection.update_one({"_id": ObjectId(payment_id)}, {"$set": update_data})
-        log_activity(current_user["id"], current_user["name"], "update", "payment", payment_id, update_data)
+        
+        # Log activity with old and new values
+        changes = {}
+        for key, new_value in update_data.items():
+            old_value = old_payment.get(key)
+            if old_value != new_value:
+                changes[key] = {"old": old_value, "new": new_value}
+        
+        log_activity(current_user["id"], current_user["name"], "update", "payment", payment_id, 
+                    {"changes": changes, "client_id": old_payment.get("client_id")})
+    
     payment = payments_collection.find_one({"_id": ObjectId(payment_id)})
-    if not payment:
-        raise HTTPException(status_code=404, detail="Payment not found")
     return serialize_doc(payment)
 
 @app.delete("/api/payments/{payment_id}")
