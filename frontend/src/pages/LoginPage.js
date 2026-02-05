@@ -62,7 +62,7 @@ export default function LoginPage() {
 
           {/* Logo */}
           <h1 className="text-4xl font-bold mb-2" data-testid="login-logo">
-            <span className="text-primary">Course</span>CRM
+            <span className="text-primary">School</span>CRM
           </h1>
           <p className="text-text-secondary mb-10">{t.auth.welcome}</p>
 
