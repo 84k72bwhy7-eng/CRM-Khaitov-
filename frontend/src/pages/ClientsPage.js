@@ -460,9 +460,20 @@ export default function ClientsPage() {
                   <tr key={client.id} className="table-row" data-testid={`client-row-${client.id}`}>
                     <td className="p-3 lg:p-4">
                       <div className="font-medium text-text-primary">{client.name}</div>
-                      {client.is_lead && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{t.clients.isLead}</span>
-                      )}
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {client.is_lead && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{t.clients.isLead}</span>
+                        )}
+                        {client.group_name && (
+                          <span 
+                            className="text-xs px-2 py-0.5 rounded"
+                            style={{ backgroundColor: `${client.group_color || '#6B7280'}20`, color: client.group_color || '#6B7280' }}
+                            data-testid={`client-group-badge-${client.id}`}
+                          >
+                            {client.group_name}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-3 lg:p-4 text-text-secondary">{client.phone}</td>
                     <td className="p-3 lg:p-4 text-text-secondary hidden sm:table-cell">{client.source || '-'}</td>
