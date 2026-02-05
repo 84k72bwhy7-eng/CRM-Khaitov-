@@ -218,7 +218,18 @@ export default function ClientsPage() {
           <button
             onClick={() => {
               setEditingClient(null);
-              setFormData({ name: '', phone: '', source: '', status: 'new', manager_id: '' });
+              setFormData({ 
+                name: '', 
+                phone: '', 
+                source: '', 
+                status: 'new', 
+                manager_id: '',
+                tariff_id: '',
+                initial_comment: '',
+                reminder_text: '',
+                reminder_at: ''
+              });
+              setShowReminderFields(false);
               setShowModal(true);
             }}
             className="btn-primary flex items-center gap-2 text-sm"
