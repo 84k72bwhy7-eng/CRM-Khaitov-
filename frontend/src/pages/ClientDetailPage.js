@@ -773,11 +773,13 @@ export default function ClientDetailPage() {
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+        <div className="modal-overlay" onClick={() => { setShowPaymentModal(false); setEditingPayment(null); }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} data-testid="payment-modal">
             <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between">
-              <h2 className="text-lg lg:text-xl font-bold text-text-primary">{t.payments.addPayment}</h2>
-              <button onClick={() => setShowPaymentModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary">
+                {editingPayment ? t.payments.editPayment : t.payments.addPayment}
+              </h2>
+              <button onClick={() => { setShowPaymentModal(false); setEditingPayment(null); }} className="p-2 hover:bg-gray-100 rounded-lg">
                 <X size={20} />
               </button>
             </div>
@@ -829,8 +831,20 @@ export default function ClientDetailPage() {
                   data-testid="payment-date-input"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  {t.payments.comment} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                </label>
+                <textarea
+                  value={paymentForm.comment}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, comment: e.target.value })}
+                  className="input-field min-h-[80px] resize-y"
+                  placeholder={t.payments.commentPlaceholder}
+                  data-testid="payment-comment-input"
+                />
+              </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-outline flex-1">
+                <button type="button" onClick={() => { setShowPaymentModal(false); setEditingPayment(null); }} className="btn-outline flex-1">
                   {t.common.cancel}
                 </button>
                 <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2" data-testid="save-payment-button">
