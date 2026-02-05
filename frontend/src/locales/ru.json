@@ -141,6 +141,10 @@
     "paymentAdded": "Платеж добавлен",
     "paymentUpdated": "Платеж обновлен",
     "paymentDeleted": "Платеж удален",
+    "editPayment": "Редактировать платеж",
+    "comment": "Комментарий",
+    "commentPlaceholder": "Комментарий к платежу...",
+    "invalidAmount": "Сумма не может быть отрицательной",
     "debtors": "Должники",
     "paidClients": "Оплатившие клиенты"
   },
