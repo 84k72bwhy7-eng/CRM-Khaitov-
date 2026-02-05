@@ -1233,7 +1233,25 @@ async def upload_audio(
     return serialize_doc(audio)
 
 @app.get("/api/audio/file/{audio_id}")
-async def get_audio_file(audio_id: str, current_user: dict = Depends(get_current_user)):
+async def get_audio_file(audio_id: str, token: Optional[str] = None, current_user: dict = None):
+    """
+    Serve audio file. Supports both:
+    - Authorization header (for API calls)
+    - Token query parameter (for HTML5 audio player)
+    """
+    # Try to authenticate via query parameter token if no current_user
+    if token:
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+            user = users_collection.find_one({"email": payload.get("sub")})
+            if not user:
+                raise HTTPException(status_code=401, detail="Invalid token")
+        except JWTError:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    elif not current_user:
+        # Try to get from Authorization header
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     audio = audio_files_collection.find_one({"_id": ObjectId(audio_id)})
     if not audio:
         raise HTTPException(status_code=404, detail="Audio file not found")
@@ -1242,11 +1260,65 @@ async def get_audio_file(audio_id: str, current_user: dict = Depends(get_current
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found on disk")
     
+    # Get file size for Content-Length header
+    file_size = os.path.getsize(filepath)
+    
     def iterfile():
         with open(filepath, "rb") as f:
             yield from f
     
-    return StreamingResponse(iterfile(), media_type=audio["content_type"])
+    headers = {
+        "Content-Length": str(file_size),
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-cache"
+    }
+    
+    return StreamingResponse(
+        iterfile(), 
+        media_type=audio["content_type"],
+        headers=headers
+    )
+
+@app.get("/api/audio/stream/{audio_id}")
+async def stream_audio_public(audio_id: str, token: str):
+    """
+    Public audio streaming endpoint with token authentication via query param.
+    Used by HTML5 audio player which cannot send Authorization headers.
+    """
+    # Validate token
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        user = users_collection.find_one({"email": payload.get("sub")})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    audio = audio_files_collection.find_one({"_id": ObjectId(audio_id)})
+    if not audio:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    filepath = os.path.join(UPLOAD_DIR, audio["filename"])
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    
+    file_size = os.path.getsize(filepath)
+    
+    def iterfile():
+        with open(filepath, "rb") as f:
+            yield from f
+    
+    headers = {
+        "Content-Length": str(file_size),
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-cache"
+    }
+    
+    return StreamingResponse(
+        iterfile(), 
+        media_type=audio["content_type"],
+        headers=headers
+    )
 
 @app.delete("/api/audio/{audio_id}")
 async def delete_audio(audio_id: str, current_user: dict = Depends(get_current_user)):
