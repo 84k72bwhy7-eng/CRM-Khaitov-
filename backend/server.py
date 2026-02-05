@@ -48,6 +48,7 @@ audio_files_collection = db["audio_files"]
 tariffs_collection = db["tariffs"]
 settings_collection = db["settings"]
 notifications_collection = db["notifications"]
+groups_collection = db["groups"]
 
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
