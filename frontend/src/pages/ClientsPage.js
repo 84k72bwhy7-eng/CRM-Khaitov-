@@ -198,6 +198,107 @@ export default function ClientsPage() {
     }
   };
 
+  // Import handlers
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.csv') && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      toast.error(t.import.selectFile);
+      return;
+    }
+    
+    setImportFile(file);
+    setImportPreview(null);
+    setImportResult(null);
+    
+    // Upload and get preview
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      setImporting(true);
+      const response = await fetch('/api/import/preview', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('crm_token')}`
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Preview failed');
+      }
+      
+      const preview = await response.json();
+      setImportPreview(preview);
+    } catch (error) {
+      toast.error(error.message || t.import.importFailed);
+      setImportFile(null);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleImportConfirm = async () => {
+    if (!importPreview || importPreview.valid === 0) {
+      toast.error(t.import.importFailed);
+      return;
+    }
+    
+    try {
+      setImporting(true);
+      
+      // Prepare valid rows for import
+      const validRows = importPreview.rows.filter(r => r.valid).map(r => ({
+        name: r.name,
+        phone: r.phone,
+        source: r.source || '',
+        status: r.status || 'new',
+        manager_id: null
+      }));
+      
+      const response = await fetch('/api/import/save', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('crm_token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(validRows)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Import failed');
+      }
+      
+      const result = await response.json();
+      setImportResult(result);
+      
+      if (result.success > 0) {
+        toast.success(`${t.import.importSuccess}: ${result.success} ${t.clients.title.toLowerCase()}`);
+        loadClients();
+      }
+    } catch (error) {
+      toast.error(error.message || t.import.importFailed);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const resetImportModal = () => {
+    setShowImportModal(false);
+    setImportFile(null);
+    setImportPreview(null);
+    setImportResult(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
