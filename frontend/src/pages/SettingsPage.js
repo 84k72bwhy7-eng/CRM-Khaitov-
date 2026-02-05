@@ -391,6 +391,112 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Tariff Management (Admin Only) */}
+        {isAdmin && (
+          <div className="card" data-testid="tariff-settings">
+            <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                <Tag size={20} />
+                {t.settings.tariffManagement}
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingTariff(null);
+                  setTariffForm({ name: '', price: 0, currency: systemSettings.currency, description: '' });
+                  setShowTariffModal(true);
+                }}
+                className="btn-primary flex items-center gap-2 text-sm"
+                data-testid="add-tariff-button"
+              >
+                <Plus size={16} />
+                {t.tariffs.addTariff}
+              </button>
+            </div>
+            <div className="p-4 lg:p-6">
+              {tariffs.length === 0 ? (
+                <p className="text-text-muted text-center py-4">{t.tariffs.noTariffs}</p>
+              ) : (
+                <div className="space-y-3">
+                  {tariffs.map((tariff) => (
+                    <div
+                      key={tariff.id}
+                      className="flex items-center justify-between p-3 bg-background-subtle rounded-lg"
+                      data-testid={`tariff-item-${tariff.id}`}
+                    >
+                      <div>
+                        <p className="font-medium text-text-primary">{tariff.name}</p>
+                        <p className="text-sm text-text-muted">
+                          {tariff.price.toLocaleString()} {tariff.currency}
+                          {tariff.description && ` • ${tariff.description}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditTariff(tariff)}
+                          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                          data-testid={`edit-tariff-${tariff.id}`}
+                        >
+                          <Edit size={16} className="text-text-secondary" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTariff(tariff)}
+                          className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                          data-testid={`delete-tariff-${tariff.id}`}
+                        >
+                          <Trash2 size={16} className="text-status-error" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Currency Settings (Admin Only) */}
+        {isAdmin && (
+          <div className="card" data-testid="currency-settings">
+            <div className="p-4 lg:p-6 border-b border-border">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                <DollarSign size={20} />
+                {t.settings.currencySettings}
+              </h2>
+            </div>
+            <div className="p-4 lg:p-6">
+              <label className="block text-sm font-medium text-text-primary mb-3">{t.settings.selectCurrency}</label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => handleCurrencyChange('USD')}
+                  disabled={savingCurrency}
+                  className={`flex-1 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                    systemSettings.currency === 'USD'
+                      ? 'bg-primary text-black'
+                      : 'bg-background-subtle text-text-secondary hover:bg-gray-100'
+                  }`}
+                  data-testid="currency-usd-button"
+                >
+                  {savingCurrency && systemSettings.currency !== 'USD' && <Loader2 size={18} className="animate-spin" />}
+                  $ USD
+                </button>
+                <button
+                  onClick={() => handleCurrencyChange('UZS')}
+                  disabled={savingCurrency}
+                  className={`flex-1 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                    systemSettings.currency === 'UZS'
+                      ? 'bg-primary text-black'
+                      : 'bg-background-subtle text-text-secondary hover:bg-gray-100'
+                  }`}
+                  data-testid="currency-uzs-button"
+                >
+                  {savingCurrency && systemSettings.currency !== 'UZS' && <Loader2 size={18} className="animate-spin" />}
+                  UZS
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Status Modal */}
