@@ -571,6 +571,11 @@ async def get_clients(
             if group:
                 client["group_name"] = group["name"]
                 client["group_color"] = group["color"]
+        # Add manager info
+        if client.get("manager_id"):
+            manager = users_collection.find_one({"_id": ObjectId(client["manager_id"])})
+            if manager:
+                client["manager_name"] = manager["name"]
         result.append(client)
     return result
 
