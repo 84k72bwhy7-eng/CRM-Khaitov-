@@ -11,7 +11,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - **Proxy**: React dev server proxy to backend
 
 ## User Personas
-1. **Admin**: Full access - manages users, statuses, sees all clients, activity log
+1. **Admin**: Full access - manages users, statuses, tariffs, sees all clients, activity log
 2. **Manager**: Limited access - sees only assigned clients, can add notes/payments/reminders
 
 ## Core Requirements (Static)
@@ -19,7 +19,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - Client CRUD with status management
 - Manager assignment per client
 - Notes/Comments system per client
-- Payment tracking with USD currency
+- Payment tracking with USD/UZS currency
 - Dashboard with stats
 - Search & filter clients
 - Bilingual support (Uzbek/Russian)
@@ -49,35 +49,42 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Audio File Upload**: Upload call recordings, play in browser, stored in /app/uploads
 - [x] **Full Mobile Optimization**: Responsive UI, hamburger menu, touch-friendly
 
+### Phase 3 - Advanced Features (2026-02-05)
+- [x] **Comments & Reminders in Client Creation**: Add initial comment and set reminder when creating a client
+- [x] **Tariff Management**: Admin can create/edit/delete course tariffs with price and currency
+- [x] **Currency Switcher**: Admin can switch system currency between USD and UZS in settings
+- [ ] **Excel/CSV Client Import**: Bulk import with column mapping and duplicate checking (In Progress)
+- [ ] **Advanced Dashboard Analytics**: Charts for monthly sales, revenue comparison, growth metrics
+- [ ] **Reminder Push Notifications**: Browser notifications + in-app notification center
+
 ### Database Schema
 **Collections:**
 - `users`: id, name, email, phone, password, role, created_at
-- `clients`: id, name, phone, source, manager_id, status, is_lead, is_archived, archived_at, created_at
+- `clients`: id, name, phone, source, manager_id, status, is_lead, is_archived, archived_at, tariff_id, created_at
 - `notes`: id, client_id, text, author_id, author_name, created_at
 - `payments`: id, client_id, amount, currency, status, date, created_at
-- `reminders`: id, client_id, user_id, text, remind_at, is_completed, created_at
+- `reminders`: id, client_id, user_id, text, remind_at, is_completed, notified, created_at
 - `statuses`: id, name, color, order, is_default, created_at
+- `tariffs`: id, name, price, currency, description, created_at
+- `settings`: id, key, currency, created_at
+- `notifications`: id, user_id, title, message, type, entity_id, is_read, created_at
 - `activity_log`: id, user_id, user_name, action, entity_type, entity_id, details, created_at
 - `audio_files`: id, client_id, filename, original_name, content_type, size, uploader_id, uploader_name, created_at
 
 ## Testing Status
-- Backend: 100% pass (all API endpoints)
-- Frontend: 98% pass (minor modal automation issue)
-- Extended Features: 100% pass
+- Phase 1 & 2: 100% pass
+- Phase 3 (Completed): 100% pass (iteration_3.json, iteration_4.json)
 
 ## Prioritized Backlog
 
-### P0 (Critical) - COMPLETED
-All 11 requested features implemented
+### P0 (In Progress) - Phase 3 Continuation
+- [ ] **Excel/CSV Client Import**: Upload, column mapping, duplicate check, bulk save
+- [ ] **Advanced Dashboard Analytics**: Charts with recharts library
 
-### P1 (High Priority) - Future
-- [ ] Bulk client import (CSV upload)
-- [ ] Excel export (in addition to CSV)
-- [ ] Push notifications for reminders
-- [ ] Advanced date range filters
+### P1 (High Priority) - Phase 3 Remaining
+- [ ] **Reminder Push Notifications**: Browser notifications + notification center UI
 
 ### P2 (Medium Priority) - Future
-- [ ] Dashboard charts/graphs visualization
 - [ ] Email/SMS integration for notifications
 - [ ] Client tags/categories
 - [ ] Report generation (PDF)
@@ -93,14 +100,19 @@ All 11 requested features implemented
 - Users: GET/POST /api/users, PUT/DELETE /api/users/{id}
 - Clients: GET/POST /api/clients, GET/PUT/DELETE /api/clients/{id}
 - Archive: POST /api/clients/{id}/archive, POST /api/clients/{id}/restore
+- Convert: POST /api/clients/{id}/convert-to-lead
 - Notes: GET /api/notes/{client_id}, POST /api/notes, DELETE /api/notes/{id}
 - Payments: GET /api/payments, GET /api/payments/client/{id}, POST/PUT/DELETE /api/payments/{id}
 - Reminders: GET /api/reminders, GET /api/reminders/overdue, POST/PUT/DELETE /api/reminders/{id}
 - Statuses: GET/POST /api/statuses, PUT/DELETE /api/statuses/{id}
+- Tariffs: GET/POST /api/tariffs, PUT/DELETE /api/tariffs/{id}
+- Settings: GET/PUT /api/settings
 - Activity: GET /api/activity-log
 - Audio: GET /api/audio/{client_id}, POST /api/audio/upload, GET /api/audio/file/{id}, DELETE /api/audio/{id}
 - Export: GET /api/export/clients
-- Dashboard: GET /api/dashboard/stats, GET /api/dashboard/recent-clients, GET /api/dashboard/recent-notes, GET /api/dashboard/manager-stats
+- Import: POST /api/import/preview, POST /api/import/save
+- Dashboard: GET /api/dashboard/stats, GET /api/dashboard/recent-clients, GET /api/dashboard/recent-notes, GET /api/dashboard/manager-stats, GET /api/dashboard/analytics
+- Notifications: GET /api/notifications, GET /api/notifications/unread-count, PUT /api/notifications/{id}/read, PUT /api/notifications/read-all, GET /api/notifications/check-reminders
 
 ## Credentials
 - Admin: admin@crm.local / admin123
