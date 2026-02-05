@@ -25,7 +25,8 @@ export default function ClientDetailPage() {
   const [newNote, setNewNote] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
-  const [paymentForm, setPaymentForm] = useState({ amount: '', currency: 'USD', status: 'pending', date: '' });
+  const [paymentForm, setPaymentForm] = useState({ amount: '', currency: 'USD', status: 'pending', date: '', comment: '' });
+  const [editingPayment, setEditingPayment] = useState(null);
   const [reminderForm, setReminderForm] = useState({ text: '', remind_at: '' });
   const [editingClient, setEditingClient] = useState(false);
   const [clientForm, setClientForm] = useState({ name: '', phone: '', source: '', status: '' });
