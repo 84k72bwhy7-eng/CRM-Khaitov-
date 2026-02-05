@@ -663,6 +663,188 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="modal-overlay" onClick={resetImportModal}>
+          <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()} data-testid="import-modal">
+            <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                <FileSpreadsheet size={20} />
+                {t.import.title}
+              </h2>
+              <button
+                onClick={resetImportModal}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                data-testid="close-import-modal"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4 lg:p-6 space-y-6">
+              {/* File Upload Section */}
+              {!importResult && (
+                <div className="space-y-4">
+                  <div 
+                    className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                    data-testid="import-drop-zone"
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".csv,.xlsx,.xls"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      data-testid="import-file-input"
+                    />
+                    <Upload size={48} className="mx-auto mb-4 text-text-muted" />
+                    <p className="text-text-primary font-medium mb-2">{t.import.uploadFile}</p>
+                    <p className="text-text-muted text-sm">{t.import.selectFile}</p>
+                    {importFile && (
+                      <p className="mt-4 text-sm text-primary font-medium">
+                        {importFile.name}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {importing && (
+                    <div className="flex items-center justify-center gap-2 py-4">
+                      <Loader2 size={24} className="animate-spin text-primary" />
+                      <span className="text-text-secondary">{t.import.importing}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Preview Section */}
+              {importPreview && !importResult && (
+                <div className="space-y-4">
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-background-subtle p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-text-primary">{importPreview.total}</p>
+                      <p className="text-sm text-text-muted">{t.import.totalRows}</p>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-600">{importPreview.valid}</p>
+                      <p className="text-sm text-text-muted">{t.import.validRows}</p>
+                    </div>
+                    <div className="bg-yellow-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-yellow-600">{importPreview.duplicates}</p>
+                      <p className="text-sm text-text-muted">{t.import.duplicates}</p>
+                    </div>
+                    <div className="bg-red-50 p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-red-600">{importPreview.errors}</p>
+                      <p className="text-sm text-text-muted">{t.import.errors}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Preview Table */}
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto max-h-64">
+                      <table className="w-full text-sm">
+                        <thead className="bg-background-subtle sticky top-0">
+                          <tr>
+                            <th className="text-left p-3 font-medium">#</th>
+                            <th className="text-left p-3 font-medium">{t.clients.name}</th>
+                            <th className="text-left p-3 font-medium">{t.clients.phone}</th>
+                            <th className="text-left p-3 font-medium">{t.clients.source}</th>
+                            <th className="text-left p-3 font-medium">{t.clients.status}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importPreview.rows.slice(0, 20).map((row, idx) => (
+                            <tr 
+                              key={idx} 
+                              className={`border-t border-border ${row.is_duplicate ? 'bg-yellow-50' : row.valid ? '' : 'bg-red-50'}`}
+                            >
+                              <td className="p-3">
+                                {row.valid ? (
+                                  <CheckCircle size={16} className="text-green-500" />
+                                ) : (
+                                  <AlertCircle size={16} className={row.is_duplicate ? "text-yellow-500" : "text-red-500"} />
+                                )}
+                              </td>
+                              <td className="p-3">{row.name}</td>
+                              <td className="p-3">{row.phone}</td>
+                              <td className="p-3">{row.source || '-'}</td>
+                              <td className="p-3">{row.status}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {importPreview.rows.length > 20 && (
+                      <p className="text-center text-sm text-text-muted py-2 border-t border-border">
+                        ... {importPreview.rows.length - 20} more rows
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={resetImportModal}
+                      className="btn-outline flex-1"
+                    >
+                      {t.common.cancel}
+                    </button>
+                    <button 
+                      onClick={handleImportConfirm}
+                      disabled={importing || importPreview.valid === 0}
+                      className="btn-primary flex-1 flex items-center justify-center gap-2"
+                      data-testid="confirm-import-button"
+                    >
+                      {importing && <Loader2 size={18} className="animate-spin" />}
+                      {t.import.confirmImport} ({importPreview.valid})
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Result Section */}
+              {importResult && (
+                <div className="space-y-4">
+                  <div className="text-center py-6">
+                    {importResult.success > 0 ? (
+                      <CheckCircle size={64} className="mx-auto mb-4 text-green-500" />
+                    ) : (
+                      <AlertCircle size={64} className="mx-auto mb-4 text-red-500" />
+                    )}
+                    <h3 className="text-xl font-bold text-text-primary mb-2">
+                      {importResult.success > 0 ? t.import.importSuccess : t.import.importFailed}
+                    </h3>
+                    <p className="text-text-secondary">
+                      {importResult.success} {t.import.validRows.toLowerCase()} • {importResult.failed} {t.import.errors.toLowerCase()}
+                    </p>
+                  </div>
+                  
+                  {importResult.failed_rows && importResult.failed_rows.length > 0 && (
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-red-800 mb-2">{t.import.errors}:</h4>
+                      <ul className="text-sm text-red-700 space-y-1">
+                        {importResult.failed_rows.slice(0, 5).map((row, idx) => (
+                          <li key={idx}>Row {row.row}: {row.phone} - {row.error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  <button 
+                    onClick={resetImportModal}
+                    className="btn-primary w-full"
+                    data-testid="close-import-result"
+                  >
+                    {t.common.close}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
