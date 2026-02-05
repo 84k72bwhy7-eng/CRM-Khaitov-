@@ -553,6 +553,74 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Group Management (Admin Only) */}
+        {isAdmin && (
+          <div className="card" data-testid="group-settings">
+            <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary flex items-center gap-2">
+                <Users size={20} />
+                {t.settings.groupManagement}
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingGroup(null);
+                  setGroupForm({ name: '', color: '#6B7280', description: '' });
+                  setShowGroupModal(true);
+                }}
+                className="btn-primary flex items-center gap-2 text-sm"
+                data-testid="add-group-button"
+              >
+                <Plus size={16} />
+                {t.groups.addGroup}
+              </button>
+            </div>
+            <div className="p-4 lg:p-6">
+              {groups.length === 0 ? (
+                <p className="text-text-muted text-center py-4">{t.groups.noGroups}</p>
+              ) : (
+                <div className="space-y-3">
+                  {groups.map((group) => (
+                    <div
+                      key={group.id}
+                      className="flex items-center justify-between p-3 bg-background-subtle rounded-lg"
+                      data-testid={`group-item-${group.id}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: group.color || '#6B7280' }}
+                        />
+                        <div>
+                          <p className="font-medium text-text-primary">{group.name}</p>
+                          {group.description && (
+                            <p className="text-sm text-text-muted">{group.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditGroup(group)}
+                          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                          data-testid={`edit-group-${group.id}`}
+                        >
+                          <Edit size={16} className="text-text-secondary" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGroup(group)}
+                          className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                          data-testid={`delete-group-${group.id}`}
+                        >
+                          <Trash2 size={16} className="text-status-error" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Status Modal */}
