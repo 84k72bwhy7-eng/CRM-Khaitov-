@@ -522,9 +522,14 @@ async def get_clients(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     is_archived: Optional[bool] = False,
+    exclude_sold: Optional[bool] = False,
     current_user: dict = Depends(get_current_user)
 ):
     query = {"is_archived": {"$ne": True} if not is_archived else True}
+    
+    # Exclude sold clients if requested (for main clients list)
+    if exclude_sold and not status:
+        query["status"] = {"$ne": "sold"}
     
     # Role-based filtering
     if current_user["role"] != "admin":
@@ -537,7 +542,7 @@ async def get_clients(
             {"name": {"$regex": search, "$options": "i"}}
         ]
     
-    # Filter by status
+    # Filter by status (overrides exclude_sold)
     if status:
         query["status"] = status
     
