@@ -175,9 +175,25 @@
     "language": "Язык",
     "statusManagement": "Управление статусами",
     "tariffManagement": "Управление тарифами",
+    "groupManagement": "Управление группами",
     "currencySettings": "Настройки валюты",
     "selectCurrency": "Выберите валюту",
     "currencyUpdated": "Валюта обновлена"
+  },
+  "groups": {
+    "title": "Группы",
+    "addGroup": "Добавить группу",
+    "editGroup": "Редактировать группу",
+    "groupName": "Название группы",
+    "groupColor": "Цвет",
+    "groupDescription": "Описание",
+    "noGroups": "Групп нет",
+    "groupCreated": "Группа создана",
+    "groupUpdated": "Группа обновлена",
+    "groupDeleted": "Группа удалена",
+    "groupInUse": "Эта группа используется клиентами",
+    "selectGroup": "Выберите группу",
+    "allGroups": "Все группы"
   },
   "import": {
     "title": "Импорт",
