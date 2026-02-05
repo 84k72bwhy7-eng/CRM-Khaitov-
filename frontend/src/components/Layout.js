@@ -59,10 +59,19 @@ const Layout = ({ children }) => {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-white/10">
-            <h1 className="text-2xl font-bold tracking-tight" data-testid="app-logo">
-              <span className="text-primary">Course</span>CRM
-            </h1>
+          <div className="p-4 border-b border-white/10">
+            <div className="flex items-center gap-3" data-testid="app-logo">
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-black flex-shrink-0">
+                <img 
+                  src="/images/logo.jpg" 
+                  alt="SchoolCRM" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h1 className="text-xl font-bold tracking-tight">
+                <span className="text-primary">School</span>CRM
+              </h1>
+            </div>
           </div>
 
           {/* Navigation */}
