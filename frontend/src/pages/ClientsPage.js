@@ -29,6 +29,7 @@ export default function ClientsPage() {
     status: 'new', 
     manager_id: '',
     tariff_id: '',
+    group_id: '',
     initial_comment: '',
     reminder_text: '',
     reminder_at: ''
