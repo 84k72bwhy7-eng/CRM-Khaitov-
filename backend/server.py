@@ -427,6 +427,65 @@ async def delete_tariff(tariff_id: str, current_user: dict = Depends(get_current
     log_activity(current_user["id"], current_user["name"], "delete", "tariff", tariff_id, {})
     return {"message": "Tariff deleted"}
 
+# ==================== GROUPS ENDPOINTS ====================
+
+@app.get("/api/groups")
+async def get_groups(current_user: dict = Depends(get_current_user)):
+    groups = list(groups_collection.find().sort("name", 1))
+    return [serialize_doc(g) for g in groups]
+
+@app.post("/api/groups")
+async def create_group(data: GroupCreate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check for duplicate name
+    existing = groups_collection.find_one({"name": data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Group with this name already exists")
+    
+    group_doc = {
+        "name": data.name,
+        "color": data.color or "#6B7280",
+        "description": data.description or "",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    result = groups_collection.insert_one(group_doc)
+    log_activity(current_user["id"], current_user["name"], "create", "group", str(result.inserted_id), {"name": data.name})
+    group = groups_collection.find_one({"_id": result.inserted_id})
+    return serialize_doc(group)
+
+@app.put("/api/groups/{group_id}")
+async def update_group(group_id: str, data: GroupUpdate, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if update_data:
+        groups_collection.update_one({"_id": ObjectId(group_id)}, {"$set": update_data})
+        log_activity(current_user["id"], current_user["name"], "update", "group", group_id, update_data)
+    
+    group = groups_collection.find_one({"_id": ObjectId(group_id)})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    return serialize_doc(group)
+
+@app.delete("/api/groups/{group_id}")
+async def delete_group(group_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if any clients use this group
+    clients_in_group = clients_collection.count_documents({"group_id": group_id})
+    if clients_in_group > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete group: {clients_in_group} clients are using it")
+    
+    result = groups_collection.delete_one({"_id": ObjectId(group_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Group not found")
+    log_activity(current_user["id"], current_user["name"], "delete", "group", group_id, {})
+    return {"message": "Group deleted"}
+
 # ==================== SETTINGS ENDPOINTS ====================
 
 @app.get("/api/settings")
