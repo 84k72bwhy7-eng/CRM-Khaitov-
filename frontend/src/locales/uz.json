@@ -5,6 +5,7 @@
   "nav": {
     "dashboard": "Bosh sahifa",
     "clients": "Mijozlar",
+    "soldClients": "Sotilganlar",
     "payments": "To'lovlar",
     "users": "Foydalanuvchilar",
     "settings": "Sozlamalar",
@@ -12,6 +13,25 @@
     "archive": "Arxiv",
     "activityLog": "Faoliyat tarixi",
     "import": "Import"
+  },
+  "sold": {
+    "description": "Sotilgan va yakunlangan mijozlar ro'yxati",
+    "totalSold": "Jami sotilgan",
+    "totalRevenue": "Jami daromad",
+    "activeDeals": "Faol bitimlar",
+    "archivedDeals": "Arxivlangan",
+    "allMonths": "Barcha oylar",
+    "allManagers": "Barcha menejerlar",
+    "allTariffs": "Barcha tariflar",
+    "showActive": "Faollarni ko'rsatish",
+    "showingArchived": "Arxivlanganlar",
+    "soldDate": "Sotilgan sana",
+    "noSoldClients": "Sotilgan mijozlar yo'q",
+    "noArchivedClients": "Arxivlangan mijozlar yo'q",
+    "archive": "Arxivlash",
+    "restore": "Qaytarish",
+    "clientArchived": "Mijoz arxivlandi",
+    "clientRestored": "Mijoz qaytarildi"
   },
   "auth": {
     "login": "Kirish",
