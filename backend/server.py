@@ -812,6 +812,7 @@ async def create_payment(data: PaymentCreate, current_user: dict = Depends(get_c
         "currency": currency,
         "status": data.status,
         "date": data.date or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "comment": data.comment or "",
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     result = payments_collection.insert_one(payment_doc)
