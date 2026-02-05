@@ -151,6 +151,16 @@ class TariffUpdate(BaseModel):
     currency: Optional[str] = None
     description: Optional[str] = None
 
+class GroupCreate(BaseModel):
+    name: str
+    color: Optional[str] = "#6B7280"
+    description: Optional[str] = ""
+
+class GroupUpdate(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
+    description: Optional[str] = None
+
 class SettingsUpdate(BaseModel):
     currency: Optional[str] = None
 
