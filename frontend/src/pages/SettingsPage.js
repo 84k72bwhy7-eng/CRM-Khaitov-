@@ -75,6 +75,15 @@ export default function SettingsPage() {
     }
   };
 
+  const loadGroups = async () => {
+    try {
+      const data = await get('/api/groups');
+      setGroups(data);
+    } catch (error) {
+      console.error('Failed to load groups:', error);
+    }
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
