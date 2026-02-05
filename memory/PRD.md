@@ -54,7 +54,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Tariff Management**: Admin can create/edit/delete course tariffs with price and currency
 - [x] **Currency Switcher**: Admin can switch system currency between USD and UZS in settings
 - [x] **Excel/CSV Client Import**: Bulk import with preview, duplicate detection, and validation (Admin only)
-- [ ] **Advanced Dashboard Analytics**: Charts for monthly sales, revenue comparison, growth metrics
+- [x] **Advanced Dashboard Analytics**: Charts for monthly sales, revenue comparison, growth metrics (Admin only)
 - [ ] **Reminder Push Notifications**: Browser notifications + in-app notification center
 
 ### Database Schema
