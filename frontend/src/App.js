@@ -74,6 +74,13 @@ function AppRoutes() {
           </Layout>
         </ProtectedRoute>
       } />
+      <Route path="/sold" element={
+        <ProtectedRoute>
+          <Layout>
+            <SoldClientsPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
       <Route path="/payments" element={
         <ProtectedRoute>
           <Layout>
