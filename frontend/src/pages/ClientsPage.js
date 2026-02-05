@@ -85,18 +85,54 @@ export default function ClientsPage() {
     e.preventDefault();
     try {
       if (editingClient) {
-        await put(`/api/clients/${editingClient.id}`, formData);
+        // For editing, only send basic fields (no comment/reminder)
+        const updateData = {
+          name: formData.name,
+          phone: formData.phone,
+          source: formData.source,
+          status: formData.status,
+          manager_id: formData.manager_id,
+          tariff_id: formData.tariff_id || null
+        };
+        await put(`/api/clients/${editingClient.id}`, updateData);
         toast.success(t.clients.clientUpdated);
       } else {
-        await post('/api/clients', formData);
+        // For creating, include comment and reminder
+        const createData = {
+          name: formData.name,
+          phone: formData.phone,
+          source: formData.source,
+          status: formData.status,
+          manager_id: formData.manager_id || null,
+          tariff_id: formData.tariff_id || null,
+          initial_comment: formData.initial_comment || null,
+          reminder_text: showReminderFields && formData.reminder_text ? formData.reminder_text : null,
+          reminder_at: showReminderFields && formData.reminder_at ? formData.reminder_at : null
+        };
+        await post('/api/clients', createData);
         toast.success(t.clients.clientCreated);
       }
       setShowModal(false);
       setEditingClient(null);
-      setFormData({ name: '', phone: '', source: '', status: 'new', manager_id: '' });
+      setFormData({ 
+        name: '', 
+        phone: '', 
+        source: '', 
+        status: 'new', 
+        manager_id: '',
+        tariff_id: '',
+        initial_comment: '',
+        reminder_text: '',
+        reminder_at: ''
+      });
+      setShowReminderFields(false);
       loadClients();
     } catch (error) {
-      toast.error(t.common.error);
+      if (error?.response?.status === 400) {
+        toast.error(t.clients.duplicatePhone);
+      } else {
+        toast.error(t.common.error);
+      }
     }
   };
 
