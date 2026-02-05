@@ -129,11 +129,15 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary to-primary/20" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center px-12">
-            <div className="w-32 h-32 bg-primary rounded-2xl mx-auto mb-8 flex items-center justify-center">
-              <span className="text-6xl font-bold text-black">C</span>
+            <div className="w-40 h-40 rounded-2xl mx-auto mb-8 flex items-center justify-center overflow-hidden bg-black">
+              <img 
+                src="/images/logo.jpg" 
+                alt="SchoolCRM" 
+                className="w-full h-full object-cover"
+              />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">CourseCRM</h2>
-            <p className="text-white/70 text-lg">Professional CRM for Course Managers</p>
+            <h2 className="text-3xl font-bold text-white mb-4">SchoolCRM</h2>
+            <p className="text-white/70 text-lg">Professional CRM for Education</p>
           </div>
         </div>
       </div>
