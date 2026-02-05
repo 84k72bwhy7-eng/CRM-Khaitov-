@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell, Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function ClientsPage() {
   const { t } = useLanguage();
   const { isAdmin } = useAuth();
   const { get, post, put, del, loading } = useApi();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
@@ -34,6 +35,13 @@ export default function ClientsPage() {
   });
   const [exporting, setExporting] = useState(false);
   const [showReminderFields, setShowReminderFields] = useState(false);
+  
+  // Import state
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importPreview, setImportPreview] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
 
   useEffect(() => {
     loadClients();
