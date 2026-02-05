@@ -381,57 +381,73 @@ export default function ClientsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={20} />
+      <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-center">
+        {/* Search Field */}
+        <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
           <input
             type="text"
             placeholder={t.clients.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-10"
+            className="input-field pl-10 w-full"
             data-testid="search-input"
           />
         </div>
-        <div className="relative w-full sm:w-48">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={20} />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="input-field pl-10 appearance-none"
-            data-testid="status-filter"
-          >
-            <option value="">{t.clients.allStatuses}</option>
-            {statuses.map((s) => (
-              <option key={s.id} value={s.name}>{t.statuses[s.name] || s.name}</option>
-            ))}
-          </select>
-        </div>
-        {groups.length > 0 && (
-          <div className="relative w-full sm:w-48">
+        
+        {/* Filter Row - Stack on mobile */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
+          {/* Status Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
             <select
-              value={groupFilter}
-              onChange={(e) => setGroupFilter(e.target.value)}
-              className="input-field appearance-none"
-              data-testid="group-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="input-field pl-10 pr-8 w-full sm:w-44 appearance-none bg-white"
+              data-testid="status-filter"
             >
-              <option value="">{t.groups?.allGroups || 'All Groups'}</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>{g.name}</option>
+              <option value="">{t.clients.allStatuses}</option>
+              {statuses.map((s) => (
+                <option key={s.id} value={s.name}>{t.statuses[s.name] || s.name}</option>
               ))}
             </select>
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
+              <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-        )}
-        <button
-          onClick={() => setShowArchived(!showArchived)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-            showArchived ? 'bg-gray-100 border-gray-300' : 'border-border hover:bg-gray-50'
-          }`}
-          data-testid="archive-toggle"
-        >
-          <Archive size={18} />
-          <span className="hidden sm:inline">{t.clients.archived}</span>
-        </button>
+          
+          {/* Group Filter */}
+          {groups.length > 0 && (
+            <div className="relative">
+              <select
+                value={groupFilter}
+                onChange={(e) => setGroupFilter(e.target.value)}
+                className="input-field pr-8 w-full sm:w-44 appearance-none bg-white"
+                data-testid="group-filter"
+              >
+                <option value="">{t.groups?.allGroups || 'All Groups'}</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
+                <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          )}
+          
+          {/* Archive Toggle */}
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-colors whitespace-nowrap ${
+              showArchived ? 'bg-gray-100 border-gray-300 text-gray-700' : 'border-border hover:bg-gray-50 text-text-secondary'
+            }`}
+            data-testid="archive-toggle"
+          >
+            <Archive size={18} />
+            <span>{t.clients.archived}</span>
+          </button>
+        </div>
       </div>
 
       {/* Clients Table */}
