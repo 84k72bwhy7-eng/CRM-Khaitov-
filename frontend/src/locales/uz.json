@@ -175,9 +175,25 @@
     "language": "Til",
     "statusManagement": "Holatlarni boshqarish",
     "tariffManagement": "Tariflarni boshqarish",
+    "groupManagement": "Guruhlarni boshqarish",
     "currencySettings": "Valyuta sozlamalari",
     "selectCurrency": "Valyutani tanlang",
     "currencyUpdated": "Valyuta yangilandi"
+  },
+  "groups": {
+    "title": "Guruhlar",
+    "addGroup": "Guruh qo'shish",
+    "editGroup": "Guruhni tahrirlash",
+    "groupName": "Guruh nomi",
+    "groupColor": "Rang",
+    "groupDescription": "Tavsif",
+    "noGroups": "Guruhlar yo'q",
+    "groupCreated": "Guruh yaratildi",
+    "groupUpdated": "Guruh yangilandi",
+    "groupDeleted": "Guruh o'chirildi",
+    "groupInUse": "Bu guruh mijozlarda ishlatilmoqda",
+    "selectGroup": "Guruhni tanlang",
+    "allGroups": "Barcha guruhlar"
   },
   "import": {
     "title": "Import",
