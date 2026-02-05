@@ -689,7 +689,7 @@ export default function ClientDetailPage() {
                       {playingAudio === audio.id && (
                         <audio
                           ref={audioRef}
-                          src={`/api/audio/file/${audio.id}`}
+                          src={`/api/audio/stream/${audio.id}?token=${localStorage.getItem('crm_token')}`}
                           autoPlay
                           controls
                           className="w-full mt-3"
