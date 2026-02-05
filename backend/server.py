@@ -1287,10 +1287,13 @@ async def stream_audio_public(audio_id: str, token: str):
     """
     # Validate token
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user = users_collection.find_one({"email": payload.get("sub")})
-        if not user:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     
