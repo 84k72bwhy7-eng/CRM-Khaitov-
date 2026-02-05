@@ -42,19 +42,23 @@ export default function ClientsPage() {
   const [importPreview, setImportPreview] = useState(null);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [groupFilter, setGroupFilter] = useState('');
 
   useEffect(() => {
     loadClients();
     loadStatuses();
     loadTariffs();
+    loadGroups();
     if (isAdmin) loadUsers();
-  }, [search, statusFilter, showArchived]);
+  }, [search, statusFilter, groupFilter, showArchived]);
 
   const loadClients = async () => {
     try {
       const params = { is_archived: showArchived };
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
+      if (groupFilter) params.group_id = groupFilter;
       const data = await get('/api/clients', params);
       setClients(data);
     } catch (error) {
@@ -68,6 +72,15 @@ export default function ClientsPage() {
       setUsers(data);
     } catch (error) {
       console.error('Failed to load users:', error);
+    }
+  };
+
+  const loadGroups = async () => {
+    try {
+      const data = await get('/api/groups');
+      setGroups(data);
+    } catch (error) {
+      console.error('Failed to load groups:', error);
     }
   };
 
