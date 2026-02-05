@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Globe,
-  History
+  History,
+  CheckCircle
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -29,6 +30,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t.nav.dashboard },
     { to: '/clients', icon: Users, label: t.nav.clients },
+    { to: '/sold', icon: CheckCircle, label: t.nav.soldClients },
     { to: '/payments', icon: CreditCard, label: t.nav.payments },
     ...(isAdmin ? [
       { to: '/users', icon: UserCog, label: t.nav.users },
