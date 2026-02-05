@@ -763,6 +763,71 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* Group Modal */}
+      {showGroupModal && (
+        <div className="modal-overlay" onClick={() => setShowGroupModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} data-testid="group-modal">
+            <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg lg:text-xl font-bold text-text-primary">
+                {editingGroup ? t.groups.editGroup : t.groups.addGroup}
+              </h2>
+              <button onClick={() => setShowGroupModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleGroupSubmit} className="p-4 lg:p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">{t.groups.groupName}</label>
+                <input
+                  type="text"
+                  value={groupForm.name}
+                  onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
+                  className="input-field"
+                  required
+                  data-testid="group-name-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">{t.groups.groupColor}</label>
+                <div className="flex flex-wrap gap-2">
+                  {colorOptions.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setGroupForm({ ...groupForm, color })}
+                      className={`w-8 h-8 rounded-full transition-transform ${
+                        groupForm.color === color ? 'ring-2 ring-offset-2 ring-black scale-110' : ''
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  {t.groups.groupDescription} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                </label>
+                <textarea
+                  value={groupForm.description}
+                  onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
+                  className="input-field min-h-[80px] resize-y"
+                  data-testid="group-description-input"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setShowGroupModal(false)} className="btn-outline flex-1">
+                  {t.common.cancel}
+                </button>
+                <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  {loading && <Loader2 size={18} className="animate-spin" />}
+                  {t.common.save}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
