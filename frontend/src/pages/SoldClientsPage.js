@@ -239,15 +239,18 @@ export default function SoldClientsPage() {
               <option key={tariff.id} value={tariff.id}>{tariff.name}</option>
             ))}
           </select>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
+            <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
 
         {/* Archive Toggle */}
         <button
           onClick={() => setShowArchived(!showArchived)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-colors whitespace-nowrap w-full sm:w-auto ${
             showArchived 
               ? 'bg-primary text-black border-primary' 
-              : 'border-border hover:bg-gray-50'
+              : 'border-border hover:bg-gray-50 text-text-secondary'
           }`}
           data-testid="show-archived-toggle"
         >
