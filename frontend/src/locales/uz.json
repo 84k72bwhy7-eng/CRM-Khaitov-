@@ -10,7 +10,8 @@
     "settings": "Sozlamalar",
     "logout": "Chiqish",
     "archive": "Arxiv",
-    "activityLog": "Faoliyat tarixi"
+    "activityLog": "Faoliyat tarixi",
+    "import": "Import"
   },
   "auth": {
     "login": "Kirish",
@@ -35,7 +36,13 @@
     "overdueReminders": "Muddati o'tgan eslatmalar",
     "managerStats": "Menejerlar statistikasi",
     "revenue": "Daromad",
-    "deals": "Bitimlar"
+    "deals": "Bitimlar",
+    "analytics": "Analitika",
+    "monthlyStats": "Oylik statistika",
+    "tariffStats": "Tariflar bo'yicha",
+    "monthComparison": "Oyma-oy taqqoslash",
+    "growth": "O'sish",
+    "decline": "Pasayish"
   },
   "clients": {
     "title": "Mijozlar",
@@ -62,7 +69,25 @@
     "archived": "Arxivlangan",
     "convertToLead": "Lidga aylantirish",
     "isLead": "Lid",
-    "exportClients": "Eksport qilish"
+    "exportClients": "Eksport qilish",
+    "tariff": "Tarif",
+    "selectTariff": "Tarifni tanlang",
+    "initialComment": "Dastlabki izoh",
+    "setReminder": "Eslatma qo'shish",
+    "duplicatePhone": "Bu telefon raqami allaqachon mavjud"
+  },
+  "tariffs": {
+    "title": "Tariflar",
+    "addTariff": "Tarif qo'shish",
+    "editTariff": "Tarifni tahrirlash",
+    "tariffName": "Tarif nomi",
+    "tariffPrice": "Narxi",
+    "tariffDescription": "Tavsif",
+    "noTariffs": "Tariflar topilmadi",
+    "tariffCreated": "Tarif yaratildi",
+    "tariffUpdated": "Tarif yangilandi",
+    "tariffDeleted": "Tarif o'chirildi",
+    "tariffInUse": "Bu tarif mijozlarda ishlatilmoqda"
   },
   "statuses": {
     "new": "Yangi",
@@ -144,7 +169,34 @@
     "newPassword": "Yangi parol",
     "profileUpdated": "Profil yangilandi",
     "language": "Til",
-    "statusManagement": "Holatlarni boshqarish"
+    "statusManagement": "Holatlarni boshqarish",
+    "tariffManagement": "Tariflarni boshqarish",
+    "currencySettings": "Valyuta sozlamalari",
+    "selectCurrency": "Valyutani tanlang",
+    "currencyUpdated": "Valyuta yangilandi"
+  },
+  "import": {
+    "title": "Import",
+    "uploadFile": "Faylni yuklang",
+    "selectFile": "CSV yoki Excel fayl tanlang",
+    "preview": "Ko'rib chiqish",
+    "importing": "Import qilinmoqda...",
+    "importSuccess": "Import muvaffaqiyatli",
+    "importFailed": "Import xatosi",
+    "totalRows": "Jami qatorlar",
+    "validRows": "To'g'ri qatorlar",
+    "duplicates": "Dublikatlar",
+    "errors": "Xatolar",
+    "downloadFailed": "Xato qatorlarni yuklash",
+    "confirmImport": "Importni tasdiqlang",
+    "skipDuplicates": "Dublikatlarni o'tkazib yuborish",
+    "columnMapping": "Ustunlarni moslashtirish"
+  },
+  "notifications": {
+    "title": "Bildirishnomalar",
+    "noNotifications": "Bildirishnomalar yo'q",
+    "markAllRead": "Hammasini o'qilgan deb belgilash",
+    "newNotification": "Yangi bildirishnoma"
   },
   "audio": {
     "title": "Audio fayllar",
@@ -170,7 +222,8 @@
       "archive": "Arxivlandi",
       "restore": "Qaytarildi",
       "upload": "Yuklandi",
-      "convert_to_lead": "Lidga aylantirildi"
+      "convert_to_lead": "Lidga aylantirildi",
+      "import": "Import qilindi"
     }
   },
   "export": {
@@ -196,6 +249,7 @@
     "close": "Yopish",
     "all": "Barchasi",
     "yes": "Ha",
-    "no": "Yo'q"
+    "no": "Yo'q",
+    "optional": "Ixtiyoriy"
   }
 }
