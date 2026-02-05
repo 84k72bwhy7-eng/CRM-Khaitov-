@@ -133,6 +133,61 @@ export default function SettingsPage() {
     }
   };
 
+  // Tariff handlers
+  const handleTariffSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingTariff) {
+        await put(`/api/tariffs/${editingTariff.id}`, tariffForm);
+        toast.success(t.tariffs.tariffUpdated);
+      } else {
+        await post('/api/tariffs', tariffForm);
+        toast.success(t.tariffs.tariffCreated);
+      }
+      setShowTariffModal(false);
+      setEditingTariff(null);
+      setTariffForm({ name: '', price: 0, currency: 'USD', description: '' });
+      loadTariffs();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t.common.error);
+    }
+  };
+
+  const handleEditTariff = (tariff) => {
+    setEditingTariff(tariff);
+    setTariffForm({
+      name: tariff.name,
+      price: tariff.price,
+      currency: tariff.currency || 'USD',
+      description: tariff.description || ''
+    });
+    setShowTariffModal(true);
+  };
+
+  const handleDeleteTariff = async (tariff) => {
+    try {
+      await del(`/api/tariffs/${tariff.id}`);
+      toast.success(t.tariffs.tariffDeleted);
+      loadTariffs();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t.tariffs.tariffInUse);
+    }
+  };
+
+  // Currency handler
+  const handleCurrencyChange = async (currency) => {
+    setSavingCurrency(true);
+    try {
+      await put('/api/settings', { currency });
+      setSystemSettings({ ...systemSettings, currency });
+      toast.success(t.settings.currencyUpdated);
+    } catch (error) {
+      toast.error(t.common.error);
+    } finally {
+      setSavingCurrency(false);
+    }
+  };
+
   const colorOptions = [
     '#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', 
     '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
