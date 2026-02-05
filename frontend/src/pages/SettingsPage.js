@@ -48,6 +48,26 @@ export default function SettingsPage() {
     }
   };
 
+  const loadTariffs = async () => {
+    try {
+      const data = await get('/api/tariffs');
+      setTariffs(data);
+    } catch (error) {
+      console.error('Failed to load tariffs:', error);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const data = await get('/api/settings');
+      if (data) {
+        setSystemSettings({ currency: data.currency || 'USD' });
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
