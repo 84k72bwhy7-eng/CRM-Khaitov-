@@ -619,6 +619,28 @@ export default function ClientsPage() {
                 </select>
               </div>
 
+              {/* Group Selection */}
+              {groups.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    {t.groups?.title || 'Group'} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                  </label>
+                  <select
+                    value={formData.group_id}
+                    onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
+                    className="input-field"
+                    data-testid="client-group-select"
+                  >
+                    <option value="">{t.groups?.selectGroup || 'Select group'}</option>
+                    {groups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               {/* Initial Comment - Only for new clients */}
               {!editingClient && (
                 <div>
