@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X, DollarSign, Tag } from 'lucide-react';
+import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X, DollarSign, Tag, Users } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t, language, switchLanguage } = useLanguage();
@@ -27,6 +27,12 @@ export default function SettingsPage() {
   const [editingTariff, setEditingTariff] = useState(null);
   const [tariffForm, setTariffForm] = useState({ name: '', price: 0, currency: 'USD', description: '' });
   
+  // Group Management State
+  const [groups, setGroups] = useState([]);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [editingGroup, setEditingGroup] = useState(null);
+  const [groupForm, setGroupForm] = useState({ name: '', color: '#6B7280', description: '' });
+  
   // Currency Settings State
   const [systemSettings, setSystemSettings] = useState({ currency: 'USD' });
   const [savingCurrency, setSavingCurrency] = useState(false);
@@ -35,6 +41,7 @@ export default function SettingsPage() {
     if (isAdmin) {
       loadStatuses();
       loadTariffs();
+      loadGroups();
       loadSettings();
     }
   }, [isAdmin]);
