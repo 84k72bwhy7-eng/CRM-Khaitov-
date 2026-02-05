@@ -86,6 +86,7 @@ class ClientCreate(BaseModel):
     status: str = "new"
     is_lead: bool = True
     tariff_id: Optional[str] = None
+    group_id: Optional[str] = None
     initial_comment: Optional[str] = None
     reminder_text: Optional[str] = None
     reminder_at: Optional[str] = None
@@ -99,6 +100,7 @@ class ClientUpdate(BaseModel):
     is_lead: Optional[bool] = None
     is_archived: Optional[bool] = None
     tariff_id: Optional[str] = None
+    group_id: Optional[str] = None
 
 class NoteCreate(BaseModel):
     client_id: str
