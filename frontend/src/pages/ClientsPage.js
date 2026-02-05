@@ -433,6 +433,93 @@ export default function ClientsPage() {
                   </select>
                 </div>
               )}
+              
+              {/* Tariff Selection */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  {t.clients.tariff} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                </label>
+                <select
+                  value={formData.tariff_id}
+                  onChange={(e) => setFormData({ ...formData, tariff_id: e.target.value })}
+                  className="input-field"
+                  data-testid="client-tariff-select"
+                >
+                  <option value="">{t.clients.selectTariff}</option>
+                  {tariffs.map((tariff) => (
+                    <option key={tariff.id} value={tariff.id}>
+                      {tariff.name} - {tariff.price} {tariff.currency}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Initial Comment - Only for new clients */}
+              {!editingClient && (
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    <MessageSquare size={16} className="inline mr-2" />
+                    {t.clients.initialComment} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                  </label>
+                  <textarea
+                    value={formData.initial_comment}
+                    onChange={(e) => setFormData({ ...formData, initial_comment: e.target.value })}
+                    className="input-field min-h-[80px] resize-y"
+                    placeholder={t.notes.placeholder}
+                    data-testid="client-initial-comment"
+                  />
+                </div>
+              )}
+
+              {/* Reminder Toggle - Only for new clients */}
+              {!editingClient && (
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowReminderFields(!showReminderFields)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                      showReminderFields 
+                        ? 'bg-primary/10 border-primary text-primary' 
+                        : 'border-border hover:bg-gray-50 text-text-secondary'
+                    }`}
+                    data-testid="toggle-reminder-button"
+                  >
+                    <Bell size={16} />
+                    {t.clients.setReminder}
+                  </button>
+                  
+                  {showReminderFields && (
+                    <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-border animate-fadeIn">
+                      <div>
+                        <label className="block text-sm font-medium text-text-primary mb-2">
+                          {t.reminders.reminderText}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.reminder_text}
+                          onChange={(e) => setFormData({ ...formData, reminder_text: e.target.value })}
+                          className="input-field"
+                          placeholder={t.reminders.reminderText}
+                          data-testid="client-reminder-text"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-text-primary mb-2">
+                          {t.reminders.remindAt}
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={formData.reminder_at}
+                          onChange={(e) => setFormData({ ...formData, reminder_at: e.target.value })}
+                          className="input-field"
+                          data-testid="client-reminder-at"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
