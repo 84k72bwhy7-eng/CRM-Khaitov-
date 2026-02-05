@@ -5,6 +5,7 @@
   "nav": {
     "dashboard": "Главная",
     "clients": "Клиенты",
+    "soldClients": "Продажи",
     "payments": "Платежи",
     "users": "Пользователи",
     "settings": "Настройки",
@@ -12,6 +13,25 @@
     "archive": "Архив",
     "activityLog": "История действий",
     "import": "Импорт"
+  },
+  "sold": {
+    "description": "Список проданных и завершенных клиентов",
+    "totalSold": "Всего продано",
+    "totalRevenue": "Общий доход",
+    "activeDeals": "Активные сделки",
+    "archivedDeals": "В архиве",
+    "allMonths": "Все месяцы",
+    "allManagers": "Все менеджеры",
+    "allTariffs": "Все тарифы",
+    "showActive": "Показать активные",
+    "showingArchived": "Архивные",
+    "soldDate": "Дата продажи",
+    "noSoldClients": "Нет проданных клиентов",
+    "noArchivedClients": "Нет архивных клиентов",
+    "archive": "В архив",
+    "restore": "Восстановить",
+    "clientArchived": "Клиент архивирован",
+    "clientRestored": "Клиент восстановлен"
   },
   "auth": {
     "login": "Вход",
