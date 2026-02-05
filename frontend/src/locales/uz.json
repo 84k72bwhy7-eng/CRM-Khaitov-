@@ -141,6 +141,10 @@
     "paymentAdded": "To'lov qo'shildi",
     "paymentUpdated": "To'lov yangilandi",
     "paymentDeleted": "To'lov o'chirildi",
+    "editPayment": "To'lovni tahrirlash",
+    "comment": "Izoh",
+    "commentPlaceholder": "To'lov haqida izoh...",
+    "invalidAmount": "Summa manfiy bo'lishi mumkin emas",
     "debtors": "Qarzdorlar",
     "paidClients": "To'lagan mijozlar"
   },
