@@ -184,14 +184,14 @@ export default function SoldClientsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-center">
         {/* Month Filter */}
-        <div className="relative w-full sm:w-48">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
           <select
             value={monthFilter}
             onChange={(e) => setMonthFilter(e.target.value)}
-            className="input-field pl-10 appearance-none"
+            className="input-field pl-10 pr-8 w-full sm:w-48 appearance-none bg-white"
             data-testid="month-filter"
           >
             <option value="">{t.sold.allMonths}</option>
@@ -199,16 +199,19 @@ export default function SoldClientsPage() {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
+            <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
 
         {/* Manager Filter (Admin Only) */}
         {isAdmin && (
-          <div className="relative w-full sm:w-48">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
             <select
               value={managerFilter}
               onChange={(e) => setManagerFilter(e.target.value)}
-              className="input-field pl-10 appearance-none"
+              className="input-field pl-10 pr-8 w-full sm:w-48 appearance-none bg-white"
               data-testid="manager-filter"
             >
               <option value="">{t.sold.allManagers}</option>
@@ -216,16 +219,19 @@ export default function SoldClientsPage() {
                 <option key={user.id} value={user.id}>{user.name}</option>
               ))}
             </select>
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
+              <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         )}
 
         {/* Tariff Filter */}
-        <div className="relative w-full sm:w-48">
-          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+        <div className="relative">
+          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
           <select
             value={tariffFilter}
             onChange={(e) => setTariffFilter(e.target.value)}
-            className="input-field pl-10 appearance-none"
+            className="input-field pl-10 pr-8 w-full sm:w-48 appearance-none bg-white"
             data-testid="tariff-filter"
           >
             <option value="">{t.sold.allTariffs}</option>
