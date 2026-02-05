@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
-import { Users, UserPlus, DollarSign, TrendingUp, Clock, FileText, Bell, AlertTriangle } from 'lucide-react';
+import { Users, UserPlus, DollarSign, TrendingUp, TrendingDown, Clock, FileText, Bell, AlertTriangle, BarChart3, PieChart } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 
 export default function DashboardPage() {
   const { t } = useLanguage();
@@ -15,6 +16,7 @@ export default function DashboardPage() {
   const [recentNotes, setRecentNotes] = useState([]);
   const [overdueReminders, setOverdueReminders] = useState([]);
   const [managerStats, setManagerStats] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
 
   useEffect(() => {
     loadDashboardData();
