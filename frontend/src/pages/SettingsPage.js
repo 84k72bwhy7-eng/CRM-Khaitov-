@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X } from 'lucide-react';
+import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X, DollarSign, Tag } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t, language, switchLanguage } = useLanguage();
@@ -20,10 +20,22 @@ export default function SettingsPage() {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [editingStatus, setEditingStatus] = useState(null);
   const [statusForm, setStatusForm] = useState({ name: '', color: '#3B82F6', order: 0 });
+  
+  // Tariff Management State
+  const [tariffs, setTariffs] = useState([]);
+  const [showTariffModal, setShowTariffModal] = useState(false);
+  const [editingTariff, setEditingTariff] = useState(null);
+  const [tariffForm, setTariffForm] = useState({ name: '', price: 0, currency: 'USD', description: '' });
+  
+  // Currency Settings State
+  const [systemSettings, setSystemSettings] = useState({ currency: 'USD' });
+  const [savingCurrency, setSavingCurrency] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
       loadStatuses();
+      loadTariffs();
+      loadSettings();
     }
   }, [isAdmin]);
 
