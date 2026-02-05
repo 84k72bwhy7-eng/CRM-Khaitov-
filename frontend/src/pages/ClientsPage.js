@@ -407,6 +407,21 @@ export default function ClientsPage() {
             ))}
           </select>
         </div>
+        {groups.length > 0 && (
+          <div className="relative w-full sm:w-48">
+            <select
+              value={groupFilter}
+              onChange={(e) => setGroupFilter(e.target.value)}
+              className="input-field appearance-none"
+              data-testid="group-filter"
+            >
+              <option value="">{t.groups?.allGroups || 'All Groups'}</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <button
           onClick={() => setShowArchived(!showArchived)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
