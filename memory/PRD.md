@@ -57,6 +57,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Advanced Dashboard Analytics**: Charts for monthly sales, revenue comparison, growth metrics (Admin only)
 - [x] **Edit Payment Function**: Edit existing payments with activity logging (old/new values tracked)
 - [x] **Client Group Management**: Admin CRUD for groups, client assignment, filtering by group
+- [x] **Sold Client Management**: Dedicated page for sold clients with filtering, archive/restore functionality
 - [ ] **Reminder Push Notifications**: Browser notifications + in-app notification center
 
 ### Database Schema
