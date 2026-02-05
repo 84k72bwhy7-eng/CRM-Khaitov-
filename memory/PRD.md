@@ -114,7 +114,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - Tariffs: GET/POST /api/tariffs, PUT/DELETE /api/tariffs/{id}
 - Settings: GET/PUT /api/settings
 - Activity: GET /api/activity-log
-- Audio: GET /api/audio/{client_id}, POST /api/audio/upload, GET /api/audio/file/{id}, DELETE /api/audio/{id}
+- Audio: GET /api/audio/{client_id}, POST /api/audio/upload, GET /api/audio/file/{id}, GET /api/audio/stream/{id}?token=..., DELETE /api/audio/{id}
 - Export: GET /api/export/clients
 - Import: POST /api/import/preview, POST /api/import/save
 - Dashboard: GET /api/dashboard/stats, GET /api/dashboard/recent-clients, GET /api/dashboard/recent-notes, GET /api/dashboard/manager-stats, GET /api/dashboard/analytics
