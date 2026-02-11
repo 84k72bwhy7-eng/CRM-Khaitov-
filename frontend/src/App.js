@@ -48,16 +48,23 @@ const AdminRoute = ({ children }) => {
 };
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, isTelegram } = useAuth();
+  
+  // For Telegram Mini App, redirect root to clients for direct work entry
+  const defaultRoute = isTelegram ? '/clients' : '/';
   
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/login" element={user ? <Navigate to={defaultRoute} replace /> : <LoginPage />} />
       <Route path="/" element={
         <ProtectedRoute>
-          <Layout>
-            <DashboardPage />
-          </Layout>
+          {isTelegram ? (
+            <Navigate to="/clients" replace />
+          ) : (
+            <Layout>
+              <DashboardPage />
+            </Layout>
+          )}
         </ProtectedRoute>
       } />
       <Route path="/clients" element={
@@ -113,7 +120,7 @@ function AppRoutes() {
           </Layout>
         </ProtectedRoute>
       } />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to={defaultRoute} replace />} />
     </Routes>
   );
 }
