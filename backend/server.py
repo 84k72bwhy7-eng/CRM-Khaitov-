@@ -473,6 +473,74 @@ async def link_telegram_account(data: TelegramLinkRequest):
         "user": user_data
     }
 
+# Admin endpoint to unlink Telegram from a user
+@app.delete("/api/users/{user_id}/telegram")
+async def admin_unlink_telegram(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Admin: Unlink Telegram account from a user"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if not user.get("telegram_id"):
+        raise HTTPException(status_code=400, detail="User has no linked Telegram account")
+    
+    old_telegram_id = user.get("telegram_id")
+    
+    users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$unset": {
+            "telegram_id": "",
+            "telegram_username": "",
+            "telegram_first_name": "",
+            "telegram_linked_at": ""
+        }}
+    )
+    
+    log_activity(current_user["id"], current_user["name"], "unlink_telegram", "user", user_id, 
+                {"telegram_id": old_telegram_id, "user_name": user.get("name")})
+    
+    return {"message": f"Telegram account unlinked from {user.get('name')}"}
+
+# Admin endpoint to manually link Telegram to a user (by telegram_id)
+class AdminTelegramLink(BaseModel):
+    telegram_id: str
+    telegram_username: Optional[str] = ""
+
+@app.post("/api/users/{user_id}/telegram")
+async def admin_link_telegram(user_id: str, data: AdminTelegramLink, current_user: dict = Depends(get_current_user)):
+    """Admin: Manually link a Telegram account to a user"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if this telegram_id is already linked to another user
+    existing = users_collection.find_one({"telegram_id": data.telegram_id})
+    if existing and str(existing["_id"]) != user_id:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Telegram ID already linked to user: {existing.get('name')}"
+        )
+    
+    users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {
+            "telegram_id": data.telegram_id,
+            "telegram_username": data.telegram_username,
+            "telegram_linked_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    log_activity(current_user["id"], current_user["name"], "admin_link_telegram", "user", user_id,
+                {"telegram_id": data.telegram_id, "user_name": user.get("name")})
+    
+    return {"message": f"Telegram account linked to {user.get('name')}"}
+
 # ==================== USERS ENDPOINTS ====================
 
 @app.get("/api/users")
