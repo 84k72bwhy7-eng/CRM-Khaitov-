@@ -354,7 +354,7 @@ export default function ClientsPage() {
         reminder_at: ''
       });
       setShowReminderFields(false);
-      loadClients();
+      refreshClients();
     } catch (error) {
       if (error?.response?.status === 400) {
         toast.error(t.clients.duplicatePhone);
