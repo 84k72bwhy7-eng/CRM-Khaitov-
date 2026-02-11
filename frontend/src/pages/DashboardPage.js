@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function DashboardPage() {
   const { t } = useLanguage();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentClients, setRecentClients] = useState([]);
@@ -18,6 +18,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Don't fetch if user is not loaded yet
+    if (!user) return;
+    
     const controller = new AbortController();
     
     const loadDashboardData = async () => {
@@ -81,7 +84,7 @@ export default function DashboardPage() {
     loadDashboardData();
     
     return () => controller.abort();
-  }, [isAdmin]);
+  }, [user, isAdmin]);
 
   const formatCurrency = (amount, currency = 'USD') => {
     if (currency === 'USD') {
