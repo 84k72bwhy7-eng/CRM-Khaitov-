@@ -425,8 +425,13 @@ def get_system_currency():
 # ==================== SEED DATA ====================
 
 def seed_admin():
-    admin = users_collection.find_one({"email": "admin@crm.local"})
-    if not admin:
+    """Create default admin user only if no users exist"""
+    if DISABLE_SEED:
+        print("[Seed] Skipping admin seed (disabled in production)")
+        return
+    
+    # Only create admin if NO users exist at all (fresh database)
+    if users_collection.count_documents({}) == 0:
         users_collection.insert_one({
             "name": "Admin",
             "email": "admin@crm.local",
@@ -435,10 +440,16 @@ def seed_admin():
             "role": "admin",
             "created_at": datetime.now(timezone.utc).isoformat()
         })
-        print("Admin user created: admin@crm.local / admin123")
+        print("[Seed] Admin user created: admin@crm.local / admin123")
+    else:
+        print("[Seed] Users exist, skipping admin creation")
 
 def seed_default_statuses():
-    """Seed default statuses if none exist"""
+    """Seed default statuses only if none exist"""
+    if DISABLE_SEED:
+        print("[Seed] Skipping statuses seed (disabled in production)")
+        return
+        
     if statuses_collection.count_documents({}) == 0:
         default_statuses = [
             {"name": "new", "color": "#3B82F6", "order": 1, "is_default": True},
@@ -446,27 +457,46 @@ def seed_default_statuses():
             {"name": "sold", "color": "#22C55E", "order": 3, "is_default": True}
         ]
         statuses_collection.insert_many(default_statuses)
-        print("Default statuses created")
+        print("[Seed] Default statuses created")
+    else:
+        print("[Seed] Statuses exist, skipping")
 
 def seed_default_settings():
-    """Seed default system settings"""
+    """Seed default system settings only if none exist"""
+    if DISABLE_SEED:
+        print("[Seed] Skipping settings seed (disabled in production)")
+        return
+        
     if not settings_collection.find_one({"key": "system"}):
         settings_collection.insert_one({
             "key": "system",
             "currency": "USD",
             "created_at": datetime.now(timezone.utc).isoformat()
         })
-        print("Default settings created")
+        print("[Seed] Default settings created")
+    else:
+        print("[Seed] Settings exist, skipping")
 
-seed_admin()
-seed_default_statuses()
-seed_default_settings()
+# Run seeds only in development
+if not DISABLE_SEED:
+    seed_admin()
+    seed_default_statuses()
+    seed_default_settings()
+else:
+    print("[App] PRODUCTION MODE - All seeding disabled to protect data")
 
 # ==================== HEALTH CHECK ====================
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "app": "SchoolCRM", "version": "3.0.0"}
+    return {
+        "status": "healthy", 
+        "app": "SchoolCRM", 
+        "version": "3.0.0",
+        "environment": APP_ENV,
+        "database": DB_NAME,
+        "seed_disabled": DISABLE_SEED
+    }
 
 # ==================== AUTH ENDPOINTS ====================
 
