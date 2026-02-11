@@ -1,0 +1,2546 @@
+[
+  {
+    "_id": "6983689459e6979400b23b57",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "6983689459e6979400b23b56",
+    "details": {
+      "name": "Test Client"
+    },
+    "created_at": "2026-02-04T15:41:08.440017+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b58",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "6983689459e6979400b23b56",
+    "details": {
+      "fields": [
+        "status"
+      ],
+      "old_status": "new",
+      "new_status": "contacted"
+    },
+    "created_at": "2026-02-04T15:41:08.478106+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b5a",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "create",
+    "entity_type": "note",
+    "entity_id": "6983689459e6979400b23b59",
+    "details": {
+      "client_id": "6983689459e6979400b23b56"
+    },
+    "created_at": "2026-02-04T15:41:08.486307+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b5b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "delete",
+    "entity_type": "note",
+    "entity_id": "6983689459e6979400b23b59",
+    "details": {},
+    "created_at": "2026-02-04T15:41:08.492221+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b5d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "6983689459e6979400b23b5c",
+    "details": {
+      "client_id": "6983689459e6979400b23b56",
+      "amount": 1000000.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-04T15:41:08.495011+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b5f",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "6983689459e6979400b23b5e",
+    "details": {
+      "email": "test.manager.20260204_154108@crm.local"
+    },
+    "created_at": "2026-02-04T15:41:08.729755+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b60",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "update",
+    "entity_type": "user",
+    "entity_id": "6983689459e6979400b23b5e",
+    "details": {
+      "fields": [
+        "name"
+      ]
+    },
+    "created_at": "2026-02-04T15:41:08.736523+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b61",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Admin",
+    "action": "update",
+    "entity_type": "user",
+    "entity_id": "69835a516dc8d7c6a526b7d1",
+    "details": {
+      "fields": [
+        "name"
+      ]
+    },
+    "created_at": "2026-02-04T15:41:08.740240+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b62",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "payment",
+    "entity_id": "6983689459e6979400b23b5c",
+    "details": {},
+    "created_at": "2026-02-04T15:41:08.743910+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b63",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "6983689459e6979400b23b56",
+    "details": {
+      "name": "Test Client"
+    },
+    "created_at": "2026-02-04T15:41:08.748484+00:00"
+  },
+  {
+    "_id": "6983689459e6979400b23b64",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "6983689459e6979400b23b5e",
+    "details": {},
+    "created_at": "2026-02-04T15:41:08.751968+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b66",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698368bb59e6979400b23b65",
+    "details": {
+      "name": "Extended Test Client"
+    },
+    "created_at": "2026-02-04T15:41:47.865405+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b68",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "reminder",
+    "entity_id": "698368bb59e6979400b23b67",
+    "details": {
+      "client_id": "698368bb59e6979400b23b65"
+    },
+    "created_at": "2026-02-04T15:41:47.885584+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b6a",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "status",
+    "entity_id": "698368bb59e6979400b23b69",
+    "details": {
+      "name": "custom_test_status"
+    },
+    "created_at": "2026-02-04T15:41:47.902863+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b6b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "status",
+    "entity_id": "698368bb59e6979400b23b69",
+    "details": {
+      "color": "#4CAF50"
+    },
+    "created_at": "2026-02-04T15:41:47.905711+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b6c",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "archive",
+    "entity_type": "client",
+    "entity_id": "698368bb59e6979400b23b65",
+    "details": {
+      "name": "Extended Test Client"
+    },
+    "created_at": "2026-02-04T15:41:47.908846+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b6d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "restore",
+    "entity_type": "client",
+    "entity_id": "698368bb59e6979400b23b65",
+    "details": {
+      "name": "Extended Test Client"
+    },
+    "created_at": "2026-02-04T15:41:47.913418+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b6f",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "698368bb59e6979400b23b6e",
+    "details": {
+      "client_id": "698368bb59e6979400b23b65",
+      "amount": 500.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-04T15:41:47.947335+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b70",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "payment",
+    "entity_id": "698368bb59e6979400b23b6e",
+    "details": {},
+    "created_at": "2026-02-04T15:41:47.949872+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b71",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "status",
+    "entity_id": "698368bb59e6979400b23b69",
+    "details": {
+      "name": "custom_test_status"
+    },
+    "created_at": "2026-02-04T15:41:47.955544+00:00"
+  },
+  {
+    "_id": "698368bb59e6979400b23b72",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698368bb59e6979400b23b65",
+    "details": {
+      "name": "Extended Test Client"
+    },
+    "created_at": "2026-02-04T15:41:47.958893+00:00"
+  },
+  {
+    "_id": "698368f659e6979400b23b74",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698368f659e6979400b23b73",
+    "details": {
+      "name": "Test Client UI"
+    },
+    "created_at": "2026-02-04T15:42:46.228147+00:00"
+  },
+  {
+    "_id": "698368f859e6979400b23b76",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "note",
+    "entity_id": "698368f859e6979400b23b75",
+    "details": {
+      "client_id": "698368f659e6979400b23b73"
+    },
+    "created_at": "2026-02-04T15:42:48.482911+00:00"
+  },
+  {
+    "_id": "698368fa59e6979400b23b78",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "698368fa59e6979400b23b77",
+    "details": {
+      "client_id": "698368f659e6979400b23b73",
+      "amount": 500.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-04T15:42:50.976024+00:00"
+  },
+  {
+    "_id": "698368fd59e6979400b23b7a",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "reminder",
+    "entity_id": "698368fd59e6979400b23b79",
+    "details": {
+      "client_id": "698368f659e6979400b23b73"
+    },
+    "created_at": "2026-02-04T15:42:53.511978+00:00"
+  },
+  {
+    "_id": "698368ff59e6979400b23b7b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "archive",
+    "entity_type": "client",
+    "entity_id": "698368f659e6979400b23b73",
+    "details": {
+      "name": "Test Client UI"
+    },
+    "created_at": "2026-02-04T15:42:55.564184+00:00"
+  },
+  {
+    "_id": "6983694659e6979400b23b7d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "status",
+    "entity_id": "6983694659e6979400b23b7c",
+    "details": {
+      "name": "test_ui_status"
+    },
+    "created_at": "2026-02-04T15:44:06.528260+00:00"
+  },
+  {
+    "_id": "698429f2bfa305bcfc48f3e3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f2bfa305bcfc48f3e2",
+    "details": {
+      "name": "TEST_Basic Client"
+    },
+    "created_at": "2026-02-05T05:26:10.890963+00:00"
+  },
+  {
+    "_id": "698429f2bfa305bcfc48f3e4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f2bfa305bcfc48f3e2",
+    "details": {
+      "name": "TEST_Basic Client"
+    },
+    "created_at": "2026-02-05T05:26:10.939695+00:00"
+  },
+  {
+    "_id": "698429f3bfa305bcfc48f3e7",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f3bfa305bcfc48f3e5",
+    "details": {
+      "name": "TEST_Client With Comment"
+    },
+    "created_at": "2026-02-05T05:26:11.245506+00:00"
+  },
+  {
+    "_id": "698429f3bfa305bcfc48f3e8",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f3bfa305bcfc48f3e5",
+    "details": {
+      "name": "TEST_Client With Comment"
+    },
+    "created_at": "2026-02-05T05:26:11.331397+00:00"
+  },
+  {
+    "_id": "698429f3bfa305bcfc48f3eb",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f3bfa305bcfc48f3e9",
+    "details": {
+      "name": "TEST_Client With Reminder"
+    },
+    "created_at": "2026-02-05T05:26:11.674365+00:00"
+  },
+  {
+    "_id": "698429f3bfa305bcfc48f3ec",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f3bfa305bcfc48f3e9",
+    "details": {
+      "name": "TEST_Client With Reminder"
+    },
+    "created_at": "2026-02-05T05:26:11.757077+00:00"
+  },
+  {
+    "_id": "698429f4bfa305bcfc48f3f0",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f4bfa305bcfc48f3ed",
+    "details": {
+      "name": "TEST_Client Full"
+    },
+    "created_at": "2026-02-05T05:26:12.057292+00:00"
+  },
+  {
+    "_id": "698429f4bfa305bcfc48f3f1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f4bfa305bcfc48f3ed",
+    "details": {
+      "name": "TEST_Client Full"
+    },
+    "created_at": "2026-02-05T05:26:12.174077+00:00"
+  },
+  {
+    "_id": "698429f4bfa305bcfc48f3f3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "698429f4bfa305bcfc48f3f2",
+    "details": {
+      "name": "TEST_Tariff"
+    },
+    "created_at": "2026-02-05T05:26:12.524782+00:00"
+  },
+  {
+    "_id": "698429f4bfa305bcfc48f3f5",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f4bfa305bcfc48f3f4",
+    "details": {
+      "name": "TEST_Client With Tariff"
+    },
+    "created_at": "2026-02-05T05:26:12.564497+00:00"
+  },
+  {
+    "_id": "698429f4bfa305bcfc48f3f6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f4bfa305bcfc48f3f4",
+    "details": {
+      "name": "TEST_Client With Tariff"
+    },
+    "created_at": "2026-02-05T05:26:12.643342+00:00"
+  },
+  {
+    "_id": "698429f4bfa305bcfc48f3fa",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f4bfa305bcfc48f3f7",
+    "details": {
+      "name": "TEST_Full Client"
+    },
+    "created_at": "2026-02-05T05:26:12.979454+00:00"
+  },
+  {
+    "_id": "698429f5bfa305bcfc48f3fb",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f4bfa305bcfc48f3f7",
+    "details": {
+      "name": "TEST_Full Client"
+    },
+    "created_at": "2026-02-05T05:26:13.065836+00:00"
+  },
+  {
+    "_id": "698429f5bfa305bcfc48f3fd",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f5bfa305bcfc48f3fc",
+    "details": {
+      "name": "TEST_No Reminder Text"
+    },
+    "created_at": "2026-02-05T05:26:13.406190+00:00"
+  },
+  {
+    "_id": "698429f5bfa305bcfc48f3fe",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f5bfa305bcfc48f3fc",
+    "details": {
+      "name": "TEST_No Reminder Text"
+    },
+    "created_at": "2026-02-05T05:26:13.483142+00:00"
+  },
+  {
+    "_id": "698429f5bfa305bcfc48f400",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f5bfa305bcfc48f3ff",
+    "details": {
+      "name": "TEST_Empty Comment"
+    },
+    "created_at": "2026-02-05T05:26:13.786059+00:00"
+  },
+  {
+    "_id": "698429f5bfa305bcfc48f401",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f5bfa305bcfc48f3ff",
+    "details": {
+      "name": "TEST_Empty Comment"
+    },
+    "created_at": "2026-02-05T05:26:13.862269+00:00"
+  },
+  {
+    "_id": "698429f6bfa305bcfc48f403",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698429f6bfa305bcfc48f402",
+    "details": {
+      "name": "TEST_Update Client"
+    },
+    "created_at": "2026-02-05T05:26:14.159769+00:00"
+  },
+  {
+    "_id": "698429f6bfa305bcfc48f404",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "698429f6bfa305bcfc48f402",
+    "details": {
+      "fields": [
+        "name"
+      ],
+      "old_status": "new",
+      "new_status": null
+    },
+    "created_at": "2026-02-05T05:26:14.201431+00:00"
+  },
+  {
+    "_id": "698429f6bfa305bcfc48f405",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698429f6bfa305bcfc48f402",
+    "details": {
+      "name": "TEST_Updated Name"
+    },
+    "created_at": "2026-02-05T05:26:14.286079+00:00"
+  },
+  {
+    "_id": "69842a40bfa305bcfc48f409",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a40bfa305bcfc48f406",
+    "details": {
+      "name": "UI Test Client With Comment"
+    },
+    "created_at": "2026-02-05T05:27:28.270904+00:00"
+  },
+  {
+    "_id": "69842a6cbfa305bcfc48f40b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6cbfa305bcfc48f40a",
+    "details": {
+      "name": "TEST_Basic Client"
+    },
+    "created_at": "2026-02-05T05:28:12.146522+00:00"
+  },
+  {
+    "_id": "69842a6cbfa305bcfc48f40c",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6cbfa305bcfc48f40a",
+    "details": {
+      "name": "TEST_Basic Client"
+    },
+    "created_at": "2026-02-05T05:28:12.190401+00:00"
+  },
+  {
+    "_id": "69842a6cbfa305bcfc48f40f",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6cbfa305bcfc48f40d",
+    "details": {
+      "name": "TEST_Client With Comment"
+    },
+    "created_at": "2026-02-05T05:28:12.493390+00:00"
+  },
+  {
+    "_id": "69842a6cbfa305bcfc48f410",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6cbfa305bcfc48f40d",
+    "details": {
+      "name": "TEST_Client With Comment"
+    },
+    "created_at": "2026-02-05T05:28:12.574647+00:00"
+  },
+  {
+    "_id": "69842a6cbfa305bcfc48f413",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6cbfa305bcfc48f411",
+    "details": {
+      "name": "TEST_Client With Reminder"
+    },
+    "created_at": "2026-02-05T05:28:12.872530+00:00"
+  },
+  {
+    "_id": "69842a6dbfa305bcfc48f414",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6cbfa305bcfc48f411",
+    "details": {
+      "name": "TEST_Client With Reminder"
+    },
+    "created_at": "2026-02-05T05:28:13.033778+00:00"
+  },
+  {
+    "_id": "69842a6dbfa305bcfc48f418",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6dbfa305bcfc48f415",
+    "details": {
+      "name": "TEST_Client Full"
+    },
+    "created_at": "2026-02-05T05:28:13.329100+00:00"
+  },
+  {
+    "_id": "69842a6dbfa305bcfc48f419",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6dbfa305bcfc48f415",
+    "details": {
+      "name": "TEST_Client Full"
+    },
+    "created_at": "2026-02-05T05:28:13.485899+00:00"
+  },
+  {
+    "_id": "69842a6dbfa305bcfc48f41b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6dbfa305bcfc48f41a",
+    "details": {
+      "name": "TEST_Client With Tariff"
+    },
+    "created_at": "2026-02-05T05:28:13.818669+00:00"
+  },
+  {
+    "_id": "69842a6dbfa305bcfc48f41c",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6dbfa305bcfc48f41a",
+    "details": {
+      "name": "TEST_Client With Tariff"
+    },
+    "created_at": "2026-02-05T05:28:13.891046+00:00"
+  },
+  {
+    "_id": "69842a6ebfa305bcfc48f420",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6ebfa305bcfc48f41d",
+    "details": {
+      "name": "TEST_Full Client"
+    },
+    "created_at": "2026-02-05T05:28:14.219885+00:00"
+  },
+  {
+    "_id": "69842a6ebfa305bcfc48f421",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6ebfa305bcfc48f41d",
+    "details": {
+      "name": "TEST_Full Client"
+    },
+    "created_at": "2026-02-05T05:28:14.297041+00:00"
+  },
+  {
+    "_id": "69842a6ebfa305bcfc48f423",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6ebfa305bcfc48f422",
+    "details": {
+      "name": "TEST_No Reminder Text"
+    },
+    "created_at": "2026-02-05T05:28:14.592826+00:00"
+  },
+  {
+    "_id": "69842a6ebfa305bcfc48f424",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6ebfa305bcfc48f422",
+    "details": {
+      "name": "TEST_No Reminder Text"
+    },
+    "created_at": "2026-02-05T05:28:14.707112+00:00"
+  },
+  {
+    "_id": "69842a6fbfa305bcfc48f426",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6fbfa305bcfc48f425",
+    "details": {
+      "name": "TEST_Empty Comment"
+    },
+    "created_at": "2026-02-05T05:28:15.007653+00:00"
+  },
+  {
+    "_id": "69842a6fbfa305bcfc48f427",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6fbfa305bcfc48f425",
+    "details": {
+      "name": "TEST_Empty Comment"
+    },
+    "created_at": "2026-02-05T05:28:15.083456+00:00"
+  },
+  {
+    "_id": "69842a6fbfa305bcfc48f429",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842a6fbfa305bcfc48f428",
+    "details": {
+      "name": "TEST_Update Client"
+    },
+    "created_at": "2026-02-05T05:28:15.378966+00:00"
+  },
+  {
+    "_id": "69842a6fbfa305bcfc48f42a",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "69842a6fbfa305bcfc48f428",
+    "details": {
+      "fields": [
+        "name"
+      ],
+      "old_status": "new",
+      "new_status": null
+    },
+    "created_at": "2026-02-05T05:28:15.416937+00:00"
+  },
+  {
+    "_id": "69842a6fbfa305bcfc48f42b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842a6fbfa305bcfc48f428",
+    "details": {
+      "name": "TEST_Updated Name"
+    },
+    "created_at": "2026-02-05T05:28:15.490893+00:00"
+  },
+  {
+    "_id": "69842b721f067631f9c0d7a6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b721f067631f9c0d7a5",
+    "details": {
+      "name": "TEST_TARIFF_Basic_Plan"
+    },
+    "created_at": "2026-02-05T05:32:34.487800+00:00"
+  },
+  {
+    "_id": "69842b721f067631f9c0d7a8",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b721f067631f9c0d7a7",
+    "details": {
+      "name": "TEST_TARIFF_Premium_UZS"
+    },
+    "created_at": "2026-02-05T05:32:34.530397+00:00"
+  },
+  {
+    "_id": "69842b721f067631f9c0d7aa",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b721f067631f9c0d7a9",
+    "details": {
+      "name": "TEST_TARIFF_NoDesc_Plan"
+    },
+    "created_at": "2026-02-05T05:32:34.569527+00:00"
+  },
+  {
+    "_id": "69842b721f067631f9c0d7ac",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "69842b721f067631f9c0d7ab",
+    "details": {
+      "email": "test_manager_c807918d@test.local"
+    },
+    "created_at": "2026-02-05T05:32:34.834322+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7ae",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7ad",
+    "details": {
+      "name": "TEST_TARIFF_ToUpdate"
+    },
+    "created_at": "2026-02-05T05:32:35.177350+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7af",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7ad",
+    "details": {
+      "name": "TEST_TARIFF_Updated_Plan",
+      "price": 150.0,
+      "description": "Updated description"
+    },
+    "created_at": "2026-02-05T05:32:35.215088+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7b1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7b0",
+    "details": {
+      "name": "TEST_TARIFF_ManagerUpdateTest"
+    },
+    "created_at": "2026-02-05T05:32:35.256033+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7b3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7b2",
+    "details": {
+      "name": "TEST_TARIFF_ToDelete"
+    },
+    "created_at": "2026-02-05T05:32:35.376082+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7b4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7b2",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.416467+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7b6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7b5",
+    "details": {
+      "name": "TEST_TARIFF_InUse"
+    },
+    "created_at": "2026-02-05T05:32:35.452518+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7b8",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842b731f067631f9c0d7b7",
+    "details": {
+      "name": "TEST_TARIFF_Client"
+    },
+    "created_at": "2026-02-05T05:32:35.529434+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7b9",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842b731f067631f9c0d7b7",
+    "details": {
+      "name": "TEST_TARIFF_Client"
+    },
+    "created_at": "2026-02-05T05:32:35.604882+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7bb",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7ba",
+    "details": {
+      "name": "TEST_TARIFF_ManagerDeleteTest"
+    },
+    "created_at": "2026-02-05T05:32:35.640648+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7bc",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b721f067631f9c0d7a5",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.744809+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7bd",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b721f067631f9c0d7a7",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.778425+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7be",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b721f067631f9c0d7a9",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.814741+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7bf",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7ad",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.853023+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7c0",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7b0",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.890445+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7c1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7b5",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.925739+00:00"
+  },
+  {
+    "_id": "69842b731f067631f9c0d7c2",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b731f067631f9c0d7ba",
+    "details": {},
+    "created_at": "2026-02-05T05:32:35.961265+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7c3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "UZS"
+    },
+    "created_at": "2026-02-05T05:32:36.034382+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7c4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T05:32:36.109985+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7c6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842b741f067631f9c0d7c5",
+    "details": {
+      "name": "TEST_TARIFF_Integration_Test"
+    },
+    "created_at": "2026-02-05T05:32:36.307951+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7c8",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842b741f067631f9c0d7c7",
+    "details": {
+      "name": "TEST_TARIFF_Integration_Client"
+    },
+    "created_at": "2026-02-05T05:32:36.344709+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7c9",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69842b741f067631f9c0d7c7",
+    "details": {
+      "name": "TEST_TARIFF_Integration_Client"
+    },
+    "created_at": "2026-02-05T05:32:36.415374+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7ca",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842b741f067631f9c0d7c5",
+    "details": {},
+    "created_at": "2026-02-05T05:32:36.455370+00:00"
+  },
+  {
+    "_id": "69842b741f067631f9c0d7cb",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "69842b721f067631f9c0d7ab",
+    "details": {},
+    "created_at": "2026-02-05T05:32:36.493335+00:00"
+  },
+  {
+    "_id": "69842bc71f067631f9c0d7cd",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69842bc71f067631f9c0d7cc",
+    "details": {
+      "name": "TEST_UI_Tariff"
+    },
+    "created_at": "2026-02-05T05:33:59.190773+00:00"
+  },
+  {
+    "_id": "69842be91f067631f9c0d7ce",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "UZS"
+    },
+    "created_at": "2026-02-05T05:34:33.257912+00:00"
+  },
+  {
+    "_id": "69842beb1f067631f9c0d7cf",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T05:34:35.356909+00:00"
+  },
+  {
+    "_id": "69842bee1f067631f9c0d7d0",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "tariff",
+    "entity_id": "69842bc71f067631f9c0d7cc",
+    "details": {
+      "name": "TEST_UI_Tariff",
+      "price": 300.0,
+      "currency": "USD",
+      "description": "Test tariff from UI"
+    },
+    "created_at": "2026-02-05T05:34:38.581268+00:00"
+  },
+  {
+    "_id": "69842c081f067631f9c0d7d1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "tariff",
+    "entity_id": "69842bc71f067631f9c0d7cc",
+    "details": {},
+    "created_at": "2026-02-05T05:35:04.971780+00:00"
+  },
+  {
+    "_id": "69842c231f067631f9c0d7d3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "69842c231f067631f9c0d7d2",
+    "details": {
+      "email": "testmanager@crm.local"
+    },
+    "created_at": "2026-02-05T05:35:31.107346+00:00"
+  },
+  {
+    "_id": "69842c411f067631f9c0d7d4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "69842c231f067631f9c0d7d2",
+    "details": {},
+    "created_at": "2026-02-05T05:36:01.902175+00:00"
+  },
+  {
+    "_id": "69842cae1f067631f9c0d7d5",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "UZS"
+    },
+    "created_at": "2026-02-05T05:37:50.380510+00:00"
+  },
+  {
+    "_id": "69842cc41f067631f9c0d7d6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "69842a40bfa305bcfc48f406",
+    "details": {
+      "fields": [
+        "name",
+        "phone",
+        "source",
+        "manager_id",
+        "status",
+        "tariff_id"
+      ],
+      "old_status": "new",
+      "new_status": "new"
+    },
+    "created_at": "2026-02-05T05:38:12.082095+00:00"
+  },
+  {
+    "_id": "69842cd21f067631f9c0d7d7",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "698363066dc8d7c6a526b7de",
+    "details": {
+      "fields": [
+        "name",
+        "phone",
+        "source",
+        "manager_id",
+        "status"
+      ],
+      "old_status": "new",
+      "new_status": "new"
+    },
+    "created_at": "2026-02-05T05:38:26.875009+00:00"
+  },
+  {
+    "_id": "69842d061f067631f9c0d7d9",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "upload",
+    "entity_type": "audio",
+    "entity_id": "69842d061f067631f9c0d7d8",
+    "details": {
+      "client_id": "698363066dc8d7c6a526b7de",
+      "filename": "Elegant Luxury Hip Hop-30sec.wav"
+    },
+    "created_at": "2026-02-05T05:39:18.686054+00:00"
+  },
+  {
+    "_id": "69842d441f067631f9c0d7da",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "audio",
+    "entity_id": "69842d061f067631f9c0d7d8",
+    "details": {
+      "filename": "Elegant Luxury Hip Hop-30sec.wav"
+    },
+    "created_at": "2026-02-05T05:40:20.809240+00:00"
+  },
+  {
+    "_id": "69842d621f067631f9c0d7db",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "698363066dc8d7c6a526b7de",
+    "details": {
+      "fields": [
+        "name",
+        "phone",
+        "source",
+        "manager_id",
+        "status"
+      ],
+      "old_status": "new",
+      "new_status": "new"
+    },
+    "created_at": "2026-02-05T05:40:50.772113+00:00"
+  },
+  {
+    "_id": "69842d991f067631f9c0d7df",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69842d991f067631f9c0d7dc",
+    "details": {
+      "name": "asfgr"
+    },
+    "created_at": "2026-02-05T05:41:45.057149+00:00"
+  },
+  {
+    "_id": "69842dc91f067631f9c0d7e1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "69842dc91f067631f9c0d7e0",
+    "details": {
+      "client_id": "69842d991f067631f9c0d7dc",
+      "amount": 500000.0,
+      "currency": "UZS"
+    },
+    "created_at": "2026-02-05T05:42:33.992487+00:00"
+  },
+  {
+    "_id": "69842e501f067631f9c0d7e2",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T05:44:48.258387+00:00"
+  },
+  {
+    "_id": "69842e551f067631f9c0d7e3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "settings",
+    "entity_id": "system",
+    "details": {
+      "currency": "UZS"
+    },
+    "created_at": "2026-02-05T05:44:53.162717+00:00"
+  },
+  {
+    "_id": "6984309fb0f1118e86a3fb93",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "6984309fb0f1118e86a3fb92",
+    "details": {
+      "name": "TEST_IMPORT_Existing"
+    },
+    "created_at": "2026-02-05T05:54:39.923288+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb94",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "6984309fb0f1118e86a3fb92",
+    "details": {
+      "name": "TEST_IMPORT_Existing"
+    },
+    "created_at": "2026-02-05T05:54:40.077854+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb97",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "import",
+    "entity_type": "client",
+    "entity_id": "",
+    "details": {
+      "success": 2,
+      "failed": 0
+    },
+    "created_at": "2026-02-05T05:54:40.244762+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb98",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698430a0b0f1118e86a3fb96",
+    "details": {
+      "name": "TEST_IMPORT_Save2"
+    },
+    "created_at": "2026-02-05T05:54:40.408353+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb99",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698430a0b0f1118e86a3fb95",
+    "details": {
+      "name": "TEST_IMPORT_Save1"
+    },
+    "created_at": "2026-02-05T05:54:40.444871+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb9b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698430a0b0f1118e86a3fb9a",
+    "details": {
+      "name": "TEST_IMPORT_Existing2"
+    },
+    "created_at": "2026-02-05T05:54:40.481634+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb9c",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "import",
+    "entity_type": "client",
+    "entity_id": "",
+    "details": {
+      "success": 0,
+      "failed": 1
+    },
+    "created_at": "2026-02-05T05:54:40.516804+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb9d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698430a0b0f1118e86a3fb9a",
+    "details": {
+      "name": "TEST_IMPORT_Existing2"
+    },
+    "created_at": "2026-02-05T05:54:40.657879+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fb9e",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "import",
+    "entity_type": "client",
+    "entity_id": "",
+    "details": {
+      "success": 0,
+      "failed": 0
+    },
+    "created_at": "2026-02-05T05:54:40.703605+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fba1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "import",
+    "entity_type": "client",
+    "entity_id": "",
+    "details": {
+      "success": 2,
+      "failed": 0
+    },
+    "created_at": "2026-02-05T05:54:40.819098+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fba2",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698430a0b0f1118e86a3fba0",
+    "details": {
+      "name": "TEST_IMPORT_Flow2"
+    },
+    "created_at": "2026-02-05T05:54:40.937469+00:00"
+  },
+  {
+    "_id": "698430a0b0f1118e86a3fba3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698430a0b0f1118e86a3fb9f",
+    "details": {
+      "name": "TEST_IMPORT_Flow1"
+    },
+    "created_at": "2026-02-05T05:54:40.971746+00:00"
+  },
+  {
+    "_id": "698430a1b0f1118e86a3fba5",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "698430a1b0f1118e86a3fba4",
+    "details": {
+      "email": "test_manager_import@crm.local"
+    },
+    "created_at": "2026-02-05T05:54:41.266882+00:00"
+  },
+  {
+    "_id": "698430a1b0f1118e86a3fba7",
+    "user_id": "698430a1b0f1118e86a3fba4",
+    "user_name": "Test Manager Import",
+    "action": "import",
+    "entity_type": "client",
+    "entity_id": "",
+    "details": {
+      "success": 1,
+      "failed": 0
+    },
+    "created_at": "2026-02-05T05:54:41.603787+00:00"
+  },
+  {
+    "_id": "698430a1b0f1118e86a3fba8",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698430a1b0f1118e86a3fba6",
+    "details": {
+      "name": "TEST_IMPORT_Manager"
+    },
+    "created_at": "2026-02-05T05:54:41.679159+00:00"
+  },
+  {
+    "_id": "698430a1b0f1118e86a3fba9",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "698430a1b0f1118e86a3fba4",
+    "details": {},
+    "created_at": "2026-02-05T05:54:41.753426+00:00"
+  },
+  {
+    "_id": "69843107b0f1118e86a3fbad",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "import",
+    "entity_type": "client",
+    "entity_id": "",
+    "details": {
+      "success": 3,
+      "failed": 0
+    },
+    "created_at": "2026-02-05T05:56:23.449825+00:00"
+  },
+  {
+    "_id": "69843123b0f1118e86a3fbaf",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "69843123b0f1118e86a3fbae",
+    "details": {
+      "email": "test_manager_ui@crm.local"
+    },
+    "created_at": "2026-02-05T05:56:51.349847+00:00"
+  },
+  {
+    "_id": "6984317fb0f1118e86a3fbb0",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69843107b0f1118e86a3fbac",
+    "details": {
+      "name": "Test Import 3"
+    },
+    "created_at": "2026-02-05T05:58:23.937716+00:00"
+  },
+  {
+    "_id": "6984317fb0f1118e86a3fbb1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69843107b0f1118e86a3fbab",
+    "details": {
+      "name": "Test Import 2"
+    },
+    "created_at": "2026-02-05T05:58:23.988576+00:00"
+  },
+  {
+    "_id": "69843180b0f1118e86a3fbb2",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "69843107b0f1118e86a3fbaa",
+    "details": {
+      "name": "Test Import 1"
+    },
+    "created_at": "2026-02-05T05:58:24.037494+00:00"
+  },
+  {
+    "_id": "69843180b0f1118e86a3fbb3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "69843123b0f1118e86a3fbae",
+    "details": {},
+    "created_at": "2026-02-05T05:58:24.158715+00:00"
+  },
+  {
+    "_id": "6984363419e9f48bc1add0ef",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "6984363419e9f48bc1add0ee",
+    "details": {
+      "email": "TEST_manager_dashboard@test.com"
+    },
+    "created_at": "2026-02-05T06:18:28.259904+00:00"
+  },
+  {
+    "_id": "698439e401d9657833793069",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e401d9657833793068",
+    "details": {
+      "name": "TEST_Group_063412"
+    },
+    "created_at": "2026-02-05T06:34:12.706781+00:00"
+  },
+  {
+    "_id": "698439e401d965783379306b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306a",
+    "details": {
+      "name": "TEST_Duplicate_063412"
+    },
+    "created_at": "2026-02-05T06:34:12.757741+00:00"
+  },
+  {
+    "_id": "698439e401d965783379306d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306c",
+    "details": {
+      "name": "TEST_Update_063412"
+    },
+    "created_at": "2026-02-05T06:34:12.850390+00:00"
+  },
+  {
+    "_id": "698439e401d965783379306e",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306c",
+    "details": {
+      "name": "TEST_Updated_063412",
+      "color": "#EF4444",
+      "description": "Updated description"
+    },
+    "created_at": "2026-02-05T06:34:12.889316+00:00"
+  },
+  {
+    "_id": "698439e401d9657833793070",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306f",
+    "details": {
+      "name": "TEST_Delete_063412"
+    },
+    "created_at": "2026-02-05T06:34:12.933908+00:00"
+  },
+  {
+    "_id": "698439e401d9657833793071",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306f",
+    "details": {},
+    "created_at": "2026-02-05T06:34:12.978366+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793073",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e501d9657833793072",
+    "details": {
+      "name": "TEST_InUse_063412"
+    },
+    "created_at": "2026-02-05T06:34:13.018799+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793075",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698439e501d9657833793074",
+    "details": {
+      "name": "TEST_Client_063413"
+    },
+    "created_at": "2026-02-05T06:34:13.056758+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793076",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698439e501d9657833793074",
+    "details": {
+      "name": "TEST_Client_063413"
+    },
+    "created_at": "2026-02-05T06:34:13.142568+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793077",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e501d9657833793072",
+    "details": {},
+    "created_at": "2026-02-05T06:34:13.184512+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793079",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698439e501d9657833793078",
+    "details": {
+      "name": "TEST_PaymentClient_063413"
+    },
+    "created_at": "2026-02-05T06:34:13.489254+00:00"
+  },
+  {
+    "_id": "698439e501d965783379307b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "698439e501d965783379307a",
+    "details": {
+      "client_id": "698439e501d9657833793078",
+      "amount": 100.5,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T06:34:13.527589+00:00"
+  },
+  {
+    "_id": "698439e501d965783379307d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "698439e501d965783379307c",
+    "details": {
+      "client_id": "698439e501d9657833793078",
+      "amount": 50.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T06:34:13.569043+00:00"
+  },
+  {
+    "_id": "698439e501d965783379307e",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "payment",
+    "entity_id": "698439e501d965783379307c",
+    "details": {
+      "changes": {
+        "amount": {
+          "old": 50.0,
+          "new": 75.0
+        },
+        "currency": {
+          "old": "USD",
+          "new": "UZS"
+        },
+        "status": {
+          "old": "pending",
+          "new": "paid"
+        },
+        "date": {
+          "old": "2026-02-05",
+          "new": "2026-01-15"
+        },
+        "comment": {
+          "old": "Original comment",
+          "new": "Updated comment"
+        }
+      },
+      "client_id": "698439e501d9657833793078"
+    },
+    "created_at": "2026-02-05T06:34:13.610151+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793080",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "698439e501d965783379307f",
+    "details": {
+      "client_id": "698439e501d9657833793078",
+      "amount": 100.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T06:34:13.646786+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793082",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "698439e501d9657833793081",
+    "details": {
+      "client_id": "698439e501d9657833793078",
+      "amount": 200.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T06:34:13.724711+00:00"
+  },
+  {
+    "_id": "698439e501d9657833793083",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "payment",
+    "entity_id": "698439e501d9657833793081",
+    "details": {
+      "changes": {
+        "amount": {
+          "old": 200.0,
+          "new": 250.0
+        },
+        "status": {
+          "old": "pending",
+          "new": "paid"
+        }
+      },
+      "client_id": "698439e501d9657833793078"
+    },
+    "created_at": "2026-02-05T06:34:13.763019+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793085",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e601d9657833793084",
+    "details": {
+      "name": "TEST_FilterGroup_063414"
+    },
+    "created_at": "2026-02-05T06:34:14.099860+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793087",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698439e601d9657833793086",
+    "details": {
+      "name": "TEST_FilterClient_063414"
+    },
+    "created_at": "2026-02-05T06:34:14.137371+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793088",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698439e601d9657833793086",
+    "details": {
+      "name": "TEST_FilterClient_063414"
+    },
+    "created_at": "2026-02-05T06:34:14.218704+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793089",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e601d9657833793084",
+    "details": {},
+    "created_at": "2026-02-05T06:34:14.256931+00:00"
+  },
+  {
+    "_id": "698439e601d965783379308b",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698439e601d965783379308a",
+    "details": {
+      "name": "TEST_InfoGroup_063414"
+    },
+    "created_at": "2026-02-05T06:34:14.300155+00:00"
+  },
+  {
+    "_id": "698439e601d965783379308d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698439e601d965783379308c",
+    "details": {
+      "name": "TEST_InfoClient_063414"
+    },
+    "created_at": "2026-02-05T06:34:14.341436+00:00"
+  },
+  {
+    "_id": "698439e601d965783379308e",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698439e601d965783379308c",
+    "details": {
+      "name": "TEST_InfoClient_063414"
+    },
+    "created_at": "2026-02-05T06:34:14.414597+00:00"
+  },
+  {
+    "_id": "698439e601d965783379308f",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e601d965783379308a",
+    "details": {},
+    "created_at": "2026-02-05T06:34:14.452258+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793090",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306a",
+    "details": {},
+    "created_at": "2026-02-05T06:34:14.789099+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793091",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e401d9657833793068",
+    "details": {},
+    "created_at": "2026-02-05T06:34:14.868037+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793092",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "group",
+    "entity_id": "698439e401d965783379306c",
+    "details": {},
+    "created_at": "2026-02-05T06:34:14.906538+00:00"
+  },
+  {
+    "_id": "698439e601d9657833793093",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "client",
+    "entity_id": "698439e501d9657833793078",
+    "details": {
+      "name": "TEST_PaymentClient_063413"
+    },
+    "created_at": "2026-02-05T06:34:14.984093+00:00"
+  },
+  {
+    "_id": "69843a3001d9657833793095",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "69843a3001d9657833793094",
+    "details": {
+      "name": "UI Test Group"
+    },
+    "created_at": "2026-02-05T06:35:28.781314+00:00"
+  },
+  {
+    "_id": "69843a7001d9657833793097",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "payment",
+    "entity_id": "69843a7001d9657833793096",
+    "details": {
+      "client_id": "69842d991f067631f9c0d7dc",
+      "amount": 100.0,
+      "currency": "USD"
+    },
+    "created_at": "2026-02-05T06:36:32.702097+00:00"
+  },
+  {
+    "_id": "69843a7301d9657833793098",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "payment",
+    "entity_id": "69842dc91f067631f9c0d7e0",
+    "details": {
+      "changes": {
+        "amount": {
+          "old": 500000.0,
+          "new": 150.0
+        },
+        "comment": {
+          "old": null,
+          "new": "Updated payment comment"
+        }
+      },
+      "client_id": "69842d991f067631f9c0d7dc"
+    },
+    "created_at": "2026-02-05T06:36:35.198785+00:00"
+  },
+  {
+    "_id": "698445a61d3133c70e768ef3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "698445a61d3133c70e768ef2",
+    "details": {
+      "name": "VIP Clients"
+    },
+    "created_at": "2026-02-05T07:24:22.973356+00:00"
+  },
+  {
+    "_id": "698445b21d3133c70e768ef4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "payment",
+    "entity_id": "69842dc91f067631f9c0d7e0",
+    "details": {
+      "changes": {
+        "amount": {
+          "old": 150.0,
+          "new": 999.0
+        },
+        "comment": {
+          "old": "Updated payment comment",
+          "new": "Test update comment"
+        }
+      },
+      "client_id": "69842d991f067631f9c0d7dc"
+    },
+    "created_at": "2026-02-05T07:24:34.620263+00:00"
+  },
+  {
+    "_id": "698445f51d3133c70e768ef6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698445f51d3133c70e768ef5",
+    "details": {
+      "name": "Test Group Client"
+    },
+    "created_at": "2026-02-05T07:25:41.850192+00:00"
+  },
+  {
+    "_id": "6984493b1d3133c70e768ef7",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "payment",
+    "entity_id": "6983632c6dc8d7c6a526b7df",
+    "details": {
+      "changes": {
+        "currency": {
+          "old": null,
+          "new": "UZS"
+        }
+      },
+      "client_id": "698363066dc8d7c6a526b7de"
+    },
+    "created_at": "2026-02-05T07:39:39.544544+00:00"
+  },
+  {
+    "_id": "698449551d3133c70e768ef8",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "698363066dc8d7c6a526b7de",
+    "details": {
+      "fields": [
+        "name",
+        "phone",
+        "source",
+        "manager_id",
+        "status",
+        "group_id"
+      ],
+      "old_status": "new",
+      "new_status": "new"
+    },
+    "created_at": "2026-02-05T07:40:05.500828+00:00"
+  },
+  {
+    "_id": "69844b642b7a6cd791e25fc1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "69844b642b7a6cd791e25fc0",
+    "details": {
+      "name": "Sold Test Client"
+    },
+    "created_at": "2026-02-05T07:48:52.928607+00:00"
+  },
+  {
+    "_id": "69846da2c4b15fd7a712f711",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "698445f51d3133c70e768ef5",
+    "details": {
+      "fields": [
+        "name",
+        "phone",
+        "source",
+        "status"
+      ],
+      "old_status": "new",
+      "new_status": "sold"
+    },
+    "created_at": "2026-02-05T10:14:58.371269+00:00"
+  },
+  {
+    "_id": "69847acd66b844a1168789be",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "69835bb56dc8d7c6a526b7d3",
+    "details": {},
+    "created_at": "2026-02-05T11:11:09.274398+00:00"
+  },
+  {
+    "_id": "69847acf66b844a1168789bf",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "delete",
+    "entity_type": "user",
+    "entity_id": "6984363419e9f48bc1add0ee",
+    "details": {},
+    "created_at": "2026-02-05T11:11:11.616201+00:00"
+  },
+  {
+    "_id": "69847b0a66b844a1168789c1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "69847b0a66b844a1168789c0",
+    "details": {
+      "email": "khaitov@crm.school"
+    },
+    "created_at": "2026-02-05T11:12:10.345552+00:00"
+  },
+  {
+    "_id": "69847b1e66b844a1168789c2",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Updated Admin Name",
+    "action": "update",
+    "entity_type": "user",
+    "entity_id": "69835a516dc8d7c6a526b7d1",
+    "details": {
+      "fields": [
+        "name",
+        "email",
+        "phone",
+        "password",
+        "role"
+      ]
+    },
+    "created_at": "2026-02-05T11:12:30.416626+00:00"
+  },
+  {
+    "_id": "69847b7766b844a1168789c4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "user",
+    "entity_id": "69847b7766b844a1168789c3",
+    "details": {
+      "email": "ruxsora@khaitov.chool"
+    },
+    "created_at": "2026-02-05T11:13:59.602390+00:00"
+  },
+  {
+    "_id": "69847b8566b844a1168789c5",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "user",
+    "entity_id": "69847b7766b844a1168789c3",
+    "details": {
+      "fields": [
+        "name",
+        "email",
+        "phone",
+        "password",
+        "role"
+      ]
+    },
+    "created_at": "2026-02-05T11:14:13.542216+00:00"
+  },
+  {
+    "_id": "69847bd566b844a1168789c6",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "client",
+    "entity_id": "698363066dc8d7c6a526b7de",
+    "details": {
+      "fields": [
+        "name",
+        "phone",
+        "source",
+        "manager_id",
+        "status",
+        "group_id"
+      ],
+      "old_status": "new",
+      "new_status": "new"
+    },
+    "created_at": "2026-02-05T11:15:33.877950+00:00"
+  },
+  {
+    "_id": "69847bf466b844a1168789c7",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "status",
+    "entity_id": "6983694659e6979400b23b7c",
+    "details": {
+      "name": "O'ylab ko'radi",
+      "color": "#3B82F6",
+      "order": 6
+    },
+    "created_at": "2026-02-05T11:16:04.538994+00:00"
+  },
+  {
+    "_id": "69847c0366b844a1168789c9",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "status",
+    "entity_id": "69847c0366b844a1168789c8",
+    "details": {
+      "name": "Qayta qo'ng'iroq"
+    },
+    "created_at": "2026-02-05T11:16:19.834244+00:00"
+  },
+  {
+    "_id": "69847c0f66b844a1168789ca",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "status",
+    "entity_id": "69836842785661b5ca284d0c",
+    "details": {
+      "name": "new",
+      "color": "#EF4444",
+      "order": 1
+    },
+    "created_at": "2026-02-05T11:16:31.054597+00:00"
+  },
+  {
+    "_id": "69847c4c66b844a1168789cb",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "status",
+    "entity_id": "69847c0366b844a1168789c8",
+    "details": {
+      "name": "Qayta qo'ng'iroq",
+      "color": "#F97316",
+      "order": 4
+    },
+    "created_at": "2026-02-05T11:17:32.021761+00:00"
+  },
+  {
+    "_id": "69847c5166b844a1168789cc",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "status",
+    "entity_id": "6983694659e6979400b23b7c",
+    "details": {
+      "name": "O'ylab ko'radi",
+      "color": "#EC4899",
+      "order": 6
+    },
+    "created_at": "2026-02-05T11:17:37.576469+00:00"
+  },
+  {
+    "_id": "69847c7c66b844a1168789cd",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "tariff",
+    "entity_id": "698429f4bfa305bcfc48f3f2",
+    "details": {
+      "name": "InstaBoost",
+      "price": 200.0,
+      "currency": "USD",
+      "description": ""
+    },
+    "created_at": "2026-02-05T11:18:20.771218+00:00"
+  },
+  {
+    "_id": "69847c8d66b844a1168789cf",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69847c8d66b844a1168789ce",
+    "details": {
+      "name": "Level UP"
+    },
+    "created_at": "2026-02-05T11:18:37.726350+00:00"
+  },
+  {
+    "_id": "69847ca166b844a1168789d1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "tariff",
+    "entity_id": "69847ca166b844a1168789d0",
+    "details": {
+      "name": "Creative Pro"
+    },
+    "created_at": "2026-02-05T11:18:57.015991+00:00"
+  },
+  {
+    "_id": "69847cb866b844a1168789d3",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "group",
+    "entity_id": "69847cb866b844a1168789d2",
+    "details": {
+      "name": "Creative Pro 5"
+    },
+    "created_at": "2026-02-05T11:19:20.940497+00:00"
+  },
+  {
+    "_id": "69847ccb66b844a1168789d4",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "group",
+    "entity_id": "69843a3001d9657833793094",
+    "details": {
+      "name": "Creative Pro 6",
+      "color": "#EF4444",
+      "description": "Test description"
+    },
+    "created_at": "2026-02-05T11:19:39.184551+00:00"
+  },
+  {
+    "_id": "69847cd066b844a1168789d5",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "update",
+    "entity_type": "group",
+    "entity_id": "698445a61d3133c70e768ef2",
+    "details": {
+      "name": "Creative Pro 7",
+      "color": "#F59E0B",
+      "description": "Premium customers"
+    },
+    "created_at": "2026-02-05T11:19:44.821844+00:00"
+  },
+  {
+    "_id": "69847dd966b844a1168789d7",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "reminder",
+    "entity_id": "69847dd966b844a1168789d6",
+    "details": {
+      "client_id": "69842d991f067631f9c0d7dc"
+    },
+    "created_at": "2026-02-05T11:24:09.842931+00:00"
+  },
+  {
+    "_id": "69849224ebd60c51cf586fe2",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "upload",
+    "entity_type": "audio",
+    "entity_id": "69849224ebd60c51cf586fe1",
+    "details": {
+      "client_id": "69842d991f067631f9c0d7dc",
+      "filename": "test_audio.wav"
+    },
+    "created_at": "2026-02-05T12:50:44.136850+00:00"
+  },
+  {
+    "_id": "6984941c26dc0bbe0d28212d",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "upload",
+    "entity_type": "audio",
+    "entity_id": "6984941c26dc0bbe0d28212c",
+    "details": {
+      "client_id": "69842d991f067631f9c0d7dc",
+      "filename": "test_upload.wav"
+    },
+    "created_at": "2026-02-05T12:59:08.244093+00:00"
+  },
+  {
+    "_id": "6984941c26dc0bbe0d28212f",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "upload",
+    "entity_type": "audio",
+    "entity_id": "6984941c26dc0bbe0d28212e",
+    "details": {
+      "client_id": "69842d991f067631f9c0d7dc",
+      "filename": "to_delete.wav"
+    },
+    "created_at": "2026-02-05T12:59:08.338762+00:00"
+  },
+  {
+    "_id": "6984941c26dc0bbe0d282130",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "delete",
+    "entity_type": "audio",
+    "entity_id": "6984941c26dc0bbe0d28212e",
+    "details": {
+      "filename": "to_delete.wav"
+    },
+    "created_at": "2026-02-05T12:59:08.381523+00:00"
+  },
+  {
+    "_id": "6984948d26dc0bbe0d282131",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "delete",
+    "entity_type": "audio",
+    "entity_id": "6984941c26dc0bbe0d28212c",
+    "details": {
+      "filename": "test_upload.wav"
+    },
+    "created_at": "2026-02-05T13:01:01.929274+00:00"
+  },
+  {
+    "_id": "698c15b444a4e07dafec8f31",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "link_telegram",
+    "entity_type": "user",
+    "entity_id": "69835a516dc8d7c6a526b7d1",
+    "details": {
+      "telegram_id": "143688902"
+    },
+    "created_at": "2026-02-11T05:37:56.160736+00:00"
+  },
+  {
+    "_id": "698c1b1cb7970b68345535a7",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "reminder",
+    "entity_id": "698c1b1cb7970b68345535a6",
+    "details": {
+      "client_id": "69844b642b7a6cd791e25fc0"
+    },
+    "created_at": "2026-02-11T06:01:00.739572+00:00"
+  },
+  {
+    "_id": "698c1b5dec482f201701b2cf",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "reminder",
+    "entity_id": "698c1b5dec482f201701b2ce",
+    "details": {
+      "client_id": "69844b642b7a6cd791e25fc0"
+    },
+    "created_at": "2026-02-11T06:02:05.540678+00:00"
+  },
+  {
+    "_id": "698c1e11ec482f201701b2d1",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "user_name": "Amonov Jahongir",
+    "action": "create",
+    "entity_type": "client",
+    "entity_id": "698c1e11ec482f201701b2d0",
+    "details": {
+      "name": "Instagram Test User 6626"
+    },
+    "created_at": "2026-02-11T06:13:37.292210+00:00"
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "69835a516dc8d7c6a526b7d1",
+    "name": "Amonov Jahongir",
+    "email": "admin@crm.local",
+    "phone": "+998931535966",
+    "password": "$2b$12$RHgubvkR.KWrUgnYUpjFFOgmstOTOrH1zpTZ0bsbY8aojeRaTHOzm",
+    "role": "admin",
+    "created_at": "2026-02-04T14:40:17.283489+00:00",
+    "telegram_first_name": "Jahongir",
+    "telegram_id": "143688902",
+    "telegram_linked_at": "2026-02-11T05:37:56.158786+00:00",
+    "telegram_username": "jony599"
+  },
+  {
+    "_id": "69847b0a66b844a1168789c0",
+    "name": "Bakhriddin Khaitov",
+    "email": "khaitov@crm.school",
+    "phone": "+998883003020",
+    "password": "$2b$12$rL/64VIJ2Il/PN9JVn8I6O/QQjdR7Ofdt3Qcb32CKJ3pkQOMO7jRK",
+    "role": "admin",
+    "created_at": "2026-02-05T11:12:10.344922+00:00"
+  },
+  {
+    "_id": "69847b7766b844a1168789c3",
+    "name": "Kasimova Ruxsora",
+    "email": "ruxsora@crm.school",
+    "phone": "+998883083020",
+    "password": "$2b$12$EynobAua1N644kdApO26vu5bJLUYf2FA68EBGpuSFSPP2783Qwuci",
+    "role": "manager",
+    "created_at": "2026-02-05T11:13:59.601836+00:00"
+  }
+]

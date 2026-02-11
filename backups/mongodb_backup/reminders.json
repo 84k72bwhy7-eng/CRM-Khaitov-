@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "698368fd59e6979400b23b79",
+    "client_id": "698368f659e6979400b23b73",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "text": "Test reminder from UI",
+    "remind_at": "2026-02-05T10:00:00.000Z",
+    "is_completed": true,
+    "created_at": "2026-02-04T15:42:53.511640+00:00"
+  },
+  {
+    "_id": "69842a40bfa305bcfc48f408",
+    "client_id": "69842a40bfa305bcfc48f406",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "text": "Follow up call scheduled",
+    "remind_at": "2026-02-06T05:27",
+    "is_completed": true,
+    "created_at": "2026-02-05T05:27:28.270559+00:00"
+  },
+  {
+    "_id": "69842d991f067631f9c0d7de",
+    "client_id": "69842d991f067631f9c0d7dc",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "text": "gashta sozvon",
+    "remind_at": "2026-02-07T10:46",
+    "is_completed": true,
+    "created_at": "2026-02-05T05:41:45.056894+00:00"
+  },
+  {
+    "_id": "69847dd966b844a1168789d6",
+    "client_id": "69842d991f067631f9c0d7dc",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "text": "Urgent: Call client back!",
+    "remind_at": "2025-01-01T10:00:00",
+    "is_completed": true,
+    "created_at": "2026-02-05T11:24:09.842566+00:00"
+  },
+  {
+    "_id": "698c1b1cb7970b68345535a6",
+    "client_id": "69844b642b7a6cd791e25fc0",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "text": "Test eslatma - Mijozga qo'ng'iroq qiling",
+    "remind_at": "2026-02-11T06:00:00.668187+00:00",
+    "is_completed": false,
+    "created_at": "2026-02-11T06:01:00.734168+00:00",
+    "telegram_sent": true,
+    "telegram_sent_at": "2026-02-11T06:01:08.227567+00:00",
+    "telegram_success": false
+  },
+  {
+    "_id": "698c1b5dec482f201701b2ce",
+    "client_id": "69844b642b7a6cd791e25fc0",
+    "user_id": "69835a516dc8d7c6a526b7d1",
+    "text": "Qo'ng'iroq qiling - kurs haqida so'rang",
+    "remind_at": "2026-02-11T06:01:05.471585+00:00",
+    "is_completed": false,
+    "created_at": "2026-02-11T06:02:05.540238+00:00",
+    "telegram_sent": true,
+    "telegram_sent_at": "2026-02-11T06:02:06.090210+00:00",
+    "telegram_success": true
+  }
+]

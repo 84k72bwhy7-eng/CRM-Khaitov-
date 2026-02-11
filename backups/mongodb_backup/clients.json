@@ -1,0 +1,105 @@
+[
+  {
+    "_id": "69835bb56dc8d7c6a526b7d2",
+    "name": "Test Client",
+    "phone": "+998901234567",
+    "source": "Test Source",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "new",
+    "created_at": "2026-02-04T14:46:13.240555+00:00"
+  },
+  {
+    "_id": "69835c196dc8d7c6a526b7db",
+    "name": "Test Client UI",
+    "phone": "+998901234567",
+    "source": "UI Test",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "contacted",
+    "created_at": "2026-02-04T14:47:53.728596+00:00"
+  },
+  {
+    "_id": "698363066dc8d7c6a526b7de",
+    "name": "Jahongir",
+    "phone": "+998931535966",
+    "source": "instagram",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "new",
+    "created_at": "2026-02-04T15:17:26.148883+00:00",
+    "group_id": "69843a3001d9657833793094"
+  },
+  {
+    "_id": "698368f659e6979400b23b73",
+    "name": "Test Client UI",
+    "phone": "+998901234567",
+    "source": "UI Test",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "new",
+    "is_lead": true,
+    "is_archived": true,
+    "created_at": "2026-02-04T15:42:46.227808+00:00",
+    "archived_at": "2026-02-04T15:42:55.563877+00:00"
+  },
+  {
+    "_id": "69842a40bfa305bcfc48f406",
+    "name": "UI Test Client With Comment",
+    "phone": "+998052727415",
+    "source": "UI Test",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "new",
+    "is_lead": true,
+    "is_archived": false,
+    "tariff_id": "698429f4bfa305bcfc48f3f2",
+    "created_at": "2026-02-05T05:27:28.269448+00:00"
+  },
+  {
+    "_id": "69842d991f067631f9c0d7dc",
+    "name": "asfgr",
+    "phone": "+998900000000",
+    "source": "dfsdfgsdfg",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "contacted",
+    "is_lead": true,
+    "is_archived": false,
+    "tariff_id": "698429f4bfa305bcfc48f3f2",
+    "created_at": "2026-02-05T05:41:45.056303+00:00"
+  },
+  {
+    "_id": "698445f51d3133c70e768ef5",
+    "name": "Test Group Client",
+    "phone": "+998991234567",
+    "source": "API Test",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "sold",
+    "is_lead": true,
+    "is_archived": false,
+    "tariff_id": null,
+    "group_id": "69843a3001d9657833793094",
+    "created_at": "2026-02-05T07:25:41.849851+00:00"
+  },
+  {
+    "_id": "69844b642b7a6cd791e25fc0",
+    "name": "Sold Test Client",
+    "phone": "+998991112233",
+    "source": "Website",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "sold",
+    "is_lead": true,
+    "is_archived": false,
+    "tariff_id": "698429f4bfa305bcfc48f3f2",
+    "group_id": null,
+    "created_at": "2026-02-05T07:48:52.928273+00:00"
+  },
+  {
+    "_id": "698c1e11ec482f201701b2d0",
+    "name": "Instagram Test User 6626",
+    "phone": "+998 90 123 6626",
+    "source": "Instagram",
+    "manager_id": "69835a516dc8d7c6a526b7d1",
+    "status": "new",
+    "is_lead": true,
+    "is_archived": false,
+    "tariff_id": null,
+    "group_id": null,
+    "created_at": "2026-02-11T06:13:37.291750+00:00"
+  }
+]
