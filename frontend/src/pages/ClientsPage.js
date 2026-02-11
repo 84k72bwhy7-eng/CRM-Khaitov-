@@ -713,6 +713,7 @@ export default function ClientsPage() {
                 {/* Call Button */}
                 <a 
                   href={`tel:${formatPhoneLink(client.phone)}`}
+                  onClick={() => triggerHaptic('light')}
                   className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-50 text-green-700 rounded-lg font-medium active:bg-green-100 transition-colors"
                   data-testid={`quick-call-${client.id}`}
                 >
@@ -720,23 +721,30 @@ export default function ClientsPage() {
                   {t.clients?.call || 'Call'}
                 </a>
                 
+                {/* Add Reminder Button - Telegram focused */}
+                <button
+                  onClick={() => {
+                    triggerHaptic('light');
+                    navigate(`/clients/${client.id}?tab=reminders&action=add`);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-yellow-50 text-yellow-700 rounded-lg font-medium active:bg-yellow-100 transition-colors"
+                  data-testid={`quick-reminder-${client.id}`}
+                >
+                  <Bell size={18} />
+                  {t.clients?.reminder || 'Remind'}
+                </button>
+                
                 {/* Add Payment Button */}
                 <button
-                  onClick={() => navigate(`/clients/${client.id}?tab=payments&action=add`)}
+                  onClick={() => {
+                    triggerHaptic('light');
+                    navigate(`/clients/${client.id}?tab=payments&action=add`);
+                  }}
                   className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium active:bg-blue-100 transition-colors"
                   data-testid={`quick-payment-${client.id}`}
                 >
                   <CreditCard size={18} />
-                  {t.payments?.addPayment || 'Payment'}
-                </button>
-                
-                {/* Edit Button */}
-                <button
-                  onClick={() => handleEdit(client)}
-                  className="flex items-center justify-center p-3 bg-gray-50 text-text-secondary rounded-lg active:bg-gray-100 transition-colors"
-                  data-testid={`quick-edit-${client.id}`}
-                >
-                  <Edit size={18} />
+                  {t.payments?.payment || 'Pay'}
                 </button>
               </div>
             </div>
