@@ -53,79 +53,83 @@ export default function ClientsPage() {
   const [groupFilter, setGroupFilter] = useState('');
 
   const [clientsLoading, setClientsLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // Load all data in a single effect to avoid race conditions
+  // Load all data when component mounts or filters change
   useEffect(() => {
-    let active = true;
+    let cancelled = false;
     
-    const loadAllData = async () => {
-      setClientsLoading(true);
+    async function loadData() {
+      // Only set loading to true if we're not in initial mount
+      if (dataLoaded) {
+        setClientsLoading(true);
+      }
+      
+      const token = localStorage.getItem('crm_token');
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      const params = { is_archived: showArchived, exclude_sold: true };
+      if (search) params.search = search;
+      if (statusFilter) params.status = statusFilter;
+      if (groupFilter) params.group_id = groupFilter;
       
       try {
-        // Load reference data and clients in parallel
-        const token = localStorage.getItem('crm_token');
-        const API_URL = process.env.REACT_APP_BACKEND_URL;
-        const params = { is_archived: showArchived, exclude_sold: true };
-        if (search) params.search = search;
-        if (statusFilter) params.status = statusFilter;
-        if (groupFilter) params.group_id = groupFilter;
+        // Fetch clients
+        const clientsResponse = await fetch(
+          `${API_URL}/api/clients?${new URLSearchParams(params)}`,
+          { headers }
+        );
         
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        if (cancelled) return;
         
-        // Fetch all data in parallel
-        const [clientsRes, statusesRes, tariffsRes, groupsRes] = await Promise.all([
-          fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, { headers }),
-          fetch(`${API_URL}/api/statuses`, { headers }),
-          fetch(`${API_URL}/api/tariffs`, { headers }),
-          fetch(`${API_URL}/api/groups`, { headers })
-        ]);
-        
-        // Parse responses
-        const [clientsData, statusesData, tariffsData, groupsData] = await Promise.all([
-          clientsRes.json(),
-          statusesRes.json(),
-          tariffsRes.json(),
-          groupsRes.json()
-        ]);
-        
-        // Update state only if component is still mounted
-        if (active) {
-          setClients(Array.isArray(clientsData) ? clientsData : []);
-          setStatuses(Array.isArray(statusesData) ? statusesData : []);
-          setTariffs(Array.isArray(tariffsData) ? tariffsData : []);
-          setGroups(Array.isArray(groupsData) ? groupsData : []);
-          setClientsLoading(false);
+        if (clientsResponse.ok) {
+          const data = await clientsResponse.json();
+          if (!cancelled) {
+            setClients(Array.isArray(data) ? data : []);
+          }
         }
         
-        // Load users separately for admin
-        if (isAdmin && active) {
-          try {
-            const usersRes = await fetch(`${API_URL}/api/users`, { headers });
-            const usersData = await usersRes.json();
-            if (active) {
-              setUsers(Array.isArray(usersData) ? usersData : []);
+        // Fetch statuses, tariffs, groups only on initial load
+        if (!dataLoaded && !cancelled) {
+          const [statusesRes, tariffsRes, groupsRes] = await Promise.all([
+            fetch(`${API_URL}/api/statuses`, { headers }),
+            fetch(`${API_URL}/api/tariffs`, { headers }),
+            fetch(`${API_URL}/api/groups`, { headers })
+          ]);
+          
+          if (!cancelled) {
+            if (statusesRes.ok) setStatuses(await statusesRes.json() || []);
+            if (tariffsRes.ok) setTariffs(await tariffsRes.json() || []);
+            if (groupsRes.ok) setGroups(await groupsRes.json() || []);
+            
+            // Load users for admin
+            if (isAdmin) {
+              const usersRes = await fetch(`${API_URL}/api/users`, { headers });
+              if (usersRes.ok && !cancelled) setUsers(await usersRes.json() || []);
             }
-          } catch (e) {
-            console.error('Failed to load users:', e);
+            
+            setDataLoaded(true);
           }
         }
       } catch (error) {
         console.error('Failed to load data:', error);
-        if (active) {
+      } finally {
+        if (!cancelled) {
           setClientsLoading(false);
         }
       }
-    };
+    }
     
-    loadAllData();
+    loadData();
     
     return () => {
-      active = false;
+      cancelled = true;
     };
-  }, [search, statusFilter, groupFilter, showArchived, isAdmin]);
+  }, [search, statusFilter, groupFilter, showArchived, isAdmin, dataLoaded]);
 
   const loadClients = async () => {
     try {
