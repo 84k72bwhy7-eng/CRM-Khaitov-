@@ -43,24 +43,63 @@ export default function SettingsPage() {
   const [telegramStatus, setTelegramStatus] = useState(null);
   const [sendingTestNotification, setSendingTestNotification] = useState(false);
 
+  // Load admin data with AbortController to handle React StrictMode
   useEffect(() => {
-    if (isAdmin) {
-      loadStatuses();
-      loadTariffs();
-      loadGroups();
-      loadSettings();
-      loadTelegramStatus();
+    if (!isAdmin) return;
+    
+    const controller = new AbortController();
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
+    
+    async function loadAdminData() {
+      const token = localStorage.getItem('crm_token');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      try {
+        const [statusesRes, tariffsRes, groupsRes, settingsRes, telegramRes] = await Promise.all([
+          fetch(`${API_URL}/api/statuses`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/tariffs`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/groups`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/settings`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/notifications/telegram-status`, { headers, signal: controller.signal })
+        ]);
+        
+        if (statusesRes.ok) {
+          const data = await statusesRes.json();
+          setStatuses(Array.isArray(data) ? data : []);
+        }
+        if (tariffsRes.ok) {
+          const data = await tariffsRes.json();
+          setTariffs(Array.isArray(data) ? data : []);
+        }
+        if (groupsRes.ok) {
+          const data = await groupsRes.json();
+          setGroups(Array.isArray(data) ? data : []);
+        }
+        if (settingsRes.ok) {
+          const data = await settingsRes.json();
+          if (data) {
+            setSystemSettings({ 
+              currency: data.currency || 'USD',
+              exchange_rates: data.exchange_rates || { USD: 12500 }
+            });
+            setExchangeRateInput(String(Math.round(data.exchange_rates?.USD || 12500)));
+          }
+        }
+        if (telegramRes.ok) {
+          const data = await telegramRes.json();
+          setTelegramStatus(data);
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to load admin data:', error);
+        }
+      }
     }
+    
+    loadAdminData();
+    
+    return () => controller.abort();
   }, [isAdmin]);
-
-  const loadTelegramStatus = async () => {
-    try {
-      const data = await get('/api/notifications/telegram-status');
-      setTelegramStatus(data);
-    } catch (error) {
-      console.error('Failed to load Telegram status:', error);
-    }
-  };
 
   const sendTestNotification = async () => {
     setSendingTestNotification(true);
@@ -74,45 +113,49 @@ export default function SettingsPage() {
     }
   };
 
-  const loadStatuses = async () => {
+  // Reload functions for after CRUD operations
+  const reloadTariffs = async () => {
+    const token = localStorage.getItem('crm_token');
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
     try {
-      const data = await get('/api/statuses');
-      setStatuses(data);
-    } catch (error) {
-      console.error('Failed to load statuses:', error);
-    }
-  };
-
-  const loadTariffs = async () => {
-    try {
-      const data = await get('/api/tariffs');
-      setTariffs(data);
-    } catch (error) {
-      console.error('Failed to load tariffs:', error);
-    }
-  };
-
-  const loadSettings = async () => {
-    try {
-      const data = await get('/api/settings');
-      if (data) {
-        setSystemSettings({ 
-          currency: data.currency || 'USD',
-          exchange_rates: data.exchange_rates || { USD: 12500 }
-        });
-        setExchangeRateInput(String(data.exchange_rates?.USD || 12500));
+      const res = await fetch(`${API_URL}/api/tariffs`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setTariffs(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error('Failed to reload tariffs:', error);
     }
   };
 
-  const loadGroups = async () => {
+  const reloadStatuses = async () => {
+    const token = localStorage.getItem('crm_token');
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
     try {
-      const data = await get('/api/groups');
-      setGroups(data);
+      const res = await fetch(`${API_URL}/api/statuses`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setStatuses(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error('Failed to load groups:', error);
+      console.error('Failed to reload statuses:', error);
+    }
+  };
+
+  const reloadGroups = async () => {
+    const token = localStorage.getItem('crm_token');
+    const API_URL = process.env.REACT_APP_BACKEND_URL;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    try {
+      const res = await fetch(`${API_URL}/api/groups`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setGroups(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Failed to reload groups:', error);
     }
   };
 
