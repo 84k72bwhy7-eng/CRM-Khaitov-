@@ -1073,7 +1073,7 @@ async def refresh_exchange_rates(current_user: dict = Depends(get_current_user))
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    rate = await update_exchange_rate()
+    rate = await fetch_and_save_exchange_rate()
     if rate:
         return {"message": f"Exchange rate updated: 1 USD = {rate} UZS", "rate": rate, "source": "CBU"}
     else:
