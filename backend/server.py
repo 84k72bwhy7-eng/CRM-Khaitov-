@@ -745,7 +745,17 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
 @app.get("/api/tariffs")
 async def get_tariffs(current_user: dict = Depends(get_current_user)):
     result = supabase.table('tariffs').select('*').order('created_at', desc=True).execute()
-    return result.data
+    tariffs = result.data or []
+    
+    # Add converted price in UZS for each tariff
+    for tariff in tariffs:
+        original_price = tariff.get('price', 0)
+        original_currency = tariff.get('currency', 'UZS')
+        tariff['price_uzs'] = convert_to_uzs(original_price, original_currency)
+        tariff['price_formatted'] = format_currency(original_price, original_currency)
+        tariff['price_uzs_formatted'] = format_currency(tariff['price_uzs'], 'UZS')
+    
+    return tariffs
 
 @app.post("/api/tariffs")
 async def create_tariff(data: TariffCreate, current_user: dict = Depends(get_current_user)):
