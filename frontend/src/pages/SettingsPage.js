@@ -236,6 +236,34 @@ export default function SettingsPage() {
     }
   };
 
+  // Exchange rate handler
+  const handleExchangeRateUpdate = async () => {
+    const rate = parseFloat(exchangeRateInput);
+    if (isNaN(rate) || rate <= 0) {
+      toast.error(t.settings?.invalidRate || 'Noto\'g\'ri kurs');
+      return;
+    }
+    
+    setSavingRate(true);
+    try {
+      await put('/api/settings/exchange-rate', {
+        currency_code: 'USD',
+        rate_to_uzs: rate
+      });
+      setSystemSettings({
+        ...systemSettings,
+        exchange_rates: { ...systemSettings.exchange_rates, USD: rate }
+      });
+      toast.success(t.settings?.rateUpdated || 'Valyuta kursi yangilandi');
+      // Reload tariffs to get updated UZS prices
+      loadTariffs();
+    } catch (error) {
+      toast.error(t.common.error);
+    } finally {
+      setSavingRate(false);
+    }
+  };
+
   // Group handlers
   const handleGroupSubmit = async (e) => {
     e.preventDefault();
