@@ -29,6 +29,9 @@ export const AuthProvider = ({ children }) => {
     if (tg && isTelegramWebApp()) {
       setIsTelegram(true);
       
+      // Add body class for Telegram styling
+      document.body.classList.add('telegram-webapp');
+      
       // Signal that the Mini App is ready
       tg.ready();
       
@@ -77,6 +80,11 @@ export const AuthProvider = ({ children }) => {
           console.log('Telegram Mini App viewport stable, height:', tg.viewportHeight);
         }
       });
+      
+      // Cleanup on unmount
+      return () => {
+        document.body.classList.remove('telegram-webapp');
+      };
     }
   }, []);
 
