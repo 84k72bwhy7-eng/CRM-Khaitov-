@@ -53,20 +53,68 @@ export default function ClientsPage() {
   const [groupFilter, setGroupFilter] = useState('');
 
   const [clientsLoading, setClientsLoading] = useState(true);
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const [referenceDataLoaded, setReferenceDataLoaded] = useState(false);
 
   // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // Load all data when component mounts or filters change
+  // Load reference data (statuses, tariffs, groups, users) once on mount
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     
-    async function loadData() {
-      // Only set loading to true if we're not in initial mount
-      if (dataLoaded) {
-        setClientsLoading(true);
+    async function loadReferenceData() {
+      const token = localStorage.getItem('crm_token');
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      try {
+        const [statusesRes, tariffsRes, groupsRes] = await Promise.all([
+          fetch(`${API_URL}/api/statuses`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/tariffs`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/groups`, { headers, signal: controller.signal })
+        ]);
+        
+        if (statusesRes.ok) {
+          const data = await statusesRes.json();
+          setStatuses(Array.isArray(data) ? data : []);
+        }
+        if (tariffsRes.ok) {
+          const data = await tariffsRes.json();
+          setTariffs(Array.isArray(data) ? data : []);
+        }
+        if (groupsRes.ok) {
+          const data = await groupsRes.json();
+          setGroups(Array.isArray(data) ? data : []);
+        }
+        
+        // Load users for admin
+        if (isAdmin) {
+          const usersRes = await fetch(`${API_URL}/api/users`, { headers, signal: controller.signal });
+          if (usersRes.ok) {
+            const data = await usersRes.json();
+            setUsers(Array.isArray(data) ? data : []);
+          }
+        }
+        
+        setReferenceDataLoaded(true);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to load reference data:', error);
+        }
       }
+    }
+    
+    loadReferenceData();
+    
+    return () => controller.abort();
+  }, [isAdmin]);
+
+  // Load clients when filters change
+  useEffect(() => {
+    const controller = new AbortController();
+    
+    async function loadClients() {
+      setClientsLoading(true);
       
       const token = localStorage.getItem('crm_token');
       const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -78,56 +126,32 @@ export default function ClientsPage() {
       if (groupFilter) params.group_id = groupFilter;
       
       try {
-        // Fetch clients
-        const clientsResponse = await fetch(
+        const response = await fetch(
           `${API_URL}/api/clients?${new URLSearchParams(params)}`,
-          { headers }
+          { headers, signal: controller.signal }
         );
         
-        if (cancelled) return;
-        
-        if (clientsResponse.ok) {
-          const data = await clientsResponse.json();
-          if (!cancelled) {
-            setClients(Array.isArray(data) ? data : []);
-          }
-        }
-        
-        // Fetch statuses, tariffs, groups only on initial load
-        if (!dataLoaded && !cancelled) {
-          const [statusesRes, tariffsRes, groupsRes] = await Promise.all([
-            fetch(`${API_URL}/api/statuses`, { headers }),
-            fetch(`${API_URL}/api/tariffs`, { headers }),
-            fetch(`${API_URL}/api/groups`, { headers })
-          ]);
-          
-          if (!cancelled) {
-            if (statusesRes.ok) setStatuses(await statusesRes.json() || []);
-            if (tariffsRes.ok) setTariffs(await tariffsRes.json() || []);
-            if (groupsRes.ok) setGroups(await groupsRes.json() || []);
-            
-            // Load users for admin
-            if (isAdmin) {
-              const usersRes = await fetch(`${API_URL}/api/users`, { headers });
-              if (usersRes.ok && !cancelled) setUsers(await usersRes.json() || []);
-            }
-            
-            setDataLoaded(true);
-          }
+        if (response.ok) {
+          const data = await response.json();
+          setClients(Array.isArray(data) ? data : []);
         }
       } catch (error) {
-        console.error('Failed to load data:', error);
+        if (error.name !== 'AbortError') {
+          console.error('Failed to load clients:', error);
+          setClients([]);
+        }
       } finally {
-        if (!cancelled) {
+        // Only set loading to false if not aborted
+        if (!controller.signal.aborted) {
           setClientsLoading(false);
         }
       }
     }
     
-    loadData();
+    loadClients();
     
-    return () => {
-      cancelled = true;
+    return () => controller.abort();
+  }, [search, statusFilter, groupFilter, showArchived]);
     };
   }, [search, statusFilter, groupFilter, showArchived, isAdmin, dataLoaded]);
 
