@@ -78,3 +78,99 @@
   @apply bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto;
   animation: slideIn 0.3s ease-out;
 }
+
+/* PWA and Telegram Mini App Styles */
+
+/* Fullscreen mode adjustments */
+html.telegram-fullscreen,
+html.telegram-fullscreen body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Safe area handling for notched devices */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Telegram theme variables */
+:root {
+  --tg-theme-bg-color: #1a1a1a;
+  --tg-theme-text-color: #ffffff;
+  --tg-theme-hint-color: #999999;
+  --tg-theme-link-color: #FACC15;
+  --tg-theme-button-color: #FACC15;
+  --tg-theme-button-text-color: #1a1a1a;
+  --tg-theme-secondary-bg-color: #2a2a2a;
+}
+
+/* Apply Telegram theme when in Mini App */
+body.telegram-webapp {
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+}
+
+/* PWA standalone mode */
+@media (display-mode: standalone) {
+  .hide-in-standalone {
+    display: none !important;
+  }
+  
+  /* Add extra padding for iOS notch */
+  .main-content {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* iOS PWA specific */
+@supports (-webkit-touch-callout: none) {
+  /* Prevent rubber-banding */
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  #root {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Pull-to-refresh disable in PWA */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Touch optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, textarea, select {
+  touch-action: manipulation;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
