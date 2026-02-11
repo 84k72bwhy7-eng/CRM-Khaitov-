@@ -5,8 +5,8 @@ const CACHE_NAME = 'schoolcrm-v1';
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/api/static/icons/icon-192x192.png',
+  '/api/static/icons/icon-512x512.png'
 ];
 
 // Install event - cache core assets
