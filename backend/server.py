@@ -1067,6 +1067,20 @@ async def get_exchange_rates_endpoint(current_user: dict = Depends(get_current_u
     """Get all exchange rates"""
     return get_exchange_rates()
 
+@app.post("/api/settings/exchange-rates/refresh")
+async def refresh_exchange_rates(current_user: dict = Depends(get_current_user)):
+    """Manually refresh exchange rates from CBU"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    rate = await update_exchange_rate()
+    if rate:
+        return {"message": f"Exchange rate updated: 1 USD = {rate} UZS", "rate": rate, "source": "CBU"}
+    else:
+        # Return last saved rate
+        rates = get_exchange_rates()
+        return {"message": "Failed to fetch new rate, using last saved", "rate": rates.get('USD', 12500), "source": "cached"}
+
 # ==================== CLIENTS ENDPOINTS ====================
 
 @app.get("/api/clients")
