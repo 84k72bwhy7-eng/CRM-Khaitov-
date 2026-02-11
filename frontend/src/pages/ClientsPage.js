@@ -184,42 +184,6 @@ export default function ClientsPage() {
     }
   };
 
-  const loadUsers = async () => {
-    try {
-      const data = await get('/api/users');
-      setUsers(data);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-    }
-  };
-
-  const loadGroups = async () => {
-    try {
-      const data = await get('/api/groups');
-      setGroups(data);
-    } catch (error) {
-      console.error('Failed to load groups:', error);
-    }
-  };
-
-  const loadStatuses = async () => {
-    try {
-      const data = await get('/api/statuses');
-      setStatuses(data);
-    } catch (error) {
-      console.error('Failed to load statuses:', error);
-    }
-  };
-
-  const loadTariffs = async () => {
-    try {
-      const data = await get('/api/tariffs');
-      setTariffs(data);
-    } catch (error) {
-      console.error('Failed to load tariffs:', error);
-    }
-  };
-
   // Quick Add - minimal form for fast client creation (Instagram optimized)
   const handleQuickAdd = async (e) => {
     e.preventDefault();
