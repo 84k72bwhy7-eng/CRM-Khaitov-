@@ -43,89 +43,66 @@ export default function SettingsPage() {
   const [telegramStatus, setTelegramStatus] = useState(null);
   const [sendingTestNotification, setSendingTestNotification] = useState(false);
 
-  // Load admin data with AbortController to handle React StrictMode
+  // Load admin data - use isMounted flag to prevent state updates after unmount
   useEffect(() => {
     if (!isAdmin) return;
     
     let isMounted = true;
-    const controller = new AbortController();
     const API_URL = process.env.REACT_APP_BACKEND_URL;
+    const token = localStorage.getItem('crm_token');
+    const headers = { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
     
-    async function loadAdminData() {
-      const token = localStorage.getItem('crm_token');
-      const headers = { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      
-      try {
-        // Load statuses
-        const statusesRes = await fetch(`${API_URL}/api/statuses`, { 
-          headers, 
-          signal: controller.signal 
-        });
-        if (isMounted && statusesRes.ok) {
-          const data = await statusesRes.json();
-          setStatuses(Array.isArray(data) ? data : []);
-        }
-        
-        // Load tariffs
-        const tariffsRes = await fetch(`${API_URL}/api/tariffs`, { 
-          headers, 
-          signal: controller.signal 
-        });
-        if (isMounted && tariffsRes.ok) {
-          const data = await tariffsRes.json();
-          setTariffs(Array.isArray(data) ? data : []);
-        }
-        
-        // Load groups
-        const groupsRes = await fetch(`${API_URL}/api/groups`, { 
-          headers, 
-          signal: controller.signal 
-        });
-        if (isMounted && groupsRes.ok) {
-          const data = await groupsRes.json();
-          setGroups(Array.isArray(data) ? data : []);
-        }
-        
-        // Load settings
-        const settingsRes = await fetch(`${API_URL}/api/settings`, { 
-          headers, 
-          signal: controller.signal 
-        });
-        if (isMounted && settingsRes.ok) {
-          const data = await settingsRes.json();
-          if (data) {
-            setSystemSettings({ 
-              currency: data.currency || 'USD',
-              exchange_rates: data.exchange_rates || { USD: 12500 }
-            });
-            setExchangeRateInput(String(Math.round(data.exchange_rates?.USD || 12500)));
-          }
-        }
-        
-        // Load telegram status
-        const telegramRes = await fetch(`${API_URL}/api/notifications/telegram-status`, { 
-          headers, 
-          signal: controller.signal 
-        });
-        if (isMounted && telegramRes.ok) {
-          const data = await telegramRes.json();
-          setTelegramStatus(data);
-        }
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Failed to load admin data:', error);
-        }
-      }
-    }
+    // Load statuses
+    fetch(`${API_URL}/api/statuses`, { headers })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (isMounted) setStatuses(Array.isArray(data) ? data : []);
+      })
+      .catch(err => console.error('Failed to load statuses:', err));
     
-    loadAdminData();
+    // Load tariffs
+    fetch(`${API_URL}/api/tariffs`, { headers })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (isMounted) setTariffs(Array.isArray(data) ? data : []);
+      })
+      .catch(err => console.error('Failed to load tariffs:', err));
+    
+    // Load groups
+    fetch(`${API_URL}/api/groups`, { headers })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (isMounted) setGroups(Array.isArray(data) ? data : []);
+      })
+      .catch(err => console.error('Failed to load groups:', err));
+    
+    // Load settings
+    fetch(`${API_URL}/api/settings`, { headers })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (isMounted && data) {
+          setSystemSettings({ 
+            currency: data.currency || 'USD',
+            exchange_rates: data.exchange_rates || { USD: 12500 }
+          });
+          setExchangeRateInput(String(Math.round(data.exchange_rates?.USD || 12500)));
+        }
+      })
+      .catch(err => console.error('Failed to load settings:', err));
+    
+    // Load telegram status
+    fetch(`${API_URL}/api/notifications/telegram-status`, { headers })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (isMounted && data) setTelegramStatus(data);
+      })
+      .catch(err => console.error('Failed to load telegram status:', err));
     
     return () => {
       isMounted = false;
-      controller.abort();
     };
   }, [isAdmin]);
 
