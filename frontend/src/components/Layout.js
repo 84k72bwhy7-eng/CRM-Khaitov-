@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -13,13 +13,16 @@ import {
   X,
   Globe,
   History,
-  CheckCircle
+  CheckCircle,
+  Phone,
+  Bell
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isTelegram } = useAuth();
   const { t, language, switchLanguage } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const handleLogout = () => {
@@ -27,6 +30,7 @@ const Layout = ({ children }) => {
     navigate('/login');
   };
 
+  // Full navigation for desktop/web
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t.nav.dashboard },
     { to: '/clients', icon: Users, label: t.nav.clients },
@@ -39,6 +43,75 @@ const Layout = ({ children }) => {
     { to: '/settings', icon: Settings, label: t.nav.settings }
   ];
 
+  // Simplified bottom navigation for Telegram Mini App
+  const mobileNavItems = [
+    { to: '/clients', icon: Users, label: t.nav.clients },
+    { to: '/payments', icon: CreditCard, label: t.nav.payments },
+    { to: '/settings', icon: Settings, label: t.nav.settings }
+  ];
+
+  // Telegram Mini App layout - maximized content, bottom nav
+  if (isTelegram) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col safe-area-top" data-testid="telegram-layout">
+        {/* Minimal Header - Only show on non-clients pages */}
+        {location.pathname !== '/clients' && (
+          <header className="bg-secondary text-white px-4 py-3 flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1 -ml-1"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold">
+              {location.pathname === '/payments' && t.nav.payments}
+              {location.pathname === '/settings' && t.nav.settings}
+              {location.pathname.startsWith('/clients/') && t.clients.clientDetails}
+            </h1>
+            <div className="w-6" /> {/* Spacer for centering */}
+          </header>
+        )}
+
+        {/* Main Content - Maximized */}
+        <main className="flex-1 overflow-auto pb-20">
+          <div className="p-4">
+            {children}
+          </div>
+        </main>
+
+        {/* Bottom Navigation - Always visible */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-border safe-area-bottom z-40">
+          <div className="flex justify-around items-center h-16">
+            {mobileNavItems.map((item) => {
+              const isActive = location.pathname === item.to || 
+                (item.to === '/clients' && location.pathname.startsWith('/clients'));
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+                    isActive 
+                      ? 'text-primary' 
+                      : 'text-text-muted'
+                  }`}
+                  data-testid={`bottom-nav-${item.to.replace('/', '') || 'home'}`}
+                >
+                  <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                  <span className={`text-xs mt-1 ${isActive ? 'font-semibold' : ''}`}>
+                    {item.label}
+                  </span>
+                </NavLink>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
+    );
+  }
+
+  // Standard web layout
   return (
     <div className="min-h-screen bg-background flex" data-testid="main-layout">
       {/* Mobile menu button */}
