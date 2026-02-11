@@ -1724,15 +1724,22 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     contacted_count = len([c for c in clients if c.get('status') == 'contacted'])
     sold_count = len([c for c in clients if c.get('status') == 'sold'])
     
-    # Payment stats
+    # Payment stats - convert all to UZS
     client_ids = [c['id'] for c in clients]
     if client_ids:
         payments = supabase.table('payments').select('*').in_('client_id', client_ids).execute().data or []
     else:
         payments = []
     
-    total_paid = sum(p.get('amount', 0) for p in payments if p.get('status') == 'paid')
-    total_pending = sum(p.get('amount', 0) for p in payments if p.get('status') == 'pending')
+    # Convert payments to UZS
+    total_paid_uzs = sum(
+        convert_to_uzs(p.get('amount', 0), p.get('currency', 'UZS')) 
+        for p in payments if p.get('status') == 'paid'
+    )
+    total_pending_uzs = sum(
+        convert_to_uzs(p.get('amount', 0), p.get('currency', 'UZS')) 
+        for p in payments if p.get('status') == 'pending'
+    )
     
     # Overdue reminders
     now = datetime.now(timezone.utc).isoformat()
@@ -1745,10 +1752,11 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "new_count": new_count,
         "contacted_count": contacted_count,
         "sold_count": sold_count,
-        "total_paid": total_paid,
-        "total_pending": total_pending,
+        "total_paid": total_paid_uzs,
+        "total_pending": total_pending_uzs,
         "overdue_reminders": overdue_reminders,
-        "currency": get_system_currency()
+        "currency": "UZS",  # Always display in UZS
+        "exchange_rates": get_exchange_rates()
     }
 
 @app.get("/api/dashboard/recent-clients")
