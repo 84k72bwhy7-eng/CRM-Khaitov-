@@ -274,7 +274,7 @@ async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = No
         return False
 
 def format_reminder_message(client_name: str, client_phone: str, reminder_text: str, remind_at: str, client_id: str) -> tuple:
-    """Format reminder message for Telegram"""
+    """Format reminder message for Telegram with Mini App button"""
     try:
         dt = datetime.fromisoformat(remind_at.replace('Z', '+00:00'))
         formatted_time = dt.strftime("%d.%m.%Y %H:%M")
@@ -290,8 +290,17 @@ def format_reminder_message(client_name: str, client_phone: str, reminder_text: 
 
 <i>Telefon raqamini bosib nusxalang va qo'ng'iroq qiling</i>"""
     
+    # Use web_app button to open Mini App inside Telegram
+    # Pass client_id as URL parameter for deep linking
+    miniapp_url = f"{TELEGRAM_MINIAPP_URL}/clients/{client_id}"
+    
     reply_markup = {
-        "inline_keyboard": [[{"text": "👁 Mijozni CRM da ochish", "url": f"{WEBAPP_URL}/clients/{client_id}"}]]
+        "inline_keyboard": [[
+            {
+                "text": "📱 CRM da ochish",
+                "web_app": {"url": miniapp_url}
+            }
+        ]]
     }
     return message, reply_markup
 
