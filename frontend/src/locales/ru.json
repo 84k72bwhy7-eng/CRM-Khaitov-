@@ -189,7 +189,11 @@
     "userCreated": "Пользователь создан",
     "userUpdated": "Пользователь обновлен",
     "userDeleted": "Пользователь удален",
-    "confirmDelete": "Вы уверены, что хотите удалить этого пользователя?"
+    "confirmDelete": "Вы уверены, что хотите удалить этого пользователя?",
+    "notLinked": "Не привязан",
+    "unlinkTelegram": "Отвязать Telegram",
+    "confirmUnlinkTelegram": "Отвязать Telegram аккаунт?",
+    "telegramUnlinked": "Telegram аккаунт отвязан"
   },
   "settings": {
     "title": "Настройки",
