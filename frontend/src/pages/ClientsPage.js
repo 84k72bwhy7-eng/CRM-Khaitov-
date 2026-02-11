@@ -742,9 +742,9 @@ export default function ClientsPage() {
         <Plus size={28} strokeWidth={2.5} />
       </button>
 
-      {/* Quick Add Modal - Mobile Optimized */}
+      {/* Quick Add Modal - Instagram Optimized */}
       {showQuickAdd && (
-        <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowQuickAdd(false)}>
+        <div className="fixed inset-0 z-50 bg-black/50" onClick={closeQuickAdd}>
           <div 
             className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl animate-slideUp"
             onClick={(e) => e.stopPropagation()}
@@ -752,78 +752,194 @@ export default function ClientsPage() {
           >
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3" />
             <div className="p-5">
-              <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-                <Plus size={20} />
-                {t.clients?.quickAdd || 'Quick Add Client'}
-              </h3>
-              <form onSubmit={handleQuickAdd} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t.clients.name} *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="input-field py-3 text-base"
-                    placeholder="Ism Familiya"
-                    required
-                    autoFocus
-                    data-testid="quick-add-name"
-                  />
+              
+              {/* Success State - Show after client created */}
+              {quickAddSuccess ? (
+                <div className="space-y-4" data-testid="quick-add-success">
+                  {/* Success Header */}
+                  <div className="text-center py-2">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle size={32} className="text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-bold text-text-primary">{quickAddSuccess.name}</h3>
+                    <p className="text-text-secondary">{quickAddSuccess.phone}</p>
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Call */}
+                    <a
+                      href={`tel:${formatPhoneLink(quickAddSuccess.phone)}`}
+                      className="flex flex-col items-center gap-2 p-4 bg-green-50 text-green-700 rounded-xl active:bg-green-100 transition-colors"
+                      data-testid="success-call"
+                    >
+                      <Phone size={24} />
+                      <span className="text-sm font-medium">{t.clients?.call || 'Call'}</span>
+                    </a>
+                    
+                    {/* Add Reminder */}
+                    <button
+                      onClick={() => {
+                        closeQuickAdd();
+                        navigate(`/clients/${quickAddSuccess.id}?tab=reminders&action=add`);
+                      }}
+                      className="flex flex-col items-center gap-2 p-4 bg-yellow-50 text-yellow-700 rounded-xl active:bg-yellow-100 transition-colors"
+                      data-testid="success-reminder"
+                    >
+                      <Bell size={24} />
+                      <span className="text-sm font-medium">{t.clients?.reminder || 'Reminder'}</span>
+                    </button>
+                    
+                    {/* Add Note */}
+                    <button
+                      onClick={() => {
+                        closeQuickAdd();
+                        navigate(`/clients/${quickAddSuccess.id}?tab=notes&action=add`);
+                      }}
+                      className="flex flex-col items-center gap-2 p-4 bg-blue-50 text-blue-700 rounded-xl active:bg-blue-100 transition-colors"
+                      data-testid="success-note"
+                    >
+                      <MessageSquare size={24} />
+                      <span className="text-sm font-medium">{t.clients?.note || 'Note'}</span>
+                    </button>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        closeQuickAdd();
+                        navigate(`/clients/${quickAddSuccess.id}`);
+                      }}
+                      className="btn-outline flex-1 py-3 flex items-center justify-center gap-2"
+                      data-testid="success-view"
+                    >
+                      <Eye size={18} />
+                      {t.clients?.viewClient || 'View'}
+                    </button>
+                    <button
+                      onClick={() => setQuickAddSuccess(null)}
+                      className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
+                      data-testid="success-add-another"
+                    >
+                      <Plus size={18} />
+                      {t.clients?.addAnother || 'Add Another'}
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t.clients.phone} *</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="input-field py-3 text-base"
-                    placeholder="+998 90 123 45 67"
-                    required
-                    data-testid="quick-add-phone"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-1.5">
-                    {t.clients.source} <span className="text-text-muted font-normal">({t.common.optional})</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.source}
-                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                    className="input-field py-3 text-base"
-                    placeholder="Instagram, Telegram..."
-                    data-testid="quick-add-source"
-                  />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowQuickAdd(false)}
-                    className="btn-outline flex-1 py-3"
-                  >
-                    {t.common.cancel}
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
-                    data-testid="quick-add-submit"
-                  >
-                    {loading && <Loader2 size={18} className="animate-spin" />}
-                    {t.common.save}
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowQuickAdd(false);
-                    setShowModal(true);
-                  }}
-                  className="w-full text-center text-sm text-primary py-2"
-                >
-                  {t.clients?.fullForm || 'Open full form →'}
-                </button>
-              </form>
+              ) : (
+                /* Form State - Quick Add Form */
+                <>
+                  <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+                    <Instagram size={20} className="text-pink-600" />
+                    {t.clients?.quickAddInstagram || 'Add Instagram Lead'}
+                  </h3>
+                  <form onSubmit={handleQuickAdd} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-text-primary mb-1.5">{t.clients.name} *</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="input-field py-3 text-base"
+                        placeholder="Ism Familiya"
+                        required
+                        autoFocus
+                        data-testid="quick-add-name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-text-primary mb-1.5">
+                        {t.clients.phone} * 
+                        <span className="text-text-muted font-normal ml-1">({t.clients?.pastePhone || 'paste from chat'})</span>
+                      </label>
+                      <input
+                        ref={phoneInputRef}
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onPaste={handlePhonePaste}
+                        className="input-field py-3 text-base font-mono"
+                        placeholder="+998 90 123 45 67"
+                        required
+                        data-testid="quick-add-phone"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-text-primary mb-1.5">
+                        {t.clients.source}
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, source: 'Instagram' })}
+                          className={`flex-1 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 transition-colors ${
+                            formData.source === 'Instagram' 
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                              : 'bg-gray-100 text-text-secondary'
+                          }`}
+                        >
+                          <Instagram size={16} />
+                          Instagram
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, source: 'Telegram' })}
+                          className={`flex-1 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 transition-colors ${
+                            formData.source === 'Telegram' 
+                              ? 'bg-blue-500 text-white' 
+                              : 'bg-gray-100 text-text-secondary'
+                          }`}
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                          </svg>
+                          Telegram
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, source: '' })}
+                          className={`px-3 py-2.5 rounded-lg font-medium text-sm transition-colors ${
+                            !formData.source 
+                              ? 'bg-gray-300 text-text-primary' 
+                              : 'bg-gray-100 text-text-secondary'
+                          }`}
+                        >
+                          {t.common?.other || 'Other'}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={closeQuickAdd}
+                        className="btn-outline flex-1 py-3"
+                      >
+                        {t.common.cancel}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
+                        data-testid="quick-add-submit"
+                      >
+                        {loading && <Loader2 size={18} className="animate-spin" />}
+                        {t.common.save}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeQuickAdd();
+                        setShowModal(true);
+                      }}
+                      className="w-full text-center text-sm text-primary py-2"
+                    >
+                      {t.clients?.fullForm || 'Open full form →'}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>
