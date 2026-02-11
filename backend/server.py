@@ -71,6 +71,163 @@ security = HTTPBearer()
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# ==================== TELEGRAM NOTIFICATION SYSTEM ====================
+
+# Webapp URL for deep links
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://edu-pipeline.preview.emergentagent.com")
+
+async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
+    """Send a message via Telegram Bot API"""
+    if not TELEGRAM_BOT_TOKEN:
+        print("TELEGRAM_BOT_TOKEN not configured, skipping notification")
+        return False
+    
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+    if reply_markup:
+        payload["reply_markup"] = json.dumps(reply_markup)
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, timeout=10.0)
+            if response.status_code == 200:
+                return True
+            else:
+                print(f"Telegram API error: {response.status_code} - {response.text}")
+                return False
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
+        return False
+
+def format_reminder_message(client_name: str, client_phone: str, reminder_text: str, remind_at: str, client_id: str) -> tuple:
+    """Format reminder message for Telegram"""
+    # Parse remind_at to readable format
+    try:
+        dt = datetime.fromisoformat(remind_at.replace('Z', '+00:00'))
+        formatted_time = dt.strftime("%d.%m.%Y %H:%M")
+    except:
+        formatted_time = remind_at
+    
+    message = f"""🔔 <b>Eslatma!</b>
+
+👤 <b>Mijoz:</b> {client_name}
+📞 <b>Telefon:</b> {client_phone}
+📝 <b>Eslatma:</b> {reminder_text}
+⏰ <b>Vaqt:</b> {formatted_time}"""
+    
+    # Create inline keyboard with buttons
+    reply_markup = {
+        "inline_keyboard": [
+            [
+                {"text": "📞 Qo'ng'iroq qilish", "url": f"tel:{client_phone.replace(' ', '').replace('-', '')}"},
+                {"text": "👁 Mijozni ochish", "url": f"{WEBAPP_URL}/clients/{client_id}"}
+            ]
+        ]
+    }
+    
+    return message, reply_markup
+
+async def check_and_send_telegram_reminders():
+    """Background task to check and send Telegram reminders"""
+    print(f"[{datetime.now().isoformat()}] Checking for due reminders...")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Find due reminders that haven't been sent via Telegram
+    due_reminders = list(reminders_collection.find({
+        "remind_at": {"$lte": now},
+        "is_completed": {"$ne": True},
+        "telegram_sent": {"$ne": True}
+    }))
+    
+    sent_count = 0
+    for reminder in due_reminders:
+        # Get the user who owns this reminder
+        user = users_collection.find_one({"_id": ObjectId(reminder["user_id"])})
+        if not user:
+            continue
+        
+        # Check if user has Telegram linked
+        telegram_id = user.get("telegram_id")
+        if not telegram_id:
+            # Mark as sent anyway to avoid re-checking
+            reminders_collection.update_one(
+                {"_id": reminder["_id"]},
+                {"$set": {"telegram_sent": True, "telegram_sent_at": now, "telegram_skipped": "no_telegram_id"}}
+            )
+            continue
+        
+        # Get client info
+        client = clients_collection.find_one({"_id": ObjectId(reminder["client_id"])})
+        if not client:
+            continue
+        
+        # Format and send message
+        message, reply_markup = format_reminder_message(
+            client_name=client.get("name", "Unknown"),
+            client_phone=client.get("phone", "N/A"),
+            reminder_text=reminder.get("text", ""),
+            remind_at=reminder.get("remind_at", ""),
+            client_id=str(client["_id"])
+        )
+        
+        success = await send_telegram_message(telegram_id, message, reply_markup)
+        
+        # Update reminder status
+        reminders_collection.update_one(
+            {"_id": reminder["_id"]},
+            {"$set": {
+                "telegram_sent": True,
+                "telegram_sent_at": datetime.now(timezone.utc).isoformat(),
+                "telegram_success": success
+            }}
+        )
+        
+        if success:
+            sent_count += 1
+            print(f"  ✓ Sent reminder to {user.get('name')} (Telegram ID: {telegram_id})")
+    
+    if sent_count > 0:
+        print(f"[{datetime.now().isoformat()}] Sent {sent_count} Telegram reminder(s)")
+    
+    return sent_count
+
+# Background scheduler
+reminder_scheduler_running = False
+
+async def reminder_scheduler_loop():
+    """Background loop that checks reminders every minute"""
+    global reminder_scheduler_running
+    reminder_scheduler_running = True
+    print("[Reminder Scheduler] Started")
+    
+    while reminder_scheduler_running:
+        try:
+            await check_and_send_telegram_reminders()
+        except Exception as e:
+            print(f"[Reminder Scheduler] Error: {e}")
+        
+        # Wait 60 seconds before next check
+        await asyncio.sleep(60)
+
+def start_reminder_scheduler():
+    """Start the reminder scheduler in a background thread"""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(reminder_scheduler_loop())
+
+# Start scheduler on app startup
+@app.on_event("startup")
+async def startup_event():
+    """Start background tasks on app startup"""
+    print("[App] Starting reminder scheduler...")
+    # Run scheduler in background
+    asyncio.create_task(reminder_scheduler_loop())
+
 # ==================== PYDANTIC MODELS ====================
 
 class UserCreate(BaseModel):
