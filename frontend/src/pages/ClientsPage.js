@@ -130,6 +130,7 @@ export default function ClientsPage() {
 
   const loadClients = async () => {
     try {
+      setClientsLoading(true);
       const params = { is_archived: showArchived, exclude_sold: true };
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
@@ -141,12 +142,20 @@ export default function ClientsPage() {
       const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setClients(data || []);
+      setClients(Array.isArray(data) ? data : []);
       return data;
     } catch (error) {
       console.error('Failed to load clients:', error);
+      setClients([]);
       return [];
+    } finally {
+      setClientsLoading(false);
     }
   };
 
