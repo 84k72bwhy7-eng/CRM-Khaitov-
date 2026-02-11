@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
@@ -11,6 +11,7 @@ export default function ClientsPage() {
   const { isAdmin, isTelegram } = useAuth();
   const { get, post, put, del, loading } = useApi();
   const navigate = useNavigate();
+  const location = useLocation();
   const fileInputRef = useRef(null);
   const phoneInputRef = useRef(null);
 
