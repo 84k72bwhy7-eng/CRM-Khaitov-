@@ -12,7 +12,6 @@ export const useApi = () => {
     setError(null);
     try {
       const token = localStorage.getItem('crm_token');
-      console.log(`[useApi] ${method} ${endpoint}`, { token: token ? 'present' : 'missing', params });
       const config = { 
         method, 
         url: `${API_URL}${endpoint}`,
@@ -21,10 +20,8 @@ export const useApi = () => {
       if (data) config.data = data;
       if (params) config.params = params;
       const response = await axios(config);
-      console.log(`[useApi] ${method} ${endpoint} - SUCCESS:`, response.data?.length || 'N/A');
       return response.data;
     } catch (err) {
-      console.error(`[useApi] ${method} ${endpoint} - ERROR:`, err.message, err.response?.status, err.response?.data);
       const errorMessage = err.response?.data?.detail || err.message;
       setError(errorMessage);
       throw err;
