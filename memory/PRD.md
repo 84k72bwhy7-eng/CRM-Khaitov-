@@ -75,7 +75,8 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Dual Auth Support**: Works as both web app (email/password) and Telegram Mini App (auto-login)
 - [x] **Bot Setup**: Bot configured as @khaitov_crm_bot
 - [x] **Mobile UX Optimization**: Floating add button, quick actions, clickable phones, card layout
-- [ ] **User Linking**: Admin needs to link existing users to Telegram accounts
+- [x] **Telegram Reminder Notifications**: Automatic sending of due reminders via Telegram bot
+- [x] **Notification Status UI**: Admin dashboard in Settings showing notification stats
 
 ### Database Schema
 **Collections:**
