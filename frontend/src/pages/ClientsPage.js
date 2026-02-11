@@ -263,7 +263,7 @@ export default function ClientsPage() {
         reminder_text: '',
         reminder_at: ''
       });
-      loadClients();
+      refreshClients();
       
     } catch (error) {
       if (error?.response?.status === 400) {
