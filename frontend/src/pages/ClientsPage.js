@@ -152,10 +152,9 @@ export default function ClientsPage() {
     
     return () => controller.abort();
   }, [search, statusFilter, groupFilter, showArchived]);
-    };
-  }, [search, statusFilter, groupFilter, showArchived, isAdmin, dataLoaded]);
 
-  const loadClients = async () => {
+  // Manual refresh function for use after create/update/delete
+  const refreshClients = async () => {
     try {
       setClientsLoading(true);
       const params = { is_archived: showArchived, exclude_sold: true };
@@ -163,7 +162,6 @@ export default function ClientsPage() {
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
       
-      // Direct fetch call to avoid hook-related issues
       const token = localStorage.getItem('crm_token');
       const API_URL = process.env.REACT_APP_BACKEND_URL;
       const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
@@ -178,7 +176,7 @@ export default function ClientsPage() {
       setClients(Array.isArray(data) ? data : []);
       return data;
     } catch (error) {
-      console.error('Failed to load clients:', error);
+      console.error('Failed to refresh clients:', error);
       setClients([]);
       return [];
     } finally {
