@@ -852,6 +852,11 @@ async def get_clients(
     exclude_sold: Optional[bool] = False,
     current_user: dict = Depends(get_current_user)
 ):
+    # DETAILED LOGGING for debugging sync issues
+    print(f"[CLIENT LIST] User: {current_user['name']} (ID: {current_user['id']}, Role: {current_user['role']})")
+    print(f"[CLIENT LIST] Filters: is_archived={is_archived}, exclude_sold={exclude_sold}, status={status}")
+    print(f"[CLIENT LIST] Database: Supabase @ {SUPABASE_URL}")
+    
     query = supabase.table('clients').select('*')
     
     if is_archived:
@@ -861,6 +866,9 @@ async def get_clients(
     
     if current_user["role"] != "admin":
         query = query.eq('manager_id', current_user["id"])
+        print(f"[CLIENT LIST] Non-admin filter: manager_id={current_user['id']}")
+    else:
+        print(f"[CLIENT LIST] Admin user - no manager filter")
     
     if search:
         query = query.or_(f"name.ilike.%{search}%,phone.ilike.%{search}%")
@@ -880,6 +888,8 @@ async def get_clients(
     
     result = query.order('created_at', desc=True).execute()
     clients = result.data or []
+    
+    print(f"[CLIENT LIST] Found {len(clients)} clients")
     
     # Enrich with related data
     tariffs = {t['id']: t for t in supabase.table('tariffs').select('*').execute().data}
