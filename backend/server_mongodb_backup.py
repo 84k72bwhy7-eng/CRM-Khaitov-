@@ -84,7 +84,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # ==================== TELEGRAM NOTIFICATION SYSTEM ====================
 
 # Webapp URL for deep links
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://edusync-app-3.preview.emergentagent.com")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://school-crm-telegram.preview.emergentagent.com")
 
 async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
     """Send a message via Telegram Bot API"""

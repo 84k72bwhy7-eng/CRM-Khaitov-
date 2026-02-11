@@ -10,7 +10,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://edusync-app-3.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://school-crm-telegram.preview.emergentagent.com')
 
 # Test credentials
 ADMIN_EMAIL = "admin@crm.local"

@@ -70,7 +70,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 
 #   4. Select "Bot Settings" -> "Menu Button" -> "Configure menu button"
 #   5. Set your production URL
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://edusync-app-3.preview.emergentagent.com")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://school-crm-telegram.preview.emergentagent.com")
 # Telegram Mini App URL - should be the URL configured in BotFather
 TELEGRAM_MINIAPP_URL = os.environ.get("TELEGRAM_MINIAPP_URL", WEBAPP_URL)
 
