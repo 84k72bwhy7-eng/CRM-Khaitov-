@@ -68,8 +68,10 @@ export default function ClientsPage() {
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
+      console.log('[ClientsPage] Loading clients with params:', params);
       const data = await get('/api/clients', params);
-      setClients(data);
+      console.log('[ClientsPage] Received clients:', data?.length || 0, 'items');
+      setClients(data || []);
     } catch (error) {
       console.error('Failed to load clients:', error);
     }
