@@ -128,14 +128,16 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <LanguageProvider>
-        <AuthProvider>
-          <Toaster position="top-right" richColors />
-          <AppRoutes />
-        </AuthProvider>
-      </LanguageProvider>
-    </BrowserRouter>
+    <BackendHealthCheck>
+      <BrowserRouter>
+        <LanguageProvider>
+          <AuthProvider>
+            <Toaster position="top-right" richColors />
+            <AppRoutes />
+          </AuthProvider>
+        </LanguageProvider>
+      </BrowserRouter>
+    </BackendHealthCheck>
   );
 }
 
