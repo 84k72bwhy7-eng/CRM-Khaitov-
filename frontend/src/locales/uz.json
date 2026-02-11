@@ -189,7 +189,11 @@
     "userCreated": "Foydalanuvchi yaratildi",
     "userUpdated": "Foydalanuvchi yangilandi",
     "userDeleted": "Foydalanuvchi o'chirildi",
-    "confirmDelete": "Rostdan ham bu foydalanuvchini o'chirmoqchimisiz?"
+    "confirmDelete": "Rostdan ham bu foydalanuvchini o'chirmoqchimisiz?",
+    "notLinked": "Ulanmagan",
+    "unlinkTelegram": "Telegram'ni uzish",
+    "confirmUnlinkTelegram": "Telegram hisobini uzmoqchimisiz?",
+    "telegramUnlinked": "Telegram hisobi uzildi"
   },
   "settings": {
     "title": "Sozlamalar",
