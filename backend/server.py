@@ -47,6 +47,8 @@ JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://crmtelegram-app.preview.emergentagent.com")
+# Telegram Mini App URL - should be the URL configured in BotFather
+TELEGRAM_MINIAPP_URL = os.environ.get("TELEGRAM_MINIAPP_URL", WEBAPP_URL)
 
 # Environment mode
 APP_ENV = os.environ.get("APP_ENV", "development").lower()
