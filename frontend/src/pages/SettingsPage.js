@@ -34,8 +34,10 @@ export default function SettingsPage() {
   const [groupForm, setGroupForm] = useState({ name: '', color: '#6B7280', description: '' });
   
   // Currency Settings State
-  const [systemSettings, setSystemSettings] = useState({ currency: 'USD' });
+  const [systemSettings, setSystemSettings] = useState({ currency: 'USD', exchange_rates: { USD: 12500 } });
   const [savingCurrency, setSavingCurrency] = useState(false);
+  const [exchangeRateInput, setExchangeRateInput] = useState('12500');
+  const [savingRate, setSavingRate] = useState(false);
 
   // Telegram Notification Status
   const [telegramStatus, setTelegramStatus] = useState(null);
