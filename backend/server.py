@@ -45,6 +45,16 @@ JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 
+# Environment mode (development, staging, production)
+APP_ENV = os.environ.get("APP_ENV", "development").lower()
+IS_PRODUCTION = APP_ENV == "production"
+DISABLE_SEED = os.environ.get("DISABLE_SEED", "false").lower() == "true" or IS_PRODUCTION
+
+# Log environment
+print(f"[App] Environment: {APP_ENV}")
+print(f"[App] Database: {DB_NAME}")
+print(f"[App] Seeding disabled: {DISABLE_SEED}")
+
 # MongoDB connection
 client = MongoClient(MONGO_URL)
 db = client[DB_NAME]
