@@ -4,7 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell, Upload, FileSpreadsheet, CheckCircle, AlertCircle, Phone, CreditCard } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell, Upload, FileSpreadsheet, CheckCircle, AlertCircle, Phone, CreditCard, Instagram, Copy, Check } from 'lucide-react';
 
 export default function ClientsPage() {
   const { t } = useLanguage();
@@ -12,6 +12,7 @@ export default function ClientsPage() {
   const { get, post, put, del, loading } = useApi();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const phoneInputRef = useRef(null);
 
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
@@ -26,7 +27,7 @@ export default function ClientsPage() {
   const [formData, setFormData] = useState({ 
     name: '', 
     phone: '', 
-    source: '', 
+    source: 'Instagram', 
     status: 'new', 
     manager_id: '',
     tariff_id: '',
@@ -37,6 +38,9 @@ export default function ClientsPage() {
   });
   const [exporting, setExporting] = useState(false);
   const [showReminderFields, setShowReminderFields] = useState(false);
+  
+  // Quick Add Success State
+  const [quickAddSuccess, setQuickAddSuccess] = useState(null); // Stores created client data
   
   // Import state
   const [showImportModal, setShowImportModal] = useState(false);
