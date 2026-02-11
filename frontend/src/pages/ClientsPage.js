@@ -886,42 +886,59 @@ export default function ClientsPage() {
                     <p className="text-text-secondary">{quickAddSuccess.phone}</p>
                   </div>
                   
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-3 gap-3">
+                  {/* Quick Actions - 4 main actions */}
+                  <div className="grid grid-cols-4 gap-2">
                     {/* Call */}
                     <a
                       href={`tel:${formatPhoneLink(quickAddSuccess.phone)}`}
-                      className="flex flex-col items-center gap-2 p-4 bg-green-50 text-green-700 rounded-xl active:bg-green-100 transition-colors"
+                      onClick={() => triggerHaptic('light')}
+                      className="flex flex-col items-center gap-1.5 p-3 bg-green-50 text-green-700 rounded-xl active:bg-green-100 transition-colors"
                       data-testid="success-call"
                     >
-                      <Phone size={24} />
-                      <span className="text-sm font-medium">{t.clients?.call || 'Call'}</span>
+                      <Phone size={22} />
+                      <span className="text-xs font-medium">{t.clients?.call || 'Call'}</span>
                     </a>
                     
                     {/* Add Reminder */}
                     <button
                       onClick={() => {
+                        triggerHaptic('light');
                         closeQuickAdd();
                         navigate(`/clients/${quickAddSuccess.id}?tab=reminders&action=add`);
                       }}
-                      className="flex flex-col items-center gap-2 p-4 bg-yellow-50 text-yellow-700 rounded-xl active:bg-yellow-100 transition-colors"
+                      className="flex flex-col items-center gap-1.5 p-3 bg-yellow-50 text-yellow-700 rounded-xl active:bg-yellow-100 transition-colors"
                       data-testid="success-reminder"
                     >
-                      <Bell size={24} />
-                      <span className="text-sm font-medium">{t.clients?.reminder || 'Reminder'}</span>
+                      <Bell size={22} />
+                      <span className="text-xs font-medium">{t.clients?.reminder || 'Reminder'}</span>
+                    </button>
+                    
+                    {/* Add Payment */}
+                    <button
+                      onClick={() => {
+                        triggerHaptic('light');
+                        closeQuickAdd();
+                        navigate(`/clients/${quickAddSuccess.id}?tab=payments&action=add`);
+                      }}
+                      className="flex flex-col items-center gap-1.5 p-3 bg-blue-50 text-blue-700 rounded-xl active:bg-blue-100 transition-colors"
+                      data-testid="success-payment"
+                    >
+                      <CreditCard size={22} />
+                      <span className="text-xs font-medium">{t.payments?.payment || 'Payment'}</span>
                     </button>
                     
                     {/* Add Note */}
                     <button
                       onClick={() => {
+                        triggerHaptic('light');
                         closeQuickAdd();
                         navigate(`/clients/${quickAddSuccess.id}?tab=notes&action=add`);
                       }}
-                      className="flex flex-col items-center gap-2 p-4 bg-blue-50 text-blue-700 rounded-xl active:bg-blue-100 transition-colors"
+                      className="flex flex-col items-center gap-1.5 p-3 bg-purple-50 text-purple-700 rounded-xl active:bg-purple-100 transition-colors"
                       data-testid="success-note"
                     >
-                      <MessageSquare size={24} />
-                      <span className="text-sm font-medium">{t.clients?.note || 'Note'}</span>
+                      <MessageSquare size={22} />
+                      <span className="text-xs font-medium">{t.clients?.note || 'Note'}</span>
                     </button>
                   </div>
                   
@@ -929,6 +946,7 @@ export default function ClientsPage() {
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => {
+                        triggerHaptic('light');
                         closeQuickAdd();
                         navigate(`/clients/${quickAddSuccess.id}`);
                       }}
@@ -939,7 +957,10 @@ export default function ClientsPage() {
                       {t.clients?.viewClient || 'View'}
                     </button>
                     <button
-                      onClick={() => setQuickAddSuccess(null)}
+                      onClick={() => {
+                        triggerHaptic('selection');
+                        setQuickAddSuccess(null);
+                      }}
                       className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
                       data-testid="success-add-another"
                     >
