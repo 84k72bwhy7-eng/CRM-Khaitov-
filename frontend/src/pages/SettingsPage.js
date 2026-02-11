@@ -544,6 +544,11 @@ export default function SettingsPage() {
                         <p className="font-medium text-text-primary">{tariff.name}</p>
                         <p className="text-sm text-text-muted">
                           {tariff.price.toLocaleString()} {tariff.currency}
+                          {tariff.currency === 'USD' && systemSettings.exchange_rates?.USD && (
+                            <span className="text-primary ml-2">
+                              ≈ {Math.round(tariff.price * systemSettings.exchange_rates.USD).toLocaleString()} UZS
+                            </span>
+                          )}
                           {tariff.description && ` • ${tariff.description}`}
                         </p>
                       </div>
