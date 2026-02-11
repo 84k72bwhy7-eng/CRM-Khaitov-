@@ -10,22 +10,20 @@ export const useApi = () => {
   const request = useCallback(async (method, endpoint, data = null, params = null) => {
     setLoading(true);
     setError(null);
-    console.log(`[useApi] Starting ${method} ${endpoint}`, { params });
     try {
       const token = localStorage.getItem('crm_token');
-      console.log(`[useApi] Token present: ${!!token}`);
       const config = { 
         method, 
         url: `${API_URL}${endpoint}`,
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        timeout: 30000 // 30 second timeout
       };
       if (data) config.data = data;
       if (params) config.params = params;
       const response = await axios(config);
-      console.log(`[useApi] ${method} ${endpoint} SUCCESS:`, Array.isArray(response.data) ? `${response.data.length} items` : typeof response.data);
       return response.data;
     } catch (err) {
-      console.error(`[useApi] ${method} ${endpoint} ERROR:`, err.message, err.response?.status);
+      console.error(`[useApi] ${method} ${endpoint} ERROR:`, err.message);
       const errorMessage = err.response?.data?.detail || err.message;
       setError(errorMessage);
       throw err;
