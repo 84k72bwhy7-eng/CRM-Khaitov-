@@ -86,6 +86,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Notification Status UI**: Admin dashboard in Settings showing notification stats
 - [x] **Instagram Lead Workflow**: Quick add with Instagram default, success actions (Call/Reminder/Note)
 - [x] **Mini App Deep Linking**: Reminder buttons now use `web_app` type to open CRM inside Telegram (2026-02-11)
+- [x] **PWA Support for Add to Home Screen**: Full PWA implementation with manifest.json, service worker, and app icons (2026-02-11)
 
 ### Phase 5 - Database Migration (2026-02-11)
 - [x] **Supabase Migration**: Complete migration from MongoDB to Supabase PostgreSQL
