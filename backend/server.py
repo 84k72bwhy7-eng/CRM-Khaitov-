@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pymongo import MongoClient
 from bson import ObjectId
+from dotenv import load_dotenv
 import os
 import io
 import csv
@@ -17,6 +18,9 @@ import hmac
 import hashlib
 from urllib.parse import parse_qs
 import time
+
+# Load environment variables from .env file
+load_dotenv()
 
 # App initialization
 app = FastAPI(title="SchoolCRM API", version="3.0.0")
