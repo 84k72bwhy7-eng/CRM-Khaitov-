@@ -96,7 +96,11 @@ export default function SettingsPage() {
     try {
       const data = await get('/api/settings');
       if (data) {
-        setSystemSettings({ currency: data.currency || 'USD' });
+        setSystemSettings({ 
+          currency: data.currency || 'USD',
+          exchange_rates: data.exchange_rates || { USD: 12500 }
+        });
+        setExchangeRateInput(String(data.exchange_rates?.USD || 12500));
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
