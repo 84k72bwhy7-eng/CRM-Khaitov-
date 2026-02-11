@@ -95,9 +95,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 STATIC_DIR = "/app/backend/static"
 os.makedirs(f"{STATIC_DIR}/icons", exist_ok=True)
 
-# Mount static files for PWA icons
+# Mount static files for PWA icons under /api/static to work with ingress
 from fastapi.staticfiles import StaticFiles
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/api/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # ==================== PYDANTIC MODELS ====================
 
