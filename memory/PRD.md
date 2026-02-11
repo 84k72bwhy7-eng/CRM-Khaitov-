@@ -65,11 +65,20 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Client Group Management**: Admin CRUD for groups, client assignment, filtering by group
 - [x] **Sold Client Management**: Dedicated page for sold clients with filtering, archive/restore functionality
 - [x] **Audio Playback Fix**: Fixed JWT token validation bug in `/api/audio/stream/{audio_id}` endpoint (2026-02-05)
+- [x] **Telegram Mini App Integration**: Backend auth endpoints + Frontend WebApp SDK support (2026-02-11)
 - [ ] **Reminder Push Notifications**: Browser notifications + in-app notification center
+
+### Phase 4 - Telegram Integration (2026-02-11)
+- [x] **Telegram Auth Backend**: `/api/auth/telegram` endpoint with HMAC-SHA256 validation
+- [x] **Account Linking**: `/api/auth/telegram/link` endpoint to link CRM users to Telegram
+- [x] **Frontend WebApp SDK**: Auto-detect Telegram context, theme adaptation
+- [x] **Dual Auth Support**: Works as both web app (email/password) and Telegram Mini App (auto-login)
+- [ ] **Bot Setup**: Create bot via @BotFather and configure (user action required)
+- [ ] **User Linking**: Admin needs to link existing users to Telegram accounts
 
 ### Database Schema
 **Collections:**
-- `users`: id, name, email, phone, password, role, created_at
+- `users`: id, name, email, phone, password, role, created_at, **telegram_id**, **telegram_username**, **telegram_linked_at**
 - `clients`: id, name, phone, source, manager_id, status, is_lead, is_archived, archived_at, tariff_id, created_at
 - `notes`: id, client_id, text, author_id, author_name, created_at
 - `payments`: id, client_id, amount, currency, status, date, created_at
