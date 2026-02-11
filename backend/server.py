@@ -1,3 +1,9 @@
+"""
+SchoolCRM Backend API - Supabase Version
+=========================================
+FastAPI backend with Supabase PostgreSQL database
+"""
+
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -7,27 +13,25 @@ from typing import Optional, List
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pymongo import MongoClient
-from bson import ObjectId
 from dotenv import load_dotenv
+from supabase import create_client, Client
 import os
 import io
 import csv
 import json
 import hmac
 import hashlib
-from urllib.parse import parse_qs, quote
+from urllib.parse import parse_qs
 import time
 import asyncio
 import httpx
-import threading
-from contextlib import asynccontextmanager
+import uuid
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
 # App initialization
-app = FastAPI(title="SchoolCRM API", version="3.0.0")
+app = FastAPI(title="SchoolCRM API", version="4.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,207 +42,37 @@ app.add_middleware(
 )
 
 # Environment variables
-MONGO_URL = os.environ.get("MONGO_URL")
-DB_NAME = os.environ.get("DB_NAME", "crm_db")
 JWT_SECRET = os.environ.get("JWT_SECRET", "crm_secure_jwt_secret_key_2024")
 JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://crmtelegram-app.preview.emergentagent.com")
 
-# Environment mode (development, staging, production)
+# Environment mode
 APP_ENV = os.environ.get("APP_ENV", "development").lower()
 IS_PRODUCTION = APP_ENV == "production"
 DISABLE_SEED = os.environ.get("DISABLE_SEED", "false").lower() == "true" or IS_PRODUCTION
 
-# Log environment
+# Supabase connection
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 print(f"[App] Environment: {APP_ENV}")
-print(f"[App] Database: {DB_NAME}")
+print(f"[App] Database: Supabase PostgreSQL")
 print(f"[App] Seeding disabled: {DISABLE_SEED}")
-
-# MongoDB connection
-client = MongoClient(MONGO_URL)
-db = client[DB_NAME]
-
-# Collections
-users_collection = db["users"]
-clients_collection = db["clients"]
-notes_collection = db["notes"]
-payments_collection = db["payments"]
-reminders_collection = db["reminders"]
-statuses_collection = db["statuses"]
-activity_log_collection = db["activity_log"]
-audio_files_collection = db["audio_files"]
-tariffs_collection = db["tariffs"]
-settings_collection = db["settings"]
-notifications_collection = db["notifications"]
-groups_collection = db["groups"]
 
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
-# Upload directory for files
+# Upload directory
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# ==================== TELEGRAM NOTIFICATION SYSTEM ====================
-
-# Webapp URL for deep links
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://crmtelegram-app.preview.emergentagent.com")
-
-async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
-    """Send a message via Telegram Bot API"""
-    if not TELEGRAM_BOT_TOKEN:
-        print("TELEGRAM_BOT_TOKEN not configured, skipping notification")
-        return False
-    
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "HTML"
-    }
-    if reply_markup:
-        payload["reply_markup"] = json.dumps(reply_markup)
-    
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, timeout=10.0)
-            if response.status_code == 200:
-                return True
-            else:
-                print(f"Telegram API error: {response.status_code} - {response.text}")
-                return False
-    except Exception as e:
-        print(f"Error sending Telegram message: {e}")
-        return False
-
-def format_reminder_message(client_name: str, client_phone: str, reminder_text: str, remind_at: str, client_id: str) -> tuple:
-    """Format reminder message for Telegram"""
-    # Parse remind_at to readable format
-    try:
-        dt = datetime.fromisoformat(remind_at.replace('Z', '+00:00'))
-        formatted_time = dt.strftime("%d.%m.%Y %H:%M")
-    except:
-        formatted_time = remind_at
-    
-    # Include phone as clickable text in message (Telegram auto-links phone numbers)
-    message = f"""🔔 <b>Eslatma!</b>
-
-👤 <b>Mijoz:</b> {client_name}
-📞 <b>Telefon:</b> <code>{client_phone}</code>
-📝 <b>Eslatma:</b> {reminder_text}
-⏰ <b>Vaqt:</b> {formatted_time}
-
-<i>Telefon raqamini bosib nusxalang va qo'ng'iroq qiling</i>"""
-    
-    # Create inline keyboard with button to open client in CRM
-    reply_markup = {
-        "inline_keyboard": [
-            [
-                {"text": "👁 Mijozni CRM da ochish", "url": f"{WEBAPP_URL}/clients/{client_id}"}
-            ]
-        ]
-    }
-    
-    return message, reply_markup
-
-async def check_and_send_telegram_reminders():
-    """Background task to check and send Telegram reminders"""
-    print(f"[{datetime.now().isoformat()}] Checking for due reminders...")
-    
-    now = datetime.now(timezone.utc).isoformat()
-    
-    # Find due reminders that haven't been sent via Telegram
-    due_reminders = list(reminders_collection.find({
-        "remind_at": {"$lte": now},
-        "is_completed": {"$ne": True},
-        "telegram_sent": {"$ne": True}
-    }))
-    
-    sent_count = 0
-    for reminder in due_reminders:
-        # Get the user who owns this reminder
-        user = users_collection.find_one({"_id": ObjectId(reminder["user_id"])})
-        if not user:
-            continue
-        
-        # Check if user has Telegram linked
-        telegram_id = user.get("telegram_id")
-        if not telegram_id:
-            # Mark as sent anyway to avoid re-checking
-            reminders_collection.update_one(
-                {"_id": reminder["_id"]},
-                {"$set": {"telegram_sent": True, "telegram_sent_at": now, "telegram_skipped": "no_telegram_id"}}
-            )
-            continue
-        
-        # Get client info
-        client = clients_collection.find_one({"_id": ObjectId(reminder["client_id"])})
-        if not client:
-            continue
-        
-        # Format and send message
-        message, reply_markup = format_reminder_message(
-            client_name=client.get("name", "Unknown"),
-            client_phone=client.get("phone", "N/A"),
-            reminder_text=reminder.get("text", ""),
-            remind_at=reminder.get("remind_at", ""),
-            client_id=str(client["_id"])
-        )
-        
-        success = await send_telegram_message(telegram_id, message, reply_markup)
-        
-        # Update reminder status
-        reminders_collection.update_one(
-            {"_id": reminder["_id"]},
-            {"$set": {
-                "telegram_sent": True,
-                "telegram_sent_at": datetime.now(timezone.utc).isoformat(),
-                "telegram_success": success
-            }}
-        )
-        
-        if success:
-            sent_count += 1
-            print(f"  ✓ Sent reminder to {user.get('name')} (Telegram ID: {telegram_id})")
-    
-    if sent_count > 0:
-        print(f"[{datetime.now().isoformat()}] Sent {sent_count} Telegram reminder(s)")
-    
-    return sent_count
-
-# Background scheduler
-reminder_scheduler_running = False
-
-async def reminder_scheduler_loop():
-    """Background loop that checks reminders every minute"""
-    global reminder_scheduler_running
-    reminder_scheduler_running = True
-    print("[Reminder Scheduler] Started")
-    
-    while reminder_scheduler_running:
-        try:
-            await check_and_send_telegram_reminders()
-        except Exception as e:
-            print(f"[Reminder Scheduler] Error: {e}")
-        
-        # Wait 60 seconds before next check
-        await asyncio.sleep(60)
-
-def start_reminder_scheduler():
-    """Start the reminder scheduler in a background thread"""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(reminder_scheduler_loop())
-
-# Start scheduler on app startup
-@app.on_event("startup")
-async def startup_event():
-    """Start background tasks on app startup"""
-    print("[App] Starting reminder scheduler...")
-    # Run scheduler in background
-    asyncio.create_task(reminder_scheduler_loop())
 
 # ==================== PYDANTIC MODELS ====================
 
@@ -348,21 +182,19 @@ class GroupUpdate(BaseModel):
 class SettingsUpdate(BaseModel):
     currency: Optional[str] = None
 
-class ImportRow(BaseModel):
-    name: str
-    phone: str
-    source: Optional[str] = ""
-    status: Optional[str] = "new"
-    manager_id: Optional[str] = None
+class TelegramAuthRequest(BaseModel):
+    initData: str
+
+class TelegramLinkRequest(BaseModel):
+    email: str
+    password: str
+    initData: str
+
+class AdminTelegramLink(BaseModel):
+    telegram_id: str
+    telegram_username: Optional[str] = ""
 
 # ==================== HELPER FUNCTIONS ====================
-
-def serialize_doc(doc):
-    """Convert MongoDB document to JSON-serializable dict"""
-    if doc is None:
-        return None
-    doc["id"] = str(doc.pop("_id"))
-    return doc
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
@@ -376,6 +208,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
+def new_uuid() -> str:
+    return str(uuid.uuid4())
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
@@ -386,222 +221,185 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     
-    user = users_collection.find_one({"_id": ObjectId(user_id)})
-    if user is None:
+    result = supabase.table('users').select('*').eq('id', user_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=401, detail="User not found")
-    return serialize_doc(user)
+    
+    user = result.data[0]
+    del user['password']
+    return user
 
 def log_activity(user_id: str, user_name: str, action: str, entity_type: str, entity_id: str, details: dict = None):
     """Log activity for audit trail"""
-    activity_log_collection.insert_one({
-        "user_id": user_id,
-        "user_name": user_name,
-        "action": action,
-        "entity_type": entity_type,
-        "entity_id": entity_id,
-        "details": details or {},
-        "created_at": datetime.now(timezone.utc).isoformat()
-    })
-
-def create_notification(user_id: str, title: str, message: str, notification_type: str = "reminder", entity_id: str = None):
-    """Create a notification for a user"""
-    notifications_collection.insert_one({
-        "user_id": user_id,
-        "title": title,
-        "message": message,
-        "type": notification_type,
-        "entity_id": entity_id,
-        "is_read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    })
+    supabase.table('activity_log').insert({
+        'id': new_uuid(),
+        'user_id': user_id,
+        'user_name': user_name,
+        'action': action,
+        'entity_type': entity_type,
+        'entity_id': entity_id,
+        'details': details or {},
+        'created_at': datetime.now(timezone.utc).isoformat()
+    }).execute()
 
 def get_system_currency():
     """Get the system currency setting"""
-    settings = settings_collection.find_one({"key": "system"})
-    if settings:
-        return settings.get("currency", "USD")
+    result = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+    if result.data:
+        data = result.data[0].get('data', {})
+        return data.get('currency', 'USD') if isinstance(data, dict) else 'USD'
     return "USD"
 
-# ==================== SEED DATA ====================
+# ==================== TELEGRAM NOTIFICATION SYSTEM ====================
 
-def seed_admin():
-    """Create default admin user only if no users exist"""
-    if DISABLE_SEED:
-        print("[Seed] Skipping admin seed (disabled in production)")
-        return
+async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
+    """Send a message via Telegram Bot API"""
+    if not TELEGRAM_BOT_TOKEN:
+        print("TELEGRAM_BOT_TOKEN not configured")
+        return False
     
-    # Only create admin if NO users exist at all (fresh database)
-    if users_collection.count_documents({}) == 0:
-        users_collection.insert_one({
-            "name": "Admin",
-            "email": "admin@crm.local",
-            "phone": "+998900000000",
-            "password": get_password_hash("admin123"),
-            "role": "admin",
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
-        print("[Seed] Admin user created: admin@crm.local / admin123")
-    else:
-        print("[Seed] Users exist, skipping admin creation")
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+    if reply_markup:
+        payload["reply_markup"] = json.dumps(reply_markup)
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, timeout=10.0)
+            return response.status_code == 200
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
+        return False
 
-def seed_default_statuses():
-    """Seed default statuses only if none exist"""
-    if DISABLE_SEED:
-        print("[Seed] Skipping statuses seed (disabled in production)")
-        return
-        
-    if statuses_collection.count_documents({}) == 0:
-        default_statuses = [
-            {"name": "new", "color": "#3B82F6", "order": 1, "is_default": True},
-            {"name": "contacted", "color": "#F59E0B", "order": 2, "is_default": True},
-            {"name": "sold", "color": "#22C55E", "order": 3, "is_default": True}
-        ]
-        statuses_collection.insert_many(default_statuses)
-        print("[Seed] Default statuses created")
-    else:
-        print("[Seed] Statuses exist, skipping")
+def format_reminder_message(client_name: str, client_phone: str, reminder_text: str, remind_at: str, client_id: str) -> tuple:
+    """Format reminder message for Telegram"""
+    try:
+        dt = datetime.fromisoformat(remind_at.replace('Z', '+00:00'))
+        formatted_time = dt.strftime("%d.%m.%Y %H:%M")
+    except:
+        formatted_time = remind_at
+    
+    message = f"""🔔 <b>Eslatma!</b>
 
-def seed_default_settings():
-    """Seed default system settings only if none exist"""
-    if DISABLE_SEED:
-        print("[Seed] Skipping settings seed (disabled in production)")
-        return
-        
-    if not settings_collection.find_one({"key": "system"}):
-        settings_collection.insert_one({
-            "key": "system",
-            "currency": "USD",
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
-        print("[Seed] Default settings created")
-    else:
-        print("[Seed] Settings exist, skipping")
+👤 <b>Mijoz:</b> {client_name}
+📞 <b>Telefon:</b> <code>{client_phone}</code>
+📝 <b>Eslatma:</b> {reminder_text}
+⏰ <b>Vaqt:</b> {formatted_time}
 
-# Run seeds only in development
-if not DISABLE_SEED:
-    seed_admin()
-    seed_default_statuses()
-    seed_default_settings()
-else:
-    print("[App] PRODUCTION MODE - All seeding disabled to protect data")
-
-# ==================== HEALTH CHECK ====================
-
-@app.get("/api/health")
-async def health_check():
-    return {
-        "status": "healthy", 
-        "app": "SchoolCRM", 
-        "version": "3.0.0",
-        "environment": APP_ENV,
-        "database": DB_NAME,
-        "seed_disabled": DISABLE_SEED
+<i>Telefon raqamini bosib nusxalang va qo'ng'iroq qiling</i>"""
+    
+    reply_markup = {
+        "inline_keyboard": [[{"text": "👁 Mijozni CRM da ochish", "url": f"{WEBAPP_URL}/clients/{client_id}"}]]
     }
+    return message, reply_markup
 
-@app.get("/api/admin/database-status")
-async def database_status(current_user: dict = Depends(get_current_user)):
-    """Admin: Get database status and stats (for deployment verification)"""
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
+async def check_and_send_telegram_reminders():
+    """Background task to check and send Telegram reminders"""
+    print(f"[{datetime.now().isoformat()}] Checking for due reminders...")
     
-    return {
-        "environment": APP_ENV,
-        "is_production": IS_PRODUCTION,
-        "database_name": DB_NAME,
-        "seed_disabled": DISABLE_SEED,
-        "collections": {
-            "users": users_collection.count_documents({}),
-            "clients": clients_collection.count_documents({}),
-            "payments": payments_collection.count_documents({}),
-            "reminders": reminders_collection.count_documents({}),
-            "notes": notes_collection.count_documents({}),
-            "statuses": statuses_collection.count_documents({}),
-            "groups": groups_collection.count_documents({}),
-            "tariffs": tariffs_collection.count_documents({})
-        },
-        "protection_status": "ENABLED" if DISABLE_SEED else "DISABLED - Seeds can run"
-    }
-
-# ==================== AUTH ENDPOINTS ====================
-
-@app.post("/api/auth/login")
-async def login(data: UserLogin):
-    user = users_collection.find_one({"email": data.email})
-    if not user or not verify_password(data.password, user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    now = datetime.now(timezone.utc).isoformat()
     
-    token = create_access_token({"sub": str(user["_id"]), "role": user["role"]})
-    user_data = serialize_doc(user)
-    del user_data["password"]
-    return {"token": token, "user": user_data}
+    # Find due reminders that haven't been sent
+    result = supabase.table('reminders').select('*').lt('remind_at', now).eq('is_completed', False).eq('telegram_sent', False).execute()
+    due_reminders = result.data or []
+    
+    sent_count = 0
+    for reminder in due_reminders:
+        # Get user
+        user_result = supabase.table('users').select('*').eq('id', reminder['user_id']).limit(1).execute()
+        if not user_result.data:
+            continue
+        user = user_result.data[0]
+        
+        telegram_id = user.get('telegram_id')
+        if not telegram_id:
+            supabase.table('reminders').update({
+                'telegram_sent': True,
+                'telegram_sent_at': now,
+                'telegram_success': False
+            }).eq('id', reminder['id']).execute()
+            continue
+        
+        # Get client
+        client_result = supabase.table('clients').select('*').eq('id', reminder['client_id']).limit(1).execute()
+        if not client_result.data:
+            continue
+        client = client_result.data[0]
+        
+        message, reply_markup = format_reminder_message(
+            client.get('name', 'Unknown'),
+            client.get('phone', 'N/A'),
+            reminder.get('text', ''),
+            reminder.get('remind_at', ''),
+            client['id']
+        )
+        
+        success = await send_telegram_message(telegram_id, message, reply_markup)
+        
+        supabase.table('reminders').update({
+            'telegram_sent': True,
+            'telegram_sent_at': datetime.now(timezone.utc).isoformat(),
+            'telegram_success': success
+        }).eq('id', reminder['id']).execute()
+        
+        if success:
+            sent_count += 1
+            print(f"  ✓ Sent reminder to {user.get('name')}")
+    
+    if sent_count > 0:
+        print(f"[{datetime.now().isoformat()}] Sent {sent_count} Telegram reminder(s)")
+    return sent_count
 
-@app.get("/api/auth/me")
-async def get_me(current_user: dict = Depends(get_current_user)):
-    user_data = {k: v for k, v in current_user.items() if k != "password"}
-    return user_data
+# Background scheduler
+reminder_scheduler_running = False
 
-@app.put("/api/auth/profile")
-async def update_profile(data: UserUpdate, current_user: dict = Depends(get_current_user)):
-    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
-    if "password" in update_data:
-        update_data["password"] = get_password_hash(update_data["password"])
-    if update_data:
-        users_collection.update_one({"_id": ObjectId(current_user["id"])}, {"$set": update_data})
-        log_activity(current_user["id"], current_user["name"], "update", "user", current_user["id"], {"fields": list(update_data.keys())})
-    user = users_collection.find_one({"_id": ObjectId(current_user["id"])}, {"password": 0})
-    return serialize_doc(user)
+async def reminder_scheduler_loop():
+    """Background loop that checks reminders every minute"""
+    global reminder_scheduler_running
+    reminder_scheduler_running = True
+    print("[Reminder Scheduler] Started")
+    
+    while reminder_scheduler_running:
+        try:
+            await check_and_send_telegram_reminders()
+        except Exception as e:
+            print(f"[Reminder Scheduler] Error: {e}")
+        await asyncio.sleep(60)
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background tasks on app startup"""
+    print("[App] Starting reminder scheduler...")
+    asyncio.create_task(reminder_scheduler_loop())
 
 # ==================== TELEGRAM AUTH ====================
 
-class TelegramAuthRequest(BaseModel):
-    initData: str
-
 def validate_telegram_init_data(init_data: str, bot_token: str) -> dict:
-    """Validate Telegram WebApp initData and extract user info"""
+    """Validate Telegram WebApp initData"""
     if not bot_token:
         raise ValueError("TELEGRAM_BOT_TOKEN not configured")
     
-    # Parse the init data
     try:
         parsed = dict(parse_qs(init_data, keep_blank_values=True))
         parsed = {k: v[0] for k, v in parsed.items()}
     except Exception:
         raise ValueError("Invalid initData format")
     
-    # Extract hash
     received_hash = parsed.pop('hash', None)
     if not received_hash:
         raise ValueError("Hash not found")
     
-    # Create data check string (sorted alphabetically)
-    data_check_string = '\n'.join(
-        f"{k}={v}" for k, v in sorted(parsed.items())
-    )
+    data_check_string = '\n'.join(f"{k}={v}" for k, v in sorted(parsed.items()))
+    secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+    calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
     
-    # Create secret key using HMAC-SHA256
-    secret_key = hmac.new(
-        b"WebAppData",
-        bot_token.encode(),
-        hashlib.sha256
-    ).digest()
-    
-    # Calculate expected hash
-    calculated_hash = hmac.new(
-        secret_key,
-        data_check_string.encode(),
-        hashlib.sha256
-    ).hexdigest()
-    
-    # Validate hash
     if not hmac.compare_digest(calculated_hash, received_hash):
         raise ValueError("Invalid hash")
     
-    # Check auth_date (allow 24 hours)
     auth_date = int(parsed.get('auth_date', 0))
     if time.time() - auth_date > 86400:
         raise ValueError("Auth data expired")
     
-    # Parse user JSON
     user_json = parsed.get('user', '{}')
     try:
         user_data = json.loads(user_json)
@@ -609,6 +407,73 @@ def validate_telegram_init_data(init_data: str, bot_token: str) -> dict:
         raise ValueError("Invalid user data")
     
     return user_data
+
+# ==================== HEALTH CHECK ====================
+
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "app": "SchoolCRM",
+        "version": "4.0.0",
+        "environment": APP_ENV,
+        "database": "Supabase PostgreSQL",
+        "seed_disabled": DISABLE_SEED
+    }
+
+@app.get("/api/admin/database-status")
+async def database_status(current_user: dict = Depends(get_current_user)):
+    """Admin: Get database status"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    counts = {}
+    for table in ['users', 'clients', 'payments', 'reminders', 'notes', 'statuses', 'groups', 'tariffs']:
+        result = supabase.table(table).select('count', count='exact').execute()
+        counts[table] = result.count or 0
+    
+    return {
+        "environment": APP_ENV,
+        "is_production": IS_PRODUCTION,
+        "database": "Supabase PostgreSQL",
+        "seed_disabled": DISABLE_SEED,
+        "collections": counts,
+        "protection_status": "ENABLED" if DISABLE_SEED else "DISABLED"
+    }
+
+# ==================== AUTH ENDPOINTS ====================
+
+@app.post("/api/auth/login")
+async def login(data: UserLogin):
+    result = supabase.table('users').select('*').eq('email', data.email).limit(1).execute()
+    if not result.data:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    user = result.data[0]
+    if not verify_password(data.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token = create_access_token({"sub": user["id"], "role": user["role"]})
+    del user["password"]
+    return {"token": token, "user": user}
+
+@app.get("/api/auth/me")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    return current_user
+
+@app.put("/api/auth/profile")
+async def update_profile(data: UserUpdate, current_user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if "password" in update_data:
+        update_data["password"] = get_password_hash(update_data["password"])
+    if update_data:
+        supabase.table('users').update(update_data).eq('id', current_user["id"]).execute()
+        log_activity(current_user["id"], current_user["name"], "update", "user", current_user["id"], {"fields": list(update_data.keys())})
+    
+    result = supabase.table('users').select('*').eq('id', current_user["id"]).limit(1).execute()
+    user = result.data[0]
+    del user["password"]
+    return user
 
 @app.post("/api/auth/telegram")
 async def telegram_auth(data: TelegramAuthRequest):
@@ -622,11 +487,9 @@ async def telegram_auth(data: TelegramAuthRequest):
     if not telegram_id:
         raise HTTPException(status_code=401, detail="No Telegram user ID")
     
-    # Find user by telegram_id
-    user = users_collection.find_one({"telegram_id": telegram_id})
+    result = supabase.table('users').select('*').eq('telegram_id', telegram_id).limit(1).execute()
     
-    if not user:
-        # User not linked - return info for linking
+    if not result.data:
         return {
             "status": "not_linked",
             "telegram_user": {
@@ -638,27 +501,15 @@ async def telegram_auth(data: TelegramAuthRequest):
             "message": "Telegram account not linked to CRM user"
         }
     
-    # User found - create JWT and login
-    token = create_access_token({"sub": str(user["_id"]), "role": user["role"]})
-    user_data = serialize_doc(user)
-    if "password" in user_data:
-        del user_data["password"]
+    user = result.data[0]
+    token = create_access_token({"sub": user["id"], "role": user["role"]})
+    del user["password"]
     
-    return {
-        "status": "success",
-        "token": token,
-        "user": user_data
-    }
-
-class TelegramLinkRequest(BaseModel):
-    email: str
-    password: str
-    initData: str
+    return {"status": "success", "token": token, "user": user}
 
 @app.post("/api/auth/telegram/link")
 async def link_telegram_account(data: TelegramLinkRequest):
     """Link existing CRM account to Telegram"""
-    # Validate Telegram data
     try:
         tg_user = validate_telegram_init_data(data.initData, TELEGRAM_BOT_TOKEN)
     except ValueError as e:
@@ -666,107 +517,85 @@ async def link_telegram_account(data: TelegramLinkRequest):
     
     telegram_id = str(tg_user.get('id'))
     
-    # Verify CRM credentials
-    user = users_collection.find_one({"email": data.email})
-    if not user or not verify_password(data.password, user["password"]):
+    result = supabase.table('users').select('*').eq('email', data.email).limit(1).execute()
+    if not result.data or not verify_password(data.password, result.data[0]["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    # Check if Telegram already linked to another account
-    existing = users_collection.find_one({"telegram_id": telegram_id})
-    if existing and str(existing["_id"]) != str(user["_id"]):
+    user = result.data[0]
+    
+    existing = supabase.table('users').select('*').eq('telegram_id', telegram_id).limit(1).execute()
+    if existing.data and existing.data[0]["id"] != user["id"]:
         raise HTTPException(status_code=400, detail="Telegram account already linked to another user")
     
-    # Link Telegram to this user
-    users_collection.update_one(
-        {"_id": user["_id"]},
-        {"$set": {
-            "telegram_id": telegram_id,
-            "telegram_username": tg_user.get('username', ''),
-            "telegram_first_name": tg_user.get('first_name', ''),
-            "telegram_linked_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
+    supabase.table('users').update({
+        'telegram_id': telegram_id,
+        'telegram_username': tg_user.get('username', ''),
+        'telegram_first_name': tg_user.get('first_name', ''),
+        'telegram_linked_at': datetime.now(timezone.utc).isoformat()
+    }).eq('id', user["id"]).execute()
     
-    # Create JWT and return
-    token = create_access_token({"sub": str(user["_id"]), "role": user["role"]})
-    user = users_collection.find_one({"_id": user["_id"]}, {"password": 0})
-    user_data = serialize_doc(user)
+    token = create_access_token({"sub": user["id"], "role": user["role"]})
     
-    log_activity(str(user_data["id"]), user_data["name"], "link_telegram", "user", str(user_data["id"]), {"telegram_id": telegram_id})
+    result = supabase.table('users').select('*').eq('id', user["id"]).limit(1).execute()
+    user = result.data[0]
+    del user["password"]
     
-    return {
-        "status": "success",
-        "token": token,
-        "user": user_data
-    }
+    log_activity(user["id"], user["name"], "link_telegram", "user", user["id"], {"telegram_id": telegram_id})
+    
+    return {"status": "success", "token": token, "user": user}
 
-# Admin endpoint to unlink Telegram from a user
 @app.delete("/api/users/{user_id}/telegram")
 async def admin_unlink_telegram(user_id: str, current_user: dict = Depends(get_current_user)):
-    """Admin: Unlink Telegram account from a user"""
+    """Admin: Unlink Telegram account"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    user = users_collection.find_one({"_id": ObjectId(user_id)})
-    if not user:
+    result = supabase.table('users').select('*').eq('id', user_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="User not found")
     
+    user = result.data[0]
     if not user.get("telegram_id"):
         raise HTTPException(status_code=400, detail="User has no linked Telegram account")
     
     old_telegram_id = user.get("telegram_id")
     
-    users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$unset": {
-            "telegram_id": "",
-            "telegram_username": "",
-            "telegram_first_name": "",
-            "telegram_linked_at": ""
-        }}
-    )
+    supabase.table('users').update({
+        'telegram_id': None,
+        'telegram_username': None,
+        'telegram_first_name': None,
+        'telegram_linked_at': None
+    }).eq('id', user_id).execute()
     
-    log_activity(current_user["id"], current_user["name"], "unlink_telegram", "user", user_id, 
+    log_activity(current_user["id"], current_user["name"], "unlink_telegram", "user", user_id,
                 {"telegram_id": old_telegram_id, "user_name": user.get("name")})
     
     return {"message": f"Telegram account unlinked from {user.get('name')}"}
 
-# Admin endpoint to manually link Telegram to a user (by telegram_id)
-class AdminTelegramLink(BaseModel):
-    telegram_id: str
-    telegram_username: Optional[str] = ""
-
 @app.post("/api/users/{user_id}/telegram")
 async def admin_link_telegram(user_id: str, data: AdminTelegramLink, current_user: dict = Depends(get_current_user)):
-    """Admin: Manually link a Telegram account to a user"""
+    """Admin: Manually link Telegram"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    user = users_collection.find_one({"_id": ObjectId(user_id)})
-    if not user:
+    result = supabase.table('users').select('*').eq('id', user_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Check if this telegram_id is already linked to another user
-    existing = users_collection.find_one({"telegram_id": data.telegram_id})
-    if existing and str(existing["_id"]) != user_id:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Telegram ID already linked to user: {existing.get('name')}"
-        )
+    existing = supabase.table('users').select('*').eq('telegram_id', data.telegram_id).limit(1).execute()
+    if existing.data and existing.data[0]["id"] != user_id:
+        raise HTTPException(status_code=400, detail=f"Telegram ID already linked to: {existing.data[0].get('name')}")
     
-    users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": {
-            "telegram_id": data.telegram_id,
-            "telegram_username": data.telegram_username,
-            "telegram_linked_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
+    supabase.table('users').update({
+        'telegram_id': data.telegram_id,
+        'telegram_username': data.telegram_username,
+        'telegram_linked_at': datetime.now(timezone.utc).isoformat()
+    }).eq('id', user_id).execute()
     
     log_activity(current_user["id"], current_user["name"], "admin_link_telegram", "user", user_id,
-                {"telegram_id": data.telegram_id, "user_name": user.get("name")})
+                {"telegram_id": data.telegram_id})
     
-    return {"message": f"Telegram account linked to {user.get('name')}"}
+    return {"message": f"Telegram account linked to {result.data[0].get('name')}"}
 
 # ==================== USERS ENDPOINTS ====================
 
@@ -774,29 +603,40 @@ async def admin_link_telegram(user_id: str, data: AdminTelegramLink, current_use
 async def get_users(current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
-    users = list(users_collection.find({}, {"password": 0}))
-    return [serialize_doc(u) for u in users]
+    
+    result = supabase.table('users').select('*').order('created_at', desc=True).execute()
+    users = []
+    for u in result.data:
+        del u['password']
+        users.append(u)
+    return users
 
 @app.post("/api/users")
 async def create_user(data: UserCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    if users_collection.find_one({"email": data.email}):
+    existing = supabase.table('users').select('*').eq('email', data.email).limit(1).execute()
+    if existing.data:
         raise HTTPException(status_code=400, detail="Email already exists")
     
+    user_id = new_uuid()
     user_doc = {
-        "name": data.name,
-        "email": data.email,
-        "phone": data.phone,
-        "password": get_password_hash(data.password),
-        "role": data.role,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': user_id,
+        'name': data.name,
+        'email': data.email,
+        'phone': data.phone,
+        'password': get_password_hash(data.password),
+        'role': data.role,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = users_collection.insert_one(user_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "user", str(result.inserted_id), {"email": data.email})
-    user = users_collection.find_one({"_id": result.inserted_id}, {"password": 0})
-    return serialize_doc(user)
+    supabase.table('users').insert(user_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "user", user_id, {"email": data.email})
+    
+    result = supabase.table('users').select('*').eq('id', user_id).limit(1).execute()
+    user = result.data[0]
+    del user['password']
+    return user
 
 @app.put("/api/users/{user_id}")
 async def update_user(user_id: str, data: UserUpdate, current_user: dict = Depends(get_current_user)):
@@ -807,12 +647,15 @@ async def update_user(user_id: str, data: UserUpdate, current_user: dict = Depen
     if "password" in update_data:
         update_data["password"] = get_password_hash(update_data["password"])
     if update_data:
-        users_collection.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
+        supabase.table('users').update(update_data).eq('id', user_id).execute()
         log_activity(current_user["id"], current_user["name"], "update", "user", user_id, {"fields": list(update_data.keys())})
-    user = users_collection.find_one({"_id": ObjectId(user_id)}, {"password": 0})
-    if not user:
+    
+    result = supabase.table('users').select('*').eq('id', user_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="User not found")
-    return serialize_doc(user)
+    user = result.data[0]
+    del user['password']
+    return user
 
 @app.delete("/api/users/{user_id}")
 async def delete_user(user_id: str, current_user: dict = Depends(get_current_user)):
@@ -820,9 +663,12 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
         raise HTTPException(status_code=403, detail="Admin access required")
     if user_id == current_user["id"]:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
-    result = users_collection.delete_one({"_id": ObjectId(user_id)})
-    if result.deleted_count == 0:
+    
+    result = supabase.table('users').select('*').eq('id', user_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    supabase.table('users').delete().eq('id', user_id).execute()
     log_activity(current_user["id"], current_user["name"], "delete", "user", user_id, {})
     return {"message": "User deleted"}
 
@@ -830,25 +676,28 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
 
 @app.get("/api/tariffs")
 async def get_tariffs(current_user: dict = Depends(get_current_user)):
-    tariffs = list(tariffs_collection.find().sort("created_at", -1))
-    return [serialize_doc(t) for t in tariffs]
+    result = supabase.table('tariffs').select('*').order('created_at', desc=True).execute()
+    return result.data
 
 @app.post("/api/tariffs")
 async def create_tariff(data: TariffCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
+    tariff_id = new_uuid()
     tariff_doc = {
-        "name": data.name,
-        "price": data.price,
-        "currency": data.currency,
-        "description": data.description,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': tariff_id,
+        'name': data.name,
+        'price': data.price,
+        'currency': data.currency,
+        'description': data.description,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = tariffs_collection.insert_one(tariff_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "tariff", str(result.inserted_id), {"name": data.name})
-    tariff = tariffs_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(tariff)
+    supabase.table('tariffs').insert(tariff_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "tariff", tariff_id, {"name": data.name})
+    
+    result = supabase.table('tariffs').select('*').eq('id', tariff_id).limit(1).execute()
+    return result.data[0]
 
 @app.put("/api/tariffs/{tariff_id}")
 async def update_tariff(tariff_id: str, data: TariffUpdate, current_user: dict = Depends(get_current_user)):
@@ -857,26 +706,29 @@ async def update_tariff(tariff_id: str, data: TariffUpdate, current_user: dict =
     
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if update_data:
-        tariffs_collection.update_one({"_id": ObjectId(tariff_id)}, {"$set": update_data})
+        supabase.table('tariffs').update(update_data).eq('id', tariff_id).execute()
         log_activity(current_user["id"], current_user["name"], "update", "tariff", tariff_id, update_data)
     
-    tariff = tariffs_collection.find_one({"_id": ObjectId(tariff_id)})
-    if not tariff:
+    result = supabase.table('tariffs').select('*').eq('id', tariff_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Tariff not found")
-    return serialize_doc(tariff)
+    return result.data[0]
 
 @app.delete("/api/tariffs/{tariff_id}")
 async def delete_tariff(tariff_id: str, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Check if any clients use this tariff
-    if clients_collection.count_documents({"tariff_id": tariff_id}) > 0:
+    # Check if in use
+    clients = supabase.table('clients').select('count', count='exact').eq('tariff_id', tariff_id).execute()
+    if clients.count > 0:
         raise HTTPException(status_code=400, detail="Tariff is in use by clients")
     
-    result = tariffs_collection.delete_one({"_id": ObjectId(tariff_id)})
-    if result.deleted_count == 0:
+    result = supabase.table('tariffs').select('*').eq('id', tariff_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Tariff not found")
+    
+    supabase.table('tariffs').delete().eq('id', tariff_id).execute()
     log_activity(current_user["id"], current_user["name"], "delete", "tariff", tariff_id, {})
     return {"message": "Tariff deleted"}
 
@@ -884,29 +736,31 @@ async def delete_tariff(tariff_id: str, current_user: dict = Depends(get_current
 
 @app.get("/api/groups")
 async def get_groups(current_user: dict = Depends(get_current_user)):
-    groups = list(groups_collection.find().sort("name", 1))
-    return [serialize_doc(g) for g in groups]
+    result = supabase.table('groups').select('*').order('name').execute()
+    return result.data
 
 @app.post("/api/groups")
 async def create_group(data: GroupCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Check for duplicate name
-    existing = groups_collection.find_one({"name": data.name})
-    if existing:
+    existing = supabase.table('groups').select('*').eq('name', data.name).limit(1).execute()
+    if existing.data:
         raise HTTPException(status_code=400, detail="Group with this name already exists")
     
+    group_id = new_uuid()
     group_doc = {
-        "name": data.name,
-        "color": data.color or "#6B7280",
-        "description": data.description or "",
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': group_id,
+        'name': data.name,
+        'color': data.color or "#6B7280",
+        'description': data.description or "",
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = groups_collection.insert_one(group_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "group", str(result.inserted_id), {"name": data.name})
-    group = groups_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(group)
+    supabase.table('groups').insert(group_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "group", group_id, {"name": data.name})
+    
+    result = supabase.table('groups').select('*').eq('id', group_id).limit(1).execute()
+    return result.data[0]
 
 @app.put("/api/groups/{group_id}")
 async def update_group(group_id: str, data: GroupUpdate, current_user: dict = Depends(get_current_user)):
@@ -915,27 +769,28 @@ async def update_group(group_id: str, data: GroupUpdate, current_user: dict = De
     
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if update_data:
-        groups_collection.update_one({"_id": ObjectId(group_id)}, {"$set": update_data})
+        supabase.table('groups').update(update_data).eq('id', group_id).execute()
         log_activity(current_user["id"], current_user["name"], "update", "group", group_id, update_data)
     
-    group = groups_collection.find_one({"_id": ObjectId(group_id)})
-    if not group:
+    result = supabase.table('groups').select('*').eq('id', group_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Group not found")
-    return serialize_doc(group)
+    return result.data[0]
 
 @app.delete("/api/groups/{group_id}")
 async def delete_group(group_id: str, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Check if any clients use this group
-    clients_in_group = clients_collection.count_documents({"group_id": group_id})
-    if clients_in_group > 0:
-        raise HTTPException(status_code=400, detail=f"Cannot delete group: {clients_in_group} clients are using it")
+    clients = supabase.table('clients').select('count', count='exact').eq('group_id', group_id).execute()
+    if clients.count > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete group: {clients.count} clients are using it")
     
-    result = groups_collection.delete_one({"_id": ObjectId(group_id)})
-    if result.deleted_count == 0:
+    result = supabase.table('groups').select('*').eq('id', group_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Group not found")
+    
+    supabase.table('groups').delete().eq('id', group_id).execute()
     log_activity(current_user["id"], current_user["name"], "delete", "group", group_id, {})
     return {"message": "Group deleted"}
 
@@ -943,9 +798,9 @@ async def delete_group(group_id: str, current_user: dict = Depends(get_current_u
 
 @app.get("/api/settings")
 async def get_settings(current_user: dict = Depends(get_current_user)):
-    settings = settings_collection.find_one({"key": "system"})
-    if settings:
-        return serialize_doc(settings)
+    result = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+    if result.data:
+        return result.data[0].get('data', {'currency': 'USD'})
     return {"currency": "USD"}
 
 @app.put("/api/settings")
@@ -955,15 +810,23 @@ async def update_settings(data: SettingsUpdate, current_user: dict = Depends(get
     
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if update_data:
-        settings_collection.update_one(
-            {"key": "system"},
-            {"$set": update_data},
-            upsert=True
-        )
+        existing = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+        if existing.data:
+            supabase.table('settings').update({
+                'currency': update_data.get('currency', 'USD'),
+                'data': update_data
+            }).eq('key', 'system').execute()
+        else:
+            supabase.table('settings').insert({
+                'id': new_uuid(),
+                'key': 'system',
+                'currency': update_data.get('currency', 'USD'),
+                'data': update_data
+            }).execute()
         log_activity(current_user["id"], current_user["name"], "update", "settings", "system", update_data)
     
-    settings = settings_collection.find_one({"key": "system"})
-    return serialize_doc(settings)
+    result = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+    return result.data[0].get('data', {'currency': 'USD'}) if result.data else {'currency': 'USD'}
 
 # ==================== CLIENTS ENDPOINTS ====================
 
@@ -978,678 +841,543 @@ async def get_clients(
     exclude_sold: Optional[bool] = False,
     current_user: dict = Depends(get_current_user)
 ):
-    query = {"is_archived": {"$ne": True} if not is_archived else True}
+    query = supabase.table('clients').select('*')
     
-    # Exclude sold clients if requested (for main clients list)
-    if exclude_sold and not status:
-        query["status"] = {"$ne": "sold"}
+    if is_archived:
+        query = query.eq('archived', True)
+    else:
+        query = query.eq('archived', False)
     
-    # Role-based filtering
     if current_user["role"] != "admin":
-        query["manager_id"] = current_user["id"]
+        query = query.eq('manager_id', current_user["id"])
     
-    # Search by phone or name
     if search:
-        query["$or"] = [
-            {"phone": {"$regex": search, "$options": "i"}},
-            {"name": {"$regex": search, "$options": "i"}}
-        ]
+        query = query.or_(f"name.ilike.%{search}%,phone.ilike.%{search}%")
     
-    # Filter by status (overrides exclude_sold)
     if status:
-        query["status"] = status
+        query = query.eq('status', status)
+    elif exclude_sold:
+        query = query.neq('status', 'sold')
     
-    # Filter by group
     if group_id:
-        query["group_id"] = group_id
+        query = query.eq('group_id', group_id)
     
-    # Date filters
-    if date_from or date_to:
-        date_query = {}
-        if date_from:
-            date_query["$gte"] = date_from
-        if date_to:
-            date_query["$lte"] = date_to
-        if date_query:
-            query["created_at"] = date_query
+    if date_from:
+        query = query.gte('created_at', date_from)
+    if date_to:
+        query = query.lte('created_at', date_to)
     
-    clients = list(clients_collection.find(query).sort("created_at", -1))
-    result = []
-    for c in clients:
-        client = serialize_doc(c)
-        # Add tariff info
-        if client.get("tariff_id"):
-            tariff = tariffs_collection.find_one({"_id": ObjectId(client["tariff_id"])})
-            if tariff:
-                client["tariff_name"] = tariff["name"]
-                client["tariff_price"] = tariff["price"]
-        # Add group info
-        if client.get("group_id"):
-            group = groups_collection.find_one({"_id": ObjectId(client["group_id"])})
-            if group:
-                client["group_name"] = group["name"]
-                client["group_color"] = group["color"]
-        # Add manager info
-        if client.get("manager_id"):
-            manager = users_collection.find_one({"_id": ObjectId(client["manager_id"])})
-            if manager:
-                client["manager_name"] = manager["name"]
-        result.append(client)
-    return result
+    result = query.order('created_at', desc=True).execute()
+    clients = result.data or []
+    
+    # Enrich with related data
+    tariffs = {t['id']: t for t in supabase.table('tariffs').select('*').execute().data}
+    groups = {g['id']: g for g in supabase.table('groups').select('*').execute().data}
+    users = {u['id']: u for u in supabase.table('users').select('id,name').execute().data}
+    
+    for client in clients:
+        if client.get('tariff_id') and client['tariff_id'] in tariffs:
+            client['tariff_name'] = tariffs[client['tariff_id']]['name']
+            client['tariff_price'] = tariffs[client['tariff_id']]['price']
+        if client.get('group_id') and client['group_id'] in groups:
+            client['group_name'] = groups[client['group_id']]['name']
+            client['group_color'] = groups[client['group_id']]['color']
+        if client.get('manager_id') and client['manager_id'] in users:
+            client['manager_name'] = users[client['manager_id']]['name']
+    
+    return clients
 
 @app.get("/api/clients/{client_id}")
 async def get_client(client_id: str, current_user: dict = Depends(get_current_user)):
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    if not client:
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    # Check access
+    client = result.data[0]
+    
     if current_user["role"] != "admin" and client.get("manager_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    result = serialize_doc(client)
-    # Add tariff info
-    if result.get("tariff_id"):
-        tariff = tariffs_collection.find_one({"_id": ObjectId(result["tariff_id"])})
-        if tariff:
-            result["tariff_name"] = tariff["name"]
-            result["tariff_price"] = tariff["price"]
-    return result
+    if client.get('tariff_id'):
+        tariff = supabase.table('tariffs').select('*').eq('id', client['tariff_id']).limit(1).execute()
+        if tariff.data:
+            client['tariff_name'] = tariff.data[0]['name']
+            client['tariff_price'] = tariff.data[0]['price']
+    
+    return client
 
 @app.post("/api/clients")
 async def create_client(data: ClientCreate, current_user: dict = Depends(get_current_user)):
-    # Check for duplicate phone
-    existing = clients_collection.find_one({"phone": data.phone})
-    if existing:
-        raise HTTPException(status_code=400, detail="Phone number already exists")
+    # Check duplicate phone - allow duplicates for now (different from MongoDB version)
+    # existing = supabase.table('clients').select('*').eq('phone', data.phone).limit(1).execute()
+    # if existing.data:
+    #     raise HTTPException(status_code=400, detail="Phone number already exists")
     
+    client_id = new_uuid()
     client_doc = {
-        "name": data.name,
-        "phone": data.phone,
-        "source": data.source,
-        "manager_id": data.manager_id or current_user["id"],
-        "status": data.status,
-        "is_lead": data.is_lead,
-        "is_archived": False,
-        "tariff_id": data.tariff_id,
-        "group_id": data.group_id,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': client_id,
+        'name': data.name,
+        'phone': data.phone,
+        'source': data.source,
+        'manager_id': data.manager_id or current_user["id"],
+        'status': data.status,
+        'is_lead': data.is_lead,
+        'archived': False,
+        'tariff_id': data.tariff_id,
+        'group_id': data.group_id,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = clients_collection.insert_one(client_doc)
-    client_id = str(result.inserted_id)
+    supabase.table('clients').insert(client_doc).execute()
     
-    # Create initial comment if provided
+    # Create initial comment
     if data.initial_comment:
-        notes_collection.insert_one({
-            "client_id": client_id,
-            "text": data.initial_comment,
-            "author_id": current_user["id"],
-            "author_name": current_user["name"],
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
+        supabase.table('notes').insert({
+            'id': new_uuid(),
+            'client_id': client_id,
+            'user_id': current_user["id"],
+            'text': data.initial_comment,
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }).execute()
     
-    # Create reminder if provided
+    # Create reminder
     if data.reminder_text and data.reminder_at:
         manager_id = data.manager_id or current_user["id"]
-        reminders_collection.insert_one({
-            "client_id": client_id,
-            "user_id": manager_id,
-            "text": data.reminder_text,
-            "remind_at": data.reminder_at,
-            "is_completed": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
+        supabase.table('reminders').insert({
+            'id': new_uuid(),
+            'client_id': client_id,
+            'user_id': manager_id,
+            'text': data.reminder_text,
+            'remind_at': data.reminder_at,
+            'is_completed': False,
+            'telegram_sent': False,
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }).execute()
     
     log_activity(current_user["id"], current_user["name"], "create", "client", client_id, {"name": data.name})
-    client = clients_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(client)
+    
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    return result.data[0]
 
 @app.put("/api/clients/{client_id}")
 async def update_client(client_id: str, data: ClientUpdate, current_user: dict = Depends(get_current_user)):
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    if not client:
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    # Check access
+    client = result.data[0]
+    
     if current_user["role"] != "admin" and client.get("manager_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    # Map is_archived to archived
+    if 'is_archived' in update_data:
+        update_data['archived'] = update_data.pop('is_archived')
+    
     old_status = client.get("status")
     
     if update_data:
-        clients_collection.update_one({"_id": ObjectId(client_id)}, {"$set": update_data})
-        log_activity(current_user["id"], current_user["name"], "update", "client", client_id, 
+        supabase.table('clients').update(update_data).eq('id', client_id).execute()
+        log_activity(current_user["id"], current_user["name"], "update", "client", client_id,
                     {"fields": list(update_data.keys()), "old_status": old_status, "new_status": update_data.get("status")})
     
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    return serialize_doc(client)
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    return result.data[0]
 
 @app.delete("/api/clients/{client_id}")
 async def delete_client(client_id: str, current_user: dict = Depends(get_current_user)):
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    if not client:
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    # Check access
+    client = result.data[0]
+    
     if current_user["role"] != "admin" and client.get("manager_id") != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    clients_collection.delete_one({"_id": ObjectId(client_id)})
-    notes_collection.delete_many({"client_id": client_id})
-    payments_collection.delete_many({"client_id": client_id})
-    reminders_collection.delete_many({"client_id": client_id})
+    # Delete related records
+    supabase.table('notes').delete().eq('client_id', client_id).execute()
+    supabase.table('payments').delete().eq('client_id', client_id).execute()
+    supabase.table('reminders').delete().eq('client_id', client_id).execute()
+    supabase.table('clients').delete().eq('id', client_id).execute()
+    
     log_activity(current_user["id"], current_user["name"], "delete", "client", client_id, {"name": client.get("name")})
     return {"message": "Client deleted"}
 
-# Archive/Restore client
 @app.post("/api/clients/{client_id}/archive")
 async def archive_client(client_id: str, current_user: dict = Depends(get_current_user)):
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    if not client:
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    archived_at = datetime.now(timezone.utc).isoformat()
-    clients_collection.update_one(
-        {"_id": ObjectId(client_id)}, 
-        {"$set": {"is_archived": True, "archived_at": archived_at}}
-    )
-    log_activity(current_user["id"], current_user["name"], "archive", "client", client_id, {"name": client.get("name")})
+    supabase.table('clients').update({
+        'archived': True,
+        'archived_at': datetime.now(timezone.utc).isoformat()
+    }).eq('id', client_id).execute()
+    
+    log_activity(current_user["id"], current_user["name"], "archive", "client", client_id, {"name": result.data[0].get("name")})
     return {"message": "Client archived"}
 
 @app.post("/api/clients/{client_id}/restore")
 async def restore_client(client_id: str, current_user: dict = Depends(get_current_user)):
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    if not client:
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    clients_collection.update_one(
-        {"_id": ObjectId(client_id)}, 
-        {"$set": {"is_archived": False}, "$unset": {"archived_at": ""}}
-    )
-    log_activity(current_user["id"], current_user["name"], "restore", "client", client_id, {"name": client.get("name")})
+    supabase.table('clients').update({
+        'archived': False,
+        'archived_at': None
+    }).eq('id', client_id).execute()
+    
+    log_activity(current_user["id"], current_user["name"], "restore", "client", client_id, {"name": result.data[0].get("name")})
     return {"message": "Client restored"}
 
-# Convert to lead
 @app.post("/api/clients/{client_id}/convert-to-lead")
 async def convert_to_lead(client_id: str, current_user: dict = Depends(get_current_user)):
-    client = clients_collection.find_one({"_id": ObjectId(client_id)})
-    if not client:
+    result = supabase.table('clients').select('*').eq('id', client_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    clients_collection.update_one(
-        {"_id": ObjectId(client_id)}, 
-        {"$set": {"is_lead": True, "status": "new"}}
-    )
-    log_activity(current_user["id"], current_user["name"], "convert_to_lead", "client", client_id, {"name": client.get("name")})
+    supabase.table('clients').update({
+        'is_lead': True,
+        'status': 'new'
+    }).eq('id', client_id).execute()
+    
+    log_activity(current_user["id"], current_user["name"], "convert_to_lead", "client", client_id, {"name": result.data[0].get("name")})
     return {"message": "Client converted to lead"}
 
 # ==================== IMPORT ENDPOINTS ====================
 
 @app.post("/api/import/preview")
-async def import_preview(
-    file: UploadFile = File(...),
-    current_user: dict = Depends(get_current_user)
-):
-    """Preview import data before saving"""
+async def import_preview(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Preview import data"""
     content = await file.read()
     rows = []
     errors = []
     
     try:
-        # Try CSV first
-        content_str = content.decode('utf-8')
-        reader = csv.DictReader(io.StringIO(content_str))
-        
+        decoded = content.decode('utf-8')
+        reader = csv.DictReader(io.StringIO(decoded))
         for i, row in enumerate(reader):
-            try:
-                # Normalize column names (case-insensitive)
-                normalized = {}
-                for k, v in row.items():
-                    key = k.lower().strip() if k else ''
-                    normalized[key] = v.strip() if v else ''
-                
-                # Map to our fields
-                name = normalized.get('name', normalized.get('ism', ''))
-                phone = normalized.get('phone', normalized.get('telefon', normalized.get('tel', '')))
-                source = normalized.get('source', normalized.get('manba', ''))
-                status = normalized.get('status', normalized.get('holat', 'new'))
-                
-                if not name or not phone:
-                    errors.append({"row": i + 2, "error": "Name and phone are required"})
-                    continue
-                
-                # Check for duplicate
-                existing = clients_collection.find_one({"phone": phone})
-                is_duplicate = existing is not None
-                
-                rows.append({
-                    "row": i + 2,
-                    "name": name,
-                    "phone": phone,
-                    "source": source,
-                    "status": status if status in ['new', 'contacted', 'sold'] else 'new',
-                    "is_duplicate": is_duplicate,
-                    "valid": not is_duplicate
-                })
-            except Exception as e:
-                errors.append({"row": i + 2, "error": str(e)})
+            if not row.get('name') or not row.get('phone'):
+                errors.append(f"Row {i+1}: Missing name or phone")
+                continue
+            rows.append({
+                "name": row.get('name', '').strip(),
+                "phone": row.get('phone', '').strip(),
+                "source": row.get('source', '').strip(),
+                "status": row.get('status', 'new').strip()
+            })
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error parsing file: {str(e)}")
     
-    return {
-        "total": len(rows) + len(errors),
-        "valid": len([r for r in rows if r["valid"]]),
-        "duplicates": len([r for r in rows if r["is_duplicate"]]),
-        "errors": len(errors),
-        "rows": rows,
-        "error_rows": errors
-    }
+    return {"rows": rows, "errors": errors, "total": len(rows)}
 
 @app.post("/api/import/save")
-async def import_save(
-    rows: List[ImportRow],
-    current_user: dict = Depends(get_current_user)
-):
-    """Save imported clients"""
-    success = 0
-    failed = []
+async def import_save(rows: List[dict], current_user: dict = Depends(get_current_user)):
+    """Save imported data"""
+    created = 0
+    errors = []
     
     for i, row in enumerate(rows):
         try:
-            # Skip duplicates
-            existing = clients_collection.find_one({"phone": row.phone})
-            if existing:
-                failed.append({"row": i + 1, "phone": row.phone, "error": "Duplicate phone"})
-                continue
-            
-            client_doc = {
-                "name": row.name,
-                "phone": row.phone,
-                "source": row.source,
-                "manager_id": row.manager_id or current_user["id"],
-                "status": row.status,
-                "is_lead": True,
-                "is_archived": False,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            clients_collection.insert_one(client_doc)
-            success += 1
+            client_id = new_uuid()
+            supabase.table('clients').insert({
+                'id': client_id,
+                'name': row.get('name'),
+                'phone': row.get('phone'),
+                'source': row.get('source', ''),
+                'status': row.get('status', 'new'),
+                'manager_id': row.get('manager_id') or current_user["id"],
+                'is_lead': True,
+                'archived': False,
+                'created_at': datetime.now(timezone.utc).isoformat()
+            }).execute()
+            created += 1
         except Exception as e:
-            failed.append({"row": i + 1, "phone": row.phone, "error": str(e)})
+            errors.append(f"Row {i+1}: {str(e)}")
     
-    log_activity(current_user["id"], current_user["name"], "import", "client", "", {"success": success, "failed": len(failed)})
-    
-    return {
-        "success": success,
-        "failed": len(failed),
-        "failed_rows": failed
-    }
+    log_activity(current_user["id"], current_user["name"], "import", "client", "batch", {"created": created})
+    return {"created": created, "errors": errors}
 
-# ==================== NOTES/COMMENTS ENDPOINTS ====================
+# ==================== NOTES ENDPOINTS ====================
 
 @app.get("/api/notes/{client_id}")
 async def get_notes(client_id: str, current_user: dict = Depends(get_current_user)):
-    notes = list(notes_collection.find({"client_id": client_id}).sort("created_at", -1))
-    return [serialize_doc(n) for n in notes]
+    result = supabase.table('notes').select('*').eq('client_id', client_id).order('created_at', desc=True).execute()
+    return result.data
 
 @app.post("/api/notes")
 async def create_note(data: NoteCreate, current_user: dict = Depends(get_current_user)):
+    note_id = new_uuid()
     note_doc = {
-        "client_id": data.client_id,
-        "text": data.text,
-        "author_id": current_user["id"],
-        "author_name": current_user["name"],
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': note_id,
+        'client_id': data.client_id,
+        'user_id': current_user["id"],
+        'text': data.text,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = notes_collection.insert_one(note_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "note", str(result.inserted_id), {"client_id": data.client_id})
-    note = notes_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(note)
+    supabase.table('notes').insert(note_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "note", note_id, {"client_id": data.client_id})
+    
+    result = supabase.table('notes').select('*').eq('id', note_id).limit(1).execute()
+    return result.data[0]
 
 @app.delete("/api/notes/{note_id}")
 async def delete_note(note_id: str, current_user: dict = Depends(get_current_user)):
-    note = notes_collection.find_one({"_id": ObjectId(note_id)})
-    if not note:
+    result = supabase.table('notes').select('*').eq('id', note_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Note not found")
-    if note.get("author_id") != current_user["id"] and current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Access denied")
-    notes_collection.delete_one({"_id": ObjectId(note_id)})
+    
+    supabase.table('notes').delete().eq('id', note_id).execute()
     log_activity(current_user["id"], current_user["name"], "delete", "note", note_id, {})
     return {"message": "Note deleted"}
 
 # ==================== PAYMENTS ENDPOINTS ====================
 
 @app.get("/api/payments")
-async def get_all_payments(
-    status: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
-):
-    query = {}
-    if status:
-        query["status"] = status
-    
-    payments = list(payments_collection.find(query).sort("date", -1))
-    result = []
-    for p in payments:
-        payment = serialize_doc(p)
-        client = clients_collection.find_one({"_id": ObjectId(payment["client_id"])})
-        if client:
-            # Role check
-            if current_user["role"] != "admin" and client.get("manager_id") != current_user["id"]:
-                continue
-            payment["client_name"] = client["name"]
-            payment["client_phone"] = client["phone"]
-        result.append(payment)
-    return result
+async def get_payments(current_user: dict = Depends(get_current_user)):
+    result = supabase.table('payments').select('*').order('payment_date', desc=True).execute()
+    return result.data
 
 @app.get("/api/payments/client/{client_id}")
 async def get_client_payments(client_id: str, current_user: dict = Depends(get_current_user)):
-    payments = list(payments_collection.find({"client_id": client_id}).sort("date", -1))
-    return [serialize_doc(p) for p in payments]
+    result = supabase.table('payments').select('*').eq('client_id', client_id).order('payment_date', desc=True).execute()
+    return result.data
 
 @app.post("/api/payments")
 async def create_payment(data: PaymentCreate, current_user: dict = Depends(get_current_user)):
-    # Use system currency if not specified
-    currency = data.currency or get_system_currency()
-    
+    payment_id = new_uuid()
     payment_doc = {
-        "client_id": data.client_id,
-        "amount": data.amount,
-        "currency": currency,
-        "status": data.status,
-        "date": data.date or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "comment": data.comment or "",
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': payment_id,
+        'client_id': data.client_id,
+        'user_id': current_user["id"],
+        'amount': data.amount,
+        'currency': data.currency,
+        'status': data.status,
+        'payment_date': data.date or datetime.now(timezone.utc).isoformat(),
+        'comment': data.comment,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = payments_collection.insert_one(payment_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "payment", str(result.inserted_id), 
-                {"client_id": data.client_id, "amount": data.amount, "currency": currency})
-    payment = payments_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(payment)
+    supabase.table('payments').insert(payment_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "payment", payment_id, {"amount": data.amount, "client_id": data.client_id})
+    
+    result = supabase.table('payments').select('*').eq('id', payment_id).limit(1).execute()
+    return result.data[0]
 
 @app.put("/api/payments/{payment_id}")
 async def update_payment(payment_id: str, data: PaymentUpdate, current_user: dict = Depends(get_current_user)):
-    # Get the old payment for comparison
-    old_payment = payments_collection.find_one({"_id": ObjectId(payment_id)})
-    if not old_payment:
-        raise HTTPException(status_code=404, detail="Payment not found")
-    
-    # Validate amount is not negative
-    if data.amount is not None and data.amount < 0:
-        raise HTTPException(status_code=400, detail="Amount cannot be negative")
-    
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
-    if update_data:
-        payments_collection.update_one({"_id": ObjectId(payment_id)}, {"$set": update_data})
-        
-        # Log activity with old and new values
-        changes = {}
-        for key, new_value in update_data.items():
-            old_value = old_payment.get(key)
-            if old_value != new_value:
-                changes[key] = {"old": old_value, "new": new_value}
-        
-        log_activity(current_user["id"], current_user["name"], "update", "payment", payment_id, 
-                    {"changes": changes, "client_id": old_payment.get("client_id")})
+    if 'date' in update_data:
+        update_data['payment_date'] = update_data.pop('date')
     
-    payment = payments_collection.find_one({"_id": ObjectId(payment_id)})
-    return serialize_doc(payment)
+    if update_data:
+        supabase.table('payments').update(update_data).eq('id', payment_id).execute()
+        log_activity(current_user["id"], current_user["name"], "update", "payment", payment_id, update_data)
+    
+    result = supabase.table('payments').select('*').eq('id', payment_id).limit(1).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    return result.data[0]
 
 @app.delete("/api/payments/{payment_id}")
 async def delete_payment(payment_id: str, current_user: dict = Depends(get_current_user)):
-    result = payments_collection.delete_one({"_id": ObjectId(payment_id)})
-    if result.deleted_count == 0:
+    result = supabase.table('payments').select('*').eq('id', payment_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Payment not found")
+    
+    supabase.table('payments').delete().eq('id', payment_id).execute()
     log_activity(current_user["id"], current_user["name"], "delete", "payment", payment_id, {})
     return {"message": "Payment deleted"}
 
 # ==================== REMINDERS ENDPOINTS ====================
 
 @app.get("/api/reminders")
-async def get_reminders(
-    include_completed: bool = False,
-    current_user: dict = Depends(get_current_user)
-):
-    query = {"user_id": current_user["id"]}
-    if not include_completed:
-        query["is_completed"] = {"$ne": True}
-    
-    reminders = list(reminders_collection.find(query).sort("remind_at", 1))
-    result = []
-    for r in reminders:
-        reminder = serialize_doc(r)
-        client = clients_collection.find_one({"_id": ObjectId(reminder["client_id"])})
-        if client:
-            reminder["client_name"] = client["name"]
-        result.append(reminder)
-    return result
+async def get_reminders(current_user: dict = Depends(get_current_user)):
+    query = supabase.table('reminders').select('*')
+    if current_user["role"] != "admin":
+        query = query.eq('user_id', current_user["id"])
+    result = query.order('remind_at').execute()
+    return result.data
 
 @app.get("/api/reminders/overdue")
 async def get_overdue_reminders(current_user: dict = Depends(get_current_user)):
     now = datetime.now(timezone.utc).isoformat()
-    query = {
-        "user_id": current_user["id"],
-        "remind_at": {"$lt": now},
-        "is_completed": {"$ne": True}
-    }
-    reminders = list(reminders_collection.find(query).sort("remind_at", 1))
-    result = []
-    for r in reminders:
-        reminder = serialize_doc(r)
-        client = clients_collection.find_one({"_id": ObjectId(reminder["client_id"])})
-        if client:
-            reminder["client_name"] = client["name"]
-        result.append(reminder)
-    return result
+    query = supabase.table('reminders').select('*').lt('remind_at', now).eq('is_completed', False)
+    if current_user["role"] != "admin":
+        query = query.eq('user_id', current_user["id"])
+    result = query.order('remind_at').execute()
+    return result.data
 
 @app.post("/api/reminders")
 async def create_reminder(data: ReminderCreate, current_user: dict = Depends(get_current_user)):
+    reminder_id = new_uuid()
     reminder_doc = {
-        "client_id": data.client_id,
-        "user_id": current_user["id"],
-        "text": data.text,
-        "remind_at": data.remind_at,
-        "is_completed": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': reminder_id,
+        'client_id': data.client_id,
+        'user_id': current_user["id"],
+        'text': data.text,
+        'remind_at': data.remind_at,
+        'is_completed': False,
+        'telegram_sent': False,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = reminders_collection.insert_one(reminder_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "reminder", str(result.inserted_id), {"client_id": data.client_id})
-    reminder = reminders_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(reminder)
+    supabase.table('reminders').insert(reminder_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "reminder", reminder_id, {"client_id": data.client_id})
+    
+    result = supabase.table('reminders').select('*').eq('id', reminder_id).limit(1).execute()
+    return result.data[0]
 
 @app.put("/api/reminders/{reminder_id}")
 async def update_reminder(reminder_id: str, data: ReminderUpdate, current_user: dict = Depends(get_current_user)):
-    reminder = reminders_collection.find_one({"_id": ObjectId(reminder_id)})
-    if not reminder:
-        raise HTTPException(status_code=404, detail="Reminder not found")
-    if reminder.get("user_id") != current_user["id"] and current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Access denied")
-    
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if update_data:
-        reminders_collection.update_one({"_id": ObjectId(reminder_id)}, {"$set": update_data})
+        supabase.table('reminders').update(update_data).eq('id', reminder_id).execute()
+        log_activity(current_user["id"], current_user["name"], "update", "reminder", reminder_id, update_data)
     
-    reminder = reminders_collection.find_one({"_id": ObjectId(reminder_id)})
-    return serialize_doc(reminder)
+    result = supabase.table('reminders').select('*').eq('id', reminder_id).limit(1).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+    return result.data[0]
 
 @app.delete("/api/reminders/{reminder_id}")
 async def delete_reminder(reminder_id: str, current_user: dict = Depends(get_current_user)):
-    reminder = reminders_collection.find_one({"_id": ObjectId(reminder_id)})
-    if not reminder:
+    result = supabase.table('reminders').select('*').eq('id', reminder_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Reminder not found")
-    if reminder.get("user_id") != current_user["id"] and current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Access denied")
     
-    reminders_collection.delete_one({"_id": ObjectId(reminder_id)})
+    supabase.table('reminders').delete().eq('id', reminder_id).execute()
+    log_activity(current_user["id"], current_user["name"], "delete", "reminder", reminder_id, {})
     return {"message": "Reminder deleted"}
 
 # ==================== NOTIFICATIONS ENDPOINTS ====================
 
 @app.get("/api/notifications")
-async def get_notifications(
-    unread_only: bool = False,
-    limit: int = 50,
-    current_user: dict = Depends(get_current_user)
-):
-    query = {"user_id": current_user["id"]}
-    if unread_only:
-        query["is_read"] = False
-    
-    notifications = list(notifications_collection.find(query).sort("created_at", -1).limit(limit))
-    return [serialize_doc(n) for n in notifications]
+async def get_notifications(current_user: dict = Depends(get_current_user)):
+    result = supabase.table('notifications').select('*').eq('user_id', current_user["id"]).order('created_at', desc=True).execute()
+    return result.data
 
 @app.get("/api/notifications/unread-count")
 async def get_unread_count(current_user: dict = Depends(get_current_user)):
-    count = notifications_collection.count_documents({
-        "user_id": current_user["id"],
-        "is_read": False
-    })
-    return {"count": count}
+    result = supabase.table('notifications').select('count', count='exact').eq('user_id', current_user["id"]).eq('is_read', False).execute()
+    return {"count": result.count or 0}
 
 @app.put("/api/notifications/{notification_id}/read")
 async def mark_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
-    notifications_collection.update_one(
-        {"_id": ObjectId(notification_id), "user_id": current_user["id"]},
-        {"$set": {"is_read": True}}
-    )
+    supabase.table('notifications').update({'is_read': True}).eq('id', notification_id).execute()
     return {"message": "Notification marked as read"}
 
 @app.put("/api/notifications/read-all")
 async def mark_all_read(current_user: dict = Depends(get_current_user)):
-    notifications_collection.update_many(
-        {"user_id": current_user["id"], "is_read": False},
-        {"$set": {"is_read": True}}
-    )
+    supabase.table('notifications').update({'is_read': True}).eq('user_id', current_user["id"]).eq('is_read', False).execute()
     return {"message": "All notifications marked as read"}
 
 @app.get("/api/notifications/check-reminders")
 async def check_reminders(current_user: dict = Depends(get_current_user)):
-    """Check for due reminders and create notifications"""
+    """Check for due reminders"""
     now = datetime.now(timezone.utc).isoformat()
+    result = supabase.table('reminders').select('*').eq('user_id', current_user["id"]).lt('remind_at', now).eq('is_completed', False).eq('notified', False).execute()
     
-    # Find due reminders that haven't been notified
-    due_reminders = list(reminders_collection.find({
-        "user_id": current_user["id"],
-        "remind_at": {"$lte": now},
-        "is_completed": {"$ne": True},
-        "notified": {"$ne": True}
-    }))
-    
-    new_notifications = []
+    due_reminders = result.data or []
     for reminder in due_reminders:
-        client = clients_collection.find_one({"_id": ObjectId(reminder["client_id"])})
-        client_name = client["name"] if client else "Unknown"
+        client = supabase.table('clients').select('name').eq('id', reminder['client_id']).limit(1).execute()
+        client_name = client.data[0]['name'] if client.data else 'Unknown'
         
-        # Create notification
-        notification = {
-            "user_id": current_user["id"],
-            "title": f"Reminder: {client_name}",
-            "message": reminder["text"],
-            "type": "reminder",
-            "entity_id": str(reminder["_id"]),
-            "is_read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        result = notifications_collection.insert_one(notification)
-        notification["id"] = str(result.inserted_id)
-        new_notifications.append(notification)
+        supabase.table('notifications').insert({
+            'id': new_uuid(),
+            'user_id': current_user["id"],
+            'type': 'reminder',
+            'title': 'Reminder Due',
+            'message': f"Reminder for {client_name}: {reminder['text']}",
+            'entity_type': 'reminder',
+            'entity_id': reminder['id'],
+            'is_read': False,
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }).execute()
         
-        # Mark reminder as notified
-        reminders_collection.update_one(
-            {"_id": reminder["_id"]},
-            {"$set": {"notified": True}}
-        )
+        supabase.table('reminders').update({'notified': True}).eq('id', reminder['id']).execute()
     
-    return {"new_notifications": new_notifications}
+    return {"checked": len(due_reminders)}
 
 @app.post("/api/notifications/send-telegram-reminders")
-async def send_telegram_reminders(current_user: dict = Depends(get_current_user)):
-    """Admin: Manually trigger Telegram reminder check and send"""
+async def send_telegram_reminders_manual(current_user: dict = Depends(get_current_user)):
+    """Manually trigger Telegram reminder sending"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
-    
-    sent_count = await check_and_send_telegram_reminders()
-    return {"message": f"Sent {sent_count} Telegram reminder(s)", "sent_count": sent_count}
+    sent = await check_and_send_telegram_reminders()
+    return {"sent": sent}
 
 @app.post("/api/notifications/test-telegram")
-async def test_telegram_notification(current_user: dict = Depends(get_current_user)):
-    """Test Telegram notification for current user"""
+async def test_telegram(current_user: dict = Depends(get_current_user)):
+    """Test Telegram notification"""
     telegram_id = current_user.get("telegram_id")
     if not telegram_id:
-        raise HTTPException(status_code=400, detail="Your account is not linked to Telegram")
+        raise HTTPException(status_code=400, detail="Your account has no linked Telegram")
     
-    test_message = """🧪 <b>Test xabar</b>
-
-Bu test xabar SchoolCRM dan.
-Telegram bildirishnomalar ishlayapti! ✅
-
-<i>Eslatmalar avtomatik ravishda yuboriladi.</i>"""
+    success = await send_telegram_message(
+        telegram_id,
+        f"🔔 <b>Test Notification</b>\n\nHello {current_user['name']}! This is a test message from SchoolCRM."
+    )
     
-    reply_markup = {
-        "inline_keyboard": [
-            [{"text": "📱 CRM ni ochish", "url": WEBAPP_URL}]
-        ]
-    }
-    
-    success = await send_telegram_message(telegram_id, test_message, reply_markup)
-    
-    if success:
-        return {"message": "Test notification sent successfully", "telegram_id": telegram_id}
-    else:
-        raise HTTPException(status_code=500, detail="Failed to send test notification")
+    return {"success": success, "telegram_id": telegram_id}
 
 @app.get("/api/notifications/telegram-status")
-async def get_telegram_status(current_user: dict = Depends(get_current_user)):
-    """Get Telegram notification status for current user"""
+async def telegram_status(current_user: dict = Depends(get_current_user)):
+    """Get Telegram notification system status"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Get stats
-    total_reminders = reminders_collection.count_documents({"is_completed": {"$ne": True}})
-    telegram_sent = reminders_collection.count_documents({"telegram_sent": True})
-    pending = reminders_collection.count_documents({
-        "telegram_sent": {"$ne": True},
-        "is_completed": {"$ne": True}
-    })
+    # Count users with Telegram linked
+    linked_result = supabase.table('users').select('count', count='exact').neq('telegram_id', None).execute()
+    linked_users = linked_result.count or 0
     
-    # Get users with Telegram linked
-    users_with_telegram = users_collection.count_documents({"telegram_id": {"$exists": True, "$ne": ""}})
-    total_users = users_collection.count_documents({})
+    # Count pending reminders
+    now = datetime.now(timezone.utc).isoformat()
+    pending_result = supabase.table('reminders').select('count', count='exact').lt('remind_at', now).eq('is_completed', False).eq('telegram_sent', False).execute()
+    pending_reminders = pending_result.count or 0
+    
+    # Recent sent
+    sent_result = supabase.table('reminders').select('count', count='exact').eq('telegram_sent', True).execute()
+    total_sent = sent_result.count or 0
     
     return {
         "scheduler_running": reminder_scheduler_running,
-        "bot_token_configured": bool(TELEGRAM_BOT_TOKEN),
-        "total_active_reminders": total_reminders,
-        "telegram_sent": telegram_sent,
-        "pending_reminders": pending,
-        "users_with_telegram": users_with_telegram,
-        "total_users": total_users
+        "bot_configured": bool(TELEGRAM_BOT_TOKEN),
+        "linked_users": linked_users,
+        "pending_reminders": pending_reminders,
+        "total_sent": total_sent
     }
 
 # ==================== STATUSES ENDPOINTS ====================
 
 @app.get("/api/statuses")
 async def get_statuses(current_user: dict = Depends(get_current_user)):
-    statuses = list(statuses_collection.find().sort("order", 1))
-    return [serialize_doc(s) for s in statuses]
+    result = supabase.table('statuses').select('*').order('sort_order').execute()
+    return result.data
 
 @app.post("/api/statuses")
 async def create_status(data: StatusCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
+    existing = supabase.table('statuses').select('*').eq('name', data.name).limit(1).execute()
+    if existing.data:
+        raise HTTPException(status_code=400, detail="Status with this name already exists")
+    
+    status_id = new_uuid()
     status_doc = {
-        "name": data.name,
-        "color": data.color,
-        "order": data.order,
-        "is_default": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': status_id,
+        'name': data.name,
+        'color': data.color,
+        'sort_order': data.order,
+        'is_default': False,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = statuses_collection.insert_one(status_doc)
-    log_activity(current_user["id"], current_user["name"], "create", "status", str(result.inserted_id), {"name": data.name})
-    status = statuses_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(status)
+    supabase.table('statuses').insert(status_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "create", "status", status_id, {"name": data.name})
+    
+    result = supabase.table('statuses').select('*').eq('id', status_id).limit(1).execute()
+    return result.data[0]
 
 @app.put("/api/statuses/{status_id}")
 async def update_status(status_id: str, data: StatusUpdate, current_user: dict = Depends(get_current_user)):
@@ -1657,59 +1385,54 @@ async def update_status(status_id: str, data: StatusUpdate, current_user: dict =
         raise HTTPException(status_code=403, detail="Admin access required")
     
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if 'order' in update_data:
+        update_data['sort_order'] = update_data.pop('order')
+    
     if update_data:
-        statuses_collection.update_one({"_id": ObjectId(status_id)}, {"$set": update_data})
+        supabase.table('statuses').update(update_data).eq('id', status_id).execute()
         log_activity(current_user["id"], current_user["name"], "update", "status", status_id, update_data)
     
-    status = statuses_collection.find_one({"_id": ObjectId(status_id)})
-    if not status:
+    result = supabase.table('statuses').select('*').eq('id', status_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Status not found")
-    return serialize_doc(status)
+    return result.data[0]
 
 @app.delete("/api/statuses/{status_id}")
 async def delete_status(status_id: str, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    status = statuses_collection.find_one({"_id": ObjectId(status_id)})
-    if not status:
+    result = supabase.table('statuses').select('*').eq('id', status_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Status not found")
     
-    if status.get("is_default"):
+    if result.data[0].get('is_default'):
         raise HTTPException(status_code=400, detail="Cannot delete default status")
     
-    # Check if any clients use this status
-    if clients_collection.count_documents({"status": status["name"]}) > 0:
-        raise HTTPException(status_code=400, detail="Status is in use by clients")
-    
-    statuses_collection.delete_one({"_id": ObjectId(status_id)})
-    log_activity(current_user["id"], current_user["name"], "delete", "status", status_id, {"name": status["name"]})
+    supabase.table('statuses').delete().eq('id', status_id).execute()
+    log_activity(current_user["id"], current_user["name"], "delete", "status", status_id, {})
     return {"message": "Status deleted"}
 
-# ==================== ACTIVITY LOG ENDPOINTS ====================
+# ==================== ACTIVITY LOG ====================
 
 @app.get("/api/activity-log")
 async def get_activity_log(
+    limit: int = 100,
     entity_type: Optional[str] = None,
-    limit: int = 50,
     current_user: dict = Depends(get_current_user)
 ):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
-    query = {}
+    query = supabase.table('activity_log').select('*')
     if entity_type:
-        query["entity_type"] = entity_type
-    
-    activities = list(activity_log_collection.find(query).sort("created_at", -1).limit(limit))
-    return [serialize_doc(a) for a in activities]
+        query = query.eq('entity_type', entity_type)
+    result = query.order('created_at', desc=True).limit(limit).execute()
+    return result.data
 
 # ==================== AUDIO FILES ENDPOINTS ====================
 
 @app.get("/api/audio/{client_id}")
 async def get_client_audio_files(client_id: str, current_user: dict = Depends(get_current_user)):
-    files = list(audio_files_collection.find({"client_id": client_id}).sort("created_at", -1))
-    return [serialize_doc(f) for f in files]
+    result = supabase.table('audio_files').select('*').eq('client_id', client_id).order('created_at', desc=True).execute()
+    return result.data
 
 @app.post("/api/audio/upload")
 async def upload_audio(
@@ -1717,107 +1440,85 @@ async def upload_audio(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    # Validate file type
     allowed_types = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/mp3", "audio/webm"]
     if file.content_type not in allowed_types:
-        raise HTTPException(status_code=400, detail="Invalid file type. Allowed: mp3, wav, ogg, webm")
+        raise HTTPException(status_code=400, detail="Invalid file type")
     
-    # Generate unique filename
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     filename = f"{client_id}_{timestamp}_{file.filename}"
     filepath = os.path.join(UPLOAD_DIR, filename)
     
-    # Save file
     content = await file.read()
     with open(filepath, "wb") as f:
         f.write(content)
     
-    # Save metadata to database
+    audio_id = new_uuid()
     audio_doc = {
-        "client_id": client_id,
-        "filename": filename,
-        "original_name": file.filename,
-        "content_type": file.content_type,
-        "size": len(content),
-        "uploader_id": current_user["id"],
-        "uploader_name": current_user["name"],
-        "created_at": datetime.now(timezone.utc).isoformat()
+        'id': audio_id,
+        'client_id': client_id,
+        'user_id': current_user["id"],
+        'filename': filename,
+        'original_name': file.filename,
+        'content_type': file.content_type,
+        'created_at': datetime.now(timezone.utc).isoformat()
     }
-    result = audio_files_collection.insert_one(audio_doc)
-    log_activity(current_user["id"], current_user["name"], "upload", "audio", str(result.inserted_id), {"client_id": client_id, "filename": file.filename})
+    supabase.table('audio_files').insert(audio_doc).execute()
+    log_activity(current_user["id"], current_user["name"], "upload", "audio", audio_id, {"client_id": client_id})
     
-    audio = audio_files_collection.find_one({"_id": result.inserted_id})
-    return serialize_doc(audio)
+    result = supabase.table('audio_files').select('*').eq('id', audio_id).limit(1).execute()
+    return result.data[0]
 
 @app.get("/api/audio/file/{audio_id}")
-async def get_audio_file(audio_id: str, token: Optional[str] = None, current_user: dict = None):
-    """
-    Serve audio file. Supports both:
-    - Authorization header (for API calls)
-    - Token query parameter (for HTML5 audio player)
-    """
-    # Try to authenticate via query parameter token if no current_user
+async def get_audio_file(audio_id: str, token: Optional[str] = None):
+    """Serve audio file"""
     if token:
         try:
-            payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-            user = users_collection.find_one({"email": payload.get("sub")})
-            if not user:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            user_id = payload.get("sub")
+            if not user_id:
                 raise HTTPException(status_code=401, detail="Invalid token")
         except JWTError:
             raise HTTPException(status_code=401, detail="Invalid token")
-    elif not current_user:
-        # Try to get from Authorization header
+    else:
         raise HTTPException(status_code=401, detail="Authentication required")
     
-    audio = audio_files_collection.find_one({"_id": ObjectId(audio_id)})
-    if not audio:
+    result = supabase.table('audio_files').select('*').eq('id', audio_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Audio file not found")
     
+    audio = result.data[0]
     filepath = os.path.join(UPLOAD_DIR, audio["filename"])
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found on disk")
     
-    # Get file size for Content-Length header
     file_size = os.path.getsize(filepath)
     
     def iterfile():
         with open(filepath, "rb") as f:
             yield from f
     
-    headers = {
-        "Content-Length": str(file_size),
-        "Accept-Ranges": "bytes",
-        "Cache-Control": "no-cache"
-    }
-    
     return StreamingResponse(
-        iterfile(), 
+        iterfile(),
         media_type=audio["content_type"],
-        headers=headers
+        headers={"Content-Length": str(file_size), "Accept-Ranges": "bytes", "Cache-Control": "no-cache"}
     )
 
 @app.get("/api/audio/stream/{audio_id}")
 async def stream_audio_public(audio_id: str, token: str):
-    """
-    Public audio streaming endpoint with token authentication via query param.
-    Used by HTML5 audio player which cannot send Authorization headers.
-    """
-    # Validate token
+    """Public audio streaming with token auth"""
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
-        user = users_collection.find_one({"_id": ObjectId(user_id)})
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     
-    audio = audio_files_collection.find_one({"_id": ObjectId(audio_id)})
-    if not audio:
+    result = supabase.table('audio_files').select('*').eq('id', audio_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Audio file not found")
     
+    audio = result.data[0]
     filepath = os.path.join(UPLOAD_DIR, audio["filename"])
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found on disk")
@@ -1828,46 +1529,36 @@ async def stream_audio_public(audio_id: str, token: str):
         with open(filepath, "rb") as f:
             yield from f
     
-    headers = {
-        "Content-Length": str(file_size),
-        "Accept-Ranges": "bytes",
-        "Cache-Control": "no-cache"
-    }
-    
     return StreamingResponse(
-        iterfile(), 
+        iterfile(),
         media_type=audio["content_type"],
-        headers=headers
+        headers={"Content-Length": str(file_size), "Accept-Ranges": "bytes", "Cache-Control": "no-cache"}
     )
 
 @app.delete("/api/audio/{audio_id}")
 async def delete_audio(audio_id: str, current_user: dict = Depends(get_current_user)):
-    audio = audio_files_collection.find_one({"_id": ObjectId(audio_id)})
-    if not audio:
+    result = supabase.table('audio_files').select('*').eq('id', audio_id).limit(1).execute()
+    if not result.data:
         raise HTTPException(status_code=404, detail="Audio file not found")
     
-    # Delete file from disk
+    audio = result.data[0]
     filepath = os.path.join(UPLOAD_DIR, audio["filename"])
     if os.path.exists(filepath):
         os.remove(filepath)
     
-    # Delete from database
-    audio_files_collection.delete_one({"_id": ObjectId(audio_id)})
+    supabase.table('audio_files').delete().eq('id', audio_id).execute()
     log_activity(current_user["id"], current_user["name"], "delete", "audio", audio_id, {"filename": audio["original_name"]})
     return {"message": "Audio deleted"}
 
 # ==================== EXPORT ENDPOINTS ====================
 
 @app.get("/api/export/clients")
-async def export_clients(
-    format: str = "csv",
-    current_user: dict = Depends(get_current_user)
-):
-    query = {}
+async def export_clients(format: str = "csv", current_user: dict = Depends(get_current_user)):
+    query = supabase.table('clients').select('*')
     if current_user["role"] != "admin":
-        query["manager_id"] = current_user["id"]
-    
-    clients = list(clients_collection.find(query).sort("created_at", -1))
+        query = query.eq('manager_id', current_user["id"])
+    result = query.order('created_at', desc=True).execute()
+    clients = result.data or []
     
     if format == "csv":
         output = io.StringIO()
@@ -1881,7 +1572,7 @@ async def export_clients(
                 c.get("status", ""),
                 c.get("created_at", ""),
                 c.get("is_lead", False),
-                c.get("is_archived", False)
+                c.get("archived", False)
             ])
         output.seek(0)
         return StreamingResponse(
@@ -1889,51 +1580,41 @@ async def export_clients(
             media_type="text/csv",
             headers={"Content-Disposition": "attachment; filename=clients_export.csv"}
         )
-    else:
-        raise HTTPException(status_code=400, detail="Format not supported. Use: csv")
+    raise HTTPException(status_code=400, detail="Format not supported. Use: csv")
 
 # ==================== DASHBOARD STATS ====================
 
 @app.get("/api/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
-    query = {"is_archived": {"$ne": True}}
+    # Build base query
+    query = supabase.table('clients').select('*').eq('archived', False)
     if current_user["role"] != "admin":
-        query["manager_id"] = current_user["id"]
+        query = query.eq('manager_id', current_user["id"])
+    result = query.execute()
+    clients = result.data or []
     
-    # Today's date
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     
-    # Total clients
-    total_clients = clients_collection.count_documents(query)
-    
-    # Today's leads
-    today_query = {**query, "created_at": {"$regex": f"^{today}"}}
-    todays_leads = clients_collection.count_documents(today_query)
-    
-    # Status counts
-    new_count = clients_collection.count_documents({**query, "status": "new"})
-    contacted_count = clients_collection.count_documents({**query, "status": "contacted"})
-    sold_count = clients_collection.count_documents({**query, "status": "sold"})
+    total_clients = len(clients)
+    todays_leads = len([c for c in clients if c.get('created_at', '').startswith(today)])
+    new_count = len([c for c in clients if c.get('status') == 'new'])
+    contacted_count = len([c for c in clients if c.get('status') == 'contacted'])
+    sold_count = len([c for c in clients if c.get('status') == 'sold'])
     
     # Payment stats
-    payment_query = {}
-    if current_user["role"] != "admin":
-        client_ids = [str(c["_id"]) for c in clients_collection.find(query, {"_id": 1})]
-        payment_query = {"client_id": {"$in": client_ids}}
+    client_ids = [c['id'] for c in clients]
+    if client_ids:
+        payments = supabase.table('payments').select('*').in_('client_id', client_ids).execute().data or []
+    else:
+        payments = []
     
-    total_paid = sum(p.get("amount", 0) for p in payments_collection.find({**payment_query, "status": "paid"}))
-    total_pending = sum(p.get("amount", 0) for p in payments_collection.find({**payment_query, "status": "pending"}))
+    total_paid = sum(p.get('amount', 0) for p in payments if p.get('status') == 'paid')
+    total_pending = sum(p.get('amount', 0) for p in payments if p.get('status') == 'pending')
     
-    # Overdue reminders count
+    # Overdue reminders
     now = datetime.now(timezone.utc).isoformat()
-    overdue_reminders = reminders_collection.count_documents({
-        "user_id": current_user["id"],
-        "remind_at": {"$lt": now},
-        "is_completed": {"$ne": True}
-    })
-    
-    # System currency
-    currency = get_system_currency()
+    overdue_result = supabase.table('reminders').select('count', count='exact').eq('user_id', current_user["id"]).lt('remind_at', now).eq('is_completed', False).execute()
+    overdue_reminders = overdue_result.count or 0
     
     return {
         "total_clients": total_clients,
@@ -1944,34 +1625,41 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "total_paid": total_paid,
         "total_pending": total_pending,
         "overdue_reminders": overdue_reminders,
-        "currency": currency
+        "currency": get_system_currency()
     }
 
 @app.get("/api/dashboard/recent-clients")
 async def get_recent_clients(current_user: dict = Depends(get_current_user)):
-    query = {"is_archived": {"$ne": True}}
+    query = supabase.table('clients').select('*').eq('archived', False)
     if current_user["role"] != "admin":
-        query["manager_id"] = current_user["id"]
-    
-    clients = list(clients_collection.find(query).sort("created_at", -1).limit(5))
-    return [serialize_doc(c) for c in clients]
+        query = query.eq('manager_id', current_user["id"])
+    result = query.order('created_at', desc=True).limit(5).execute()
+    return result.data
 
 @app.get("/api/dashboard/recent-notes")
 async def get_recent_notes(current_user: dict = Depends(get_current_user)):
     if current_user["role"] == "admin":
-        notes = list(notes_collection.find().sort("created_at", -1).limit(5))
+        notes_result = supabase.table('notes').select('*').order('created_at', desc=True).limit(5).execute()
     else:
-        client_ids = [str(c["_id"]) for c in clients_collection.find({"manager_id": current_user["id"]}, {"_id": 1})]
-        notes = list(notes_collection.find({"client_id": {"$in": client_ids}}).sort("created_at", -1).limit(5))
+        # Get user's client IDs
+        clients = supabase.table('clients').select('id').eq('manager_id', current_user["id"]).execute().data or []
+        client_ids = [c['id'] for c in clients]
+        if client_ids:
+            notes_result = supabase.table('notes').select('*').in_('client_id', client_ids).order('created_at', desc=True).limit(5).execute()
+        else:
+            return []
     
-    result = []
-    for n in notes:
-        note = serialize_doc(n)
-        client = clients_collection.find_one({"_id": ObjectId(note["client_id"])})
-        if client:
-            note["client_name"] = client["name"]
-        result.append(note)
-    return result
+    notes = notes_result.data or []
+    
+    # Add client names
+    client_ids = list(set(n['client_id'] for n in notes))
+    if client_ids:
+        clients = supabase.table('clients').select('id,name').in_('id', client_ids).execute().data or []
+        client_map = {c['id']: c['name'] for c in clients}
+        for note in notes:
+            note['client_name'] = client_map.get(note['client_id'], 'Unknown')
+    
+    return notes
 
 @app.get("/api/dashboard/manager-stats")
 async def get_manager_stats(current_user: dict = Depends(get_current_user)):
@@ -1979,23 +1667,41 @@ async def get_manager_stats(current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    managers = list(users_collection.find({}, {"password": 0}))
-    result = []
+    managers = supabase.table('users').select('id,name,role').execute().data or []
+    clients = supabase.table('clients').select('id,manager_id,status').execute().data or []
+    payments = supabase.table('payments').select('client_id,amount,status').execute().data or []
     
+    # Group clients by manager
+    manager_clients = {}
+    for c in clients:
+        mid = c.get('manager_id')
+        if mid:
+            if mid not in manager_clients:
+                manager_clients[mid] = []
+            manager_clients[mid].append(c)
+    
+    # Group payments by client
+    client_payments = {}
+    for p in payments:
+        cid = p.get('client_id')
+        if cid:
+            if cid not in client_payments:
+                client_payments[cid] = []
+            client_payments[cid].append(p)
+    
+    result = []
     for manager in managers:
-        manager_id = str(manager["_id"])
+        manager_id = manager['id']
+        manager_client_list = manager_clients.get(manager_id, [])
+        client_ids = [c['id'] for c in manager_client_list]
         
-        # Get clients for this manager
-        client_ids = [str(c["_id"]) for c in clients_collection.find({"manager_id": manager_id}, {"_id": 1})]
+        sold_count = len([c for c in manager_client_list if c.get('status') == 'sold'])
         
-        # Count sold clients
-        sold_count = clients_collection.count_documents({"manager_id": manager_id, "status": "sold"})
-        
-        # Total revenue
-        total_revenue = sum(
-            p.get("amount", 0) 
-            for p in payments_collection.find({"client_id": {"$in": client_ids}, "status": "paid"})
-        )
+        total_revenue = 0
+        for cid in client_ids:
+            for p in client_payments.get(cid, []):
+                if p.get('status') == 'paid':
+                    total_revenue += p.get('amount', 0)
         
         result.append({
             "id": manager_id,
@@ -2009,19 +1715,18 @@ async def get_manager_stats(current_user: dict = Depends(get_current_user)):
     return sorted(result, key=lambda x: x["total_revenue"], reverse=True)
 
 @app.get("/api/dashboard/analytics")
-async def get_analytics(
-    months: int = 6,
-    current_user: dict = Depends(get_current_user)
-):
+async def get_analytics(months: int = 6, current_user: dict = Depends(get_current_user)):
     """Get monthly analytics data"""
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Calculate date range
     end_date = datetime.now(timezone.utc)
     start_date = end_date - timedelta(days=months * 30)
     
-    # Monthly sales data
+    clients = supabase.table('clients').select('*').execute().data or []
+    payments = supabase.table('payments').select('*').execute().data or []
+    tariffs = supabase.table('tariffs').select('*').execute().data or []
+    
     monthly_data = []
     current = start_date
     
@@ -2029,26 +1734,15 @@ async def get_analytics(
         month_start = current.replace(day=1).strftime("%Y-%m")
         next_month = (current.replace(day=28) + timedelta(days=4)).replace(day=1)
         
-        # Count sold clients this month
-        sold_query = {
-            "status": "sold",
-            "created_at": {"$regex": f"^{month_start}"}
-        }
-        sold_count = clients_collection.count_documents(sold_query)
+        sold_count = len([c for c in clients if c.get('status') == 'sold' and c.get('created_at', '').startswith(month_start)])
         
-        # Revenue this month
         revenue = sum(
-            p.get("amount", 0)
-            for p in payments_collection.find({
-                "status": "paid",
-                "date": {"$regex": f"^{month_start}"}
-            })
+            p.get('amount', 0)
+            for p in payments
+            if p.get('status') == 'paid' and (p.get('payment_date') or '').startswith(month_start)
         )
         
-        # New leads this month
-        new_leads = clients_collection.count_documents({
-            "created_at": {"$regex": f"^{month_start}"}
-        })
+        new_leads = len([c for c in clients if c.get('created_at', '').startswith(month_start)])
         
         monthly_data.append({
             "month": month_start,
@@ -2062,10 +1756,8 @@ async def get_analytics(
     
     # Sales by tariff
     tariff_stats = []
-    tariffs = list(tariffs_collection.find())
     for tariff in tariffs:
-        tariff_id = str(tariff["_id"])
-        count = clients_collection.count_documents({"tariff_id": tariff_id, "status": "sold"})
+        count = len([c for c in clients if c.get('tariff_id') == tariff['id'] and c.get('status') == 'sold'])
         tariff_stats.append({
             "name": tariff["name"],
             "price": tariff["price"],
@@ -2073,21 +1765,16 @@ async def get_analytics(
             "revenue": count * tariff["price"]
         })
     
-    # Calculate month-over-month changes
+    # Month-over-month changes
     if len(monthly_data) >= 2:
-        current_month = monthly_data[-1]
-        prev_month = monthly_data[-2]
-        
-        revenue_change = current_month["revenue"] - prev_month["revenue"]
-        revenue_change_pct = ((current_month["revenue"] - prev_month["revenue"]) / prev_month["revenue"] * 100) if prev_month["revenue"] > 0 else 0
-        
-        deals_change = current_month["sold_count"] - prev_month["sold_count"]
-        deals_change_pct = ((current_month["sold_count"] - prev_month["sold_count"]) / prev_month["sold_count"] * 100) if prev_month["sold_count"] > 0 else 0
+        curr = monthly_data[-1]
+        prev = monthly_data[-2]
+        revenue_change = curr["revenue"] - prev["revenue"]
+        revenue_change_pct = ((curr["revenue"] - prev["revenue"]) / prev["revenue"] * 100) if prev["revenue"] > 0 else 0
+        deals_change = curr["sold_count"] - prev["sold_count"]
+        deals_change_pct = ((curr["sold_count"] - prev["sold_count"]) / prev["sold_count"] * 100) if prev["sold_count"] > 0 else 0
     else:
-        revenue_change = 0
-        revenue_change_pct = 0
-        deals_change = 0
-        deals_change_pct = 0
+        revenue_change = revenue_change_pct = deals_change = deals_change_pct = 0
     
     return {
         "monthly_data": monthly_data,
