@@ -11,7 +11,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 ## Architecture
 - **Frontend**: React 18 with Tailwind CSS, React Router v6
 - **Backend**: FastAPI (Python) with JWT authentication
-- **Database**: MongoDB (environment-specific databases)
+- **Database**: Supabase PostgreSQL (migrated from MongoDB on 2026-02-11)
 - **File Storage**: Local (/app/uploads for audio files)
 - **Proxy**: React dev server proxy to backend
 - **Telegram Integration**: Telegram WebApp SDK + Bot API
