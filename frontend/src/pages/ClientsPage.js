@@ -53,81 +53,79 @@ export default function ClientsPage() {
   const [groupFilter, setGroupFilter] = useState('');
 
   const [clientsLoading, setClientsLoading] = useState(true);
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
-  const isMountedRef = useRef(true);
 
   // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // Reset mount state on component mount
+  // Load all data in a single effect to avoid race conditions
   useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  // Initial load of reference data (statuses, tariffs, groups, users)
-  useEffect(() => {
-    const loadReferenceData = async () => {
-      try {
-        await Promise.all([
-          loadStatuses(),
-          loadTariffs(),
-          loadGroups(),
-          isAdmin ? loadUsers() : Promise.resolve()
-        ]);
-      } catch (error) {
-        console.error('Failed to load reference data:', error);
-      }
-      if (isMountedRef.current) {
-        setInitialLoadDone(true);
-      }
-    };
+    let active = true;
     
-    loadReferenceData();
-  }, [isAdmin]);
-
-  // Load clients when filters change or on initial load
-  useEffect(() => {
-    const fetchClients = async () => {
+    const loadAllData = async () => {
       setClientsLoading(true);
+      
       try {
+        // Load reference data and clients in parallel
         const token = localStorage.getItem('crm_token');
         const API_URL = process.env.REACT_APP_BACKEND_URL;
-        
         const params = { is_archived: showArchived, exclude_sold: true };
         if (search) params.search = search;
         if (statusFilter) params.status = statusFilter;
         if (groupFilter) params.group_id = groupFilter;
         
-        const url = `${API_URL}/api/clients?${new URLSearchParams(params)}`;
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         
-        const response = await fetch(url, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-        });
+        // Fetch all data in parallel
+        const [clientsRes, statusesRes, tariffsRes, groupsRes] = await Promise.all([
+          fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, { headers }),
+          fetch(`${API_URL}/api/statuses`, { headers }),
+          fetch(`${API_URL}/api/tariffs`, { headers }),
+          fetch(`${API_URL}/api/groups`, { headers })
+        ]);
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // Parse responses
+        const [clientsData, statusesData, tariffsData, groupsData] = await Promise.all([
+          clientsRes.json(),
+          statusesRes.json(),
+          tariffsRes.json(),
+          groupsRes.json()
+        ]);
         
-        const clientsData = await response.json();
-        
-        if (isMountedRef.current) {
+        // Update state only if component is still mounted
+        if (active) {
           setClients(Array.isArray(clientsData) ? clientsData : []);
+          setStatuses(Array.isArray(statusesData) ? statusesData : []);
+          setTariffs(Array.isArray(tariffsData) ? tariffsData : []);
+          setGroups(Array.isArray(groupsData) ? groupsData : []);
           setClientsLoading(false);
         }
+        
+        // Load users separately for admin
+        if (isAdmin && active) {
+          try {
+            const usersRes = await fetch(`${API_URL}/api/users`, { headers });
+            const usersData = await usersRes.json();
+            if (active) {
+              setUsers(Array.isArray(usersData) ? usersData : []);
+            }
+          } catch (e) {
+            console.error('Failed to load users:', e);
+          }
+        }
       } catch (error) {
-        console.error('Failed to load clients:', error);
-        if (isMountedRef.current) {
-          setClients([]);
+        console.error('Failed to load data:', error);
+        if (active) {
           setClientsLoading(false);
         }
       }
     };
     
-    fetchClients();
-  }, [search, statusFilter, groupFilter, showArchived]);
+    loadAllData();
+    
+    return () => {
+      active = false;
+    };
+  }, [search, statusFilter, groupFilter, showArchived, isAdmin]);
 
   const loadClients = async () => {
     try {
