@@ -69,7 +69,14 @@ export default function ClientsPage() {
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
-      const data = await get('/api/clients', params);
+      
+      // Direct axios call to avoid hook-related issues
+      const token = localStorage.getItem('crm_token');
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      const data = await response.json();
       setClients(data || []);
     } catch (error) {
       console.error('Failed to load clients:', error);
