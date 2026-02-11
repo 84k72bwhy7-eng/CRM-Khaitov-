@@ -73,7 +73,8 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Account Linking**: `/api/auth/telegram/link` endpoint to link CRM users to Telegram
 - [x] **Frontend WebApp SDK**: Auto-detect Telegram context, theme adaptation
 - [x] **Dual Auth Support**: Works as both web app (email/password) and Telegram Mini App (auto-login)
-- [ ] **Bot Setup**: Create bot via @BotFather and configure (user action required)
+- [x] **Bot Setup**: Bot configured as @khaitov_crm_bot
+- [x] **Mobile UX Optimization**: Floating add button, quick actions, clickable phones, card layout
 - [ ] **User Linking**: Admin needs to link existing users to Telegram accounts
 
 ### Database Schema
