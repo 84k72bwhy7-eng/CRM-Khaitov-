@@ -868,33 +868,82 @@ async def delete_group(group_id: str, current_user: dict = Depends(get_current_u
 async def get_settings(current_user: dict = Depends(get_current_user)):
     result = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
     if result.data:
-        return result.data[0].get('data', {'currency': 'USD'})
-    return {"currency": "USD"}
+        data = result.data[0].get('data', {})
+        # Ensure exchange_rates exists with defaults
+        if 'exchange_rates' not in data:
+            data['exchange_rates'] = {'USD': 12500, 'EUR': 13500}
+        return data
+    return {"currency": "UZS", "exchange_rates": {"USD": 12500, "EUR": 13500}}
 
 @app.put("/api/settings")
 async def update_settings(data: SettingsUpdate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
+    # Get existing data
+    existing = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+    existing_data = existing.data[0].get('data', {}) if existing.data else {}
+    
+    # Merge update data
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
-    if update_data:
-        existing = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
-        if existing.data:
-            supabase.table('settings').update({
-                'currency': update_data.get('currency', 'USD'),
-                'data': update_data
-            }).eq('key', 'system').execute()
-        else:
-            supabase.table('settings').insert({
-                'id': new_uuid(),
-                'key': 'system',
-                'currency': update_data.get('currency', 'USD'),
-                'data': update_data
-            }).execute()
-        log_activity(current_user["id"], current_user["name"], "update", "settings", "system", update_data)
+    merged_data = {**existing_data, **update_data}
+    
+    # Ensure exchange_rates exists
+    if 'exchange_rates' not in merged_data:
+        merged_data['exchange_rates'] = {'USD': 12500, 'EUR': 13500}
+    
+    if existing.data:
+        supabase.table('settings').update({
+            'currency': merged_data.get('currency', 'UZS'),
+            'data': merged_data
+        }).eq('key', 'system').execute()
+    else:
+        supabase.table('settings').insert({
+            'id': new_uuid(),
+            'key': 'system',
+            'currency': merged_data.get('currency', 'UZS'),
+            'data': merged_data
+        }).execute()
+    
+    log_activity(current_user["id"], current_user["name"], "update", "settings", "system", update_data)
     
     result = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
-    return result.data[0].get('data', {'currency': 'USD'}) if result.data else {'currency': 'USD'}
+    return result.data[0].get('data', {'currency': 'UZS'}) if result.data else {'currency': 'UZS'}
+
+@app.put("/api/settings/exchange-rate")
+async def update_exchange_rate(data: ExchangeRateUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a specific exchange rate"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get existing settings
+    existing = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+    existing_data = existing.data[0].get('data', {}) if existing.data else {}
+    
+    # Update exchange rate
+    exchange_rates = existing_data.get('exchange_rates', {'USD': 12500, 'EUR': 13500})
+    exchange_rates[data.currency_code] = data.rate_to_uzs
+    existing_data['exchange_rates'] = exchange_rates
+    
+    if existing.data:
+        supabase.table('settings').update({'data': existing_data}).eq('key', 'system').execute()
+    else:
+        supabase.table('settings').insert({
+            'id': new_uuid(),
+            'key': 'system',
+            'currency': 'UZS',
+            'data': existing_data
+        }).execute()
+    
+    log_activity(current_user["id"], current_user["name"], "update", "exchange_rate", data.currency_code, 
+                {"rate": data.rate_to_uzs})
+    
+    return {"message": f"Exchange rate updated: 1 {data.currency_code} = {data.rate_to_uzs} UZS"}
+
+@app.get("/api/settings/exchange-rates")
+async def get_exchange_rates_endpoint(current_user: dict = Depends(get_current_user)):
+    """Get all exchange rates"""
+    return get_exchange_rates()
 
 # ==================== CLIENTS ENDPOINTS ====================
 
