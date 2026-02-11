@@ -103,7 +103,13 @@
     "duplicatePhone": "Bu telefon raqami allaqachon mavjud",
     "call": "Qo'ng'iroq",
     "quickAdd": "Tez qo'shish",
-    "fullForm": "To'liq formani ochish →"
+    "fullForm": "To'liq formani ochish →",
+    "quickAddInstagram": "Instagram Lead qo'shish",
+    "pastePhone": "chatdan joylang",
+    "reminder": "Eslatma",
+    "note": "Izoh",
+    "viewClient": "Ko'rish",
+    "addAnother": "Yana qo'shish"
   },
   "tariffs": {
     "title": "Tariflar",
