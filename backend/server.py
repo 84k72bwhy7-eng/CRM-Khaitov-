@@ -91,6 +91,14 @@ security = HTTPBearer()
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Static files directory for PWA icons
+STATIC_DIR = "/app/backend/static"
+os.makedirs(f"{STATIC_DIR}/icons", exist_ok=True)
+
+# Mount static files for PWA icons
+from fastapi.staticfiles import StaticFiles
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 # ==================== PYDANTIC MODELS ====================
 
 class UserCreate(BaseModel):
