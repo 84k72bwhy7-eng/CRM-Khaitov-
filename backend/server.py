@@ -533,13 +533,13 @@ async def exchange_rate_scheduler_loop():
     
     # Initial fetch on startup
     await asyncio.sleep(5)  # Wait for app to fully start
-    await update_exchange_rate()
+    await fetch_and_save_exchange_rate()
     
     while exchange_rate_scheduler_running:
         try:
             # Wait 24 hours before next update
             await asyncio.sleep(24 * 60 * 60)  # 24 hours
-            await update_exchange_rate()
+            await fetch_and_save_exchange_rate()
         except Exception as e:
             print(f"[Exchange Rate Scheduler] Error: {e}")
             await asyncio.sleep(3600)  # Retry in 1 hour on error
