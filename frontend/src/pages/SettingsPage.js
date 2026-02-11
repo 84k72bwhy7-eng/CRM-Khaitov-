@@ -614,9 +614,24 @@ export default function SettingsPage() {
             <div className="p-4 lg:p-6 space-y-6">
               {/* Exchange Rate Input */}
               <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  {t.settings?.exchangeRate || 'USD → UZS kursi'}
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-text-primary">
+                    {t.settings?.exchangeRate || 'USD → UZS kursi'}
+                  </label>
+                  <button
+                    onClick={handleFetchRate}
+                    disabled={savingRate}
+                    className="text-sm text-primary hover:underline flex items-center gap-1"
+                    data-testid="fetch-rate-button"
+                  >
+                    {savingRate ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <RefreshCw size={14} />
+                    )}
+                    {t.settings?.fetchFromCBU || 'Markaziy bankdan olish'}
+                  </button>
+                </div>
                 <div className="flex gap-3">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">1 USD =</span>
@@ -642,7 +657,11 @@ export default function SettingsPage() {
                   </button>
                 </div>
                 <p className="text-sm text-text-muted mt-2">
-                  {t.settings?.exchangeRateHint || 'USD narxli tariflar avtomatik UZS ga o\'tkaziladi'}
+                  {systemSettings.exchange_rates?.source === 'CBU' && systemSettings.exchange_rates?.last_updated ? (
+                    <>Markaziy bank kursi • Yangilangan: {new Date(systemSettings.exchange_rates.last_updated).toLocaleDateString()}</>
+                  ) : (
+                    <>{t.settings?.exchangeRateHint || 'USD narxli tariflar avtomatik UZS ga o\'tkaziladi'}</>
+                  )}
                 </p>
               </div>
 
