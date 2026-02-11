@@ -524,7 +524,7 @@ export default function ClientsPage() {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-fadeIn pb-20 md:pb-6" data-testid="clients-page">
+    <div className={`space-y-4 md:space-y-6 animate-fadeIn ${isTelegram ? 'pb-4' : 'pb-20 md:pb-6'}`} data-testid="clients-page">
       {/* Sticky Search Bar for Mobile */}
       <div className="sticky top-0 z-20 bg-white -mx-4 px-4 py-3 md:relative md:mx-0 md:px-0 md:py-0 md:bg-transparent border-b md:border-0 border-border">
         <div className="relative">
