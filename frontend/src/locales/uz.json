@@ -211,7 +211,15 @@
     "groupManagement": "Guruhlarni boshqarish",
     "currencySettings": "Valyuta sozlamalari",
     "selectCurrency": "Valyutani tanlang",
-    "currencyUpdated": "Valyuta yangilandi"
+    "currencyUpdated": "Valyuta yangilandi",
+    "telegramNotifications": "Telegram bildirishnomalar",
+    "usersWithTelegram": "Ulangan foydalanuvchilar",
+    "notificationsSent": "Yuborilgan",
+    "pendingReminders": "Kutilmoqda",
+    "schedulerStatus": "Rejalashtiruvchi",
+    "sendTestNotification": "Test xabar yuborish",
+    "testNotificationSent": "Test xabar yuborildi!",
+    "linkTelegramFirst": "Test uchun Telegram hisobingizni ulang"
   },
   "groups": {
     "title": "Guruhlar",
