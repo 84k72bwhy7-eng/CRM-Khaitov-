@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await axios.post(`${API_URL}/api/auth/telegram`, {
             initData: tg.initData
-          });
+          }, { timeout: 15000 }); // 15 second timeout
           
           if (response.data.status === 'success') {
             // Telegram user is linked - auto login
@@ -66,7 +66,24 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           console.error('Telegram auth error:', error);
-          // Fall through to normal token check
+          // For Telegram users, if the backend is down, show a clear error
+          if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+            console.error('Backend timeout - server may be sleeping');
+          }
+          // Try to use cached token if available
+          const cachedToken = localStorage.getItem('crm_token');
+          if (cachedToken) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${cachedToken}`;
+            try {
+              await fetchUser();
+              return;
+            } catch (e) {
+              // Token invalid, clear it
+              localStorage.removeItem('crm_token');
+            }
+          }
+          setLoading(false);
+          return;
         }
       }
       
