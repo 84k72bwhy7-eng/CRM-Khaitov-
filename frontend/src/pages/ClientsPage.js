@@ -61,7 +61,7 @@ export default function ClientsPage() {
     loadTariffs();
     loadGroups();
     if (isAdmin) loadUsers();
-  }, [search, statusFilter, groupFilter, showArchived]);
+  }, [search, statusFilter, groupFilter, showArchived, location.key]);
 
   const loadClients = async () => {
     try {
