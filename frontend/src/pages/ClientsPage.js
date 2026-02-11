@@ -111,14 +111,14 @@ export default function ClientsPage() {
     }
   };
 
-  // Quick Add - minimal form for fast client creation
+  // Quick Add - minimal form for fast client creation (Instagram optimized)
   const handleQuickAdd = async (e) => {
     e.preventDefault();
     try {
       const createData = {
         name: formData.name,
         phone: formData.phone,
-        source: formData.source || '',
+        source: formData.source || 'Instagram',
         status: 'new',
         manager_id: null,
         tariff_id: null,
@@ -127,13 +127,25 @@ export default function ClientsPage() {
         reminder_text: null,
         reminder_at: null
       };
-      await post('/api/clients', createData);
-      toast.success(t.clients.clientCreated);
-      setShowQuickAdd(false);
+      const response = await post('/api/clients', createData);
+      
+      // Haptic feedback in Telegram
+      if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+      }
+      
+      // Show success state with action buttons
+      setQuickAddSuccess({
+        id: response.id,
+        name: formData.name,
+        phone: formData.phone
+      });
+      
+      // Reset form for next entry
       setFormData({ 
         name: '', 
         phone: '', 
-        source: '', 
+        source: 'Instagram', 
         status: 'new', 
         manager_id: '',
         tariff_id: '',
@@ -144,10 +156,6 @@ export default function ClientsPage() {
       });
       loadClients();
       
-      // Haptic feedback in Telegram
-      if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-      }
     } catch (error) {
       if (error?.response?.status === 400) {
         toast.error(t.clients.duplicatePhone);
@@ -155,6 +163,40 @@ export default function ClientsPage() {
         toast.error(t.common.error);
       }
     }
+  };
+
+  // Close quick add and reset
+  const closeQuickAdd = () => {
+    setShowQuickAdd(false);
+    setQuickAddSuccess(null);
+    setFormData({ 
+      name: '', 
+      phone: '', 
+      source: 'Instagram', 
+      status: 'new', 
+      manager_id: '',
+      tariff_id: '',
+      group_id: '',
+      initial_comment: '',
+      reminder_text: '',
+      reminder_at: ''
+    });
+  };
+
+  // Format phone for clean paste
+  const handlePhonePaste = (e) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    // Clean the phone number - keep only digits and +
+    const cleanPhone = pastedText.replace(/[^\d+]/g, '');
+    // Format if it looks like Uzbek number without +
+    let formattedPhone = cleanPhone;
+    if (cleanPhone.length === 9 && !cleanPhone.startsWith('+')) {
+      formattedPhone = '+998' + cleanPhone;
+    } else if (cleanPhone.length === 12 && cleanPhone.startsWith('998')) {
+      formattedPhone = '+' + cleanPhone;
+    }
+    setFormData({ ...formData, phone: formattedPhone });
   };
 
   const handleSubmit = async (e) => {
