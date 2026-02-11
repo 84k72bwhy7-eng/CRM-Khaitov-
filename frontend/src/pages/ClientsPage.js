@@ -53,17 +53,38 @@ export default function ClientsPage() {
   const [groupFilter, setGroupFilter] = useState('');
 
   const [clientsLoading, setClientsLoading] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  // Initial load of reference data (statuses, tariffs, groups, users)
+  useEffect(() => {
+    const loadReferenceData = async () => {
+      try {
+        await Promise.all([
+          loadStatuses(),
+          loadTariffs(),
+          loadGroups(),
+          isAdmin ? loadUsers() : Promise.resolve()
+        ]);
+      } catch (error) {
+        console.error('Failed to load reference data:', error);
+      }
+      setInitialLoadDone(true);
+    };
+    
+    loadReferenceData();
+  }, [isAdmin]);
+
+  // Load clients when filters change or on initial load
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
     
-    const loadAllData = async () => {
+    const fetchClients = async () => {
       setClientsLoading(true);
       try {
-        // Load clients directly with fetch
         const token = localStorage.getItem('crm_token');
         const API_URL = process.env.REACT_APP_BACKEND_URL;
         const params = { is_archived: showArchived, exclude_sold: true };
@@ -72,36 +93,40 @@ export default function ClientsPage() {
         if (groupFilter) params.group_id = groupFilter;
         
         const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          signal: controller.signal
         });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const clientsData = await response.json();
         
         if (isMounted) {
-          setClients(clientsData || []);
-          setClientsLoading(false);
+          setClients(Array.isArray(clientsData) ? clientsData : []);
         }
-        
-        // Load other data in parallel
-        Promise.all([
-          loadStatuses(),
-          loadTariffs(),
-          loadGroups(),
-          isAdmin ? loadUsers() : Promise.resolve()
-        ]);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        if (error.name !== 'AbortError') {
+          console.error('Failed to load clients:', error);
+          if (isMounted) {
+            setClients([]);
+          }
+        }
+      } finally {
         if (isMounted) {
           setClientsLoading(false);
         }
       }
     };
     
-    loadAllData();
+    fetchClients();
     
     return () => {
       isMounted = false;
+      controller.abort();
     };
-  }, [search, statusFilter, groupFilter, showArchived, location.key]);
+  }, [search, statusFilter, groupFilter, showArchived]);
 
   const loadClients = async () => {
     try {
