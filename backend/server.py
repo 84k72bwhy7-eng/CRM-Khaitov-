@@ -272,6 +272,43 @@ def get_system_currency():
         return data.get('currency', 'USD') if isinstance(data, dict) else 'USD'
     return "USD"
 
+def get_exchange_rates():
+    """Get exchange rates from settings"""
+    result = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+    if result.data:
+        data = result.data[0].get('data', {})
+        if isinstance(data, dict):
+            return data.get('exchange_rates', {'USD': 12500, 'EUR': 13500})
+    return {'USD': 12500, 'EUR': 13500}  # Default rates
+
+def convert_to_uzs(amount: float, currency: str) -> float:
+    """Convert amount from given currency to UZS"""
+    if currency == 'UZS':
+        return amount
+    rates = get_exchange_rates()
+    rate = rates.get(currency, 1)
+    return amount * rate
+
+def convert_from_uzs(amount: float, target_currency: str) -> float:
+    """Convert amount from UZS to target currency"""
+    if target_currency == 'UZS':
+        return amount
+    rates = get_exchange_rates()
+    rate = rates.get(target_currency, 1)
+    if rate == 0:
+        return amount
+    return amount / rate
+
+def format_currency(amount: float, currency: str = 'UZS') -> str:
+    """Format amount with currency symbol"""
+    if currency == 'UZS':
+        return f"{amount:,.0f} so'm"
+    elif currency == 'USD':
+        return f"${amount:,.2f}"
+    elif currency == 'EUR':
+        return f"€{amount:,.2f}"
+    return f"{amount:,.2f} {currency}"
+
 # ==================== TELEGRAM NOTIFICATION SYSTEM ====================
 
 async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
