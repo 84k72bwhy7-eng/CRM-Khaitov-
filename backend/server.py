@@ -60,6 +60,15 @@ app.add_middleware(NoCacheMiddleware)
 JWT_SECRET = os.environ.get("JWT_SECRET", "crm_secure_jwt_secret_key_2024")
 JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
+# Telegram configuration
+# NOTE: The bot's menu button URL must be configured manually in BotFather.
+# This application does NOT automatically set or change the BotFather menu button.
+# To change the menu button URL:
+#   1. Open @BotFather in Telegram
+#   2. Send /mybots
+#   3. Select your bot
+#   4. Select "Bot Settings" -> "Menu Button" -> "Configure menu button"
+#   5. Set your production URL
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://edusync-app-3.preview.emergentagent.com")
 # Telegram Mini App URL - should be the URL configured in BotFather
