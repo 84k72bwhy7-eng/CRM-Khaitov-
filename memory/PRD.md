@@ -113,6 +113,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 
 ## API Endpoints
 - Auth: POST /api/auth/login, GET /api/auth/me, PUT /api/auth/profile
+- **Telegram Auth**: POST /api/auth/telegram, POST /api/auth/telegram/link
 - Users: GET/POST /api/users, PUT/DELETE /api/users/{id}
 - Clients: GET/POST /api/clients, GET/PUT/DELETE /api/clients/{id}
 - Archive: POST /api/clients/{id}/archive, POST /api/clients/{id}/restore
