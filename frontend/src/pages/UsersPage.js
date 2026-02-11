@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, X, Loader2, UserCog } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Loader2, UserCog, MessageCircle, Unlink } from 'lucide-react';
 
 export default function UsersPage() {
   const { t } = useLanguage();
@@ -70,6 +70,18 @@ export default function UsersPage() {
     }
   };
 
+  const handleUnlinkTelegram = async (user) => {
+    if (window.confirm(t.users?.confirmUnlinkTelegram || `Unlink Telegram from ${user.name}?`)) {
+      try {
+        await del(`/api/users/${user.id}/telegram`);
+        toast.success(t.users?.telegramUnlinked || 'Telegram account unlinked');
+        loadUsers();
+      } catch (error) {
+        toast.error(error.response?.data?.detail || t.common.error);
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn" data-testid="users-page">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -98,13 +110,14 @@ export default function UsersPage() {
                 <th className="text-left p-4">{t.users.email}</th>
                 <th className="text-left p-4">{t.users.phone}</th>
                 <th className="text-left p-4">{t.users.role}</th>
+                <th className="text-left p-4">Telegram</th>
                 <th className="text-left p-4">{t.clients.actions}</th>
               </tr>
             </thead>
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-text-muted">
+                  <td colSpan={6} className="text-center py-12 text-text-muted">
                     {t.users.noUsers}
                   </td>
                 </tr>
@@ -127,6 +140,27 @@ export default function UsersPage() {
                       }`}>
                         {user.role === 'admin' ? t.users.admin : t.users.manager}
                       </span>
+                    </td>
+                    <td className="p-4">
+                      {user.telegram_id ? (
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                            <MessageCircle size={14} />
+                            {user.telegram_username ? `@${user.telegram_username}` : `ID: ${user.telegram_id.slice(0, 6)}...`}
+                          </span>
+                          <button
+                            onClick={() => handleUnlinkTelegram(user)}
+                            className="p-1.5 hover:bg-red-50 rounded transition-colors"
+                            title={t.users?.unlinkTelegram || 'Unlink Telegram'}
+                          >
+                            <Unlink size={14} className="text-red-500" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-text-muted text-sm">
+                          {t.users?.notLinked || 'Not linked'}
+                        </span>
+                      )}
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
