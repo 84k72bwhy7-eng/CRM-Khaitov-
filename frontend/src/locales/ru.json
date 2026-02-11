@@ -103,7 +103,13 @@
     "duplicatePhone": "Этот номер телефона уже существует",
     "call": "Звонок",
     "quickAdd": "Быстрое добавление",
-    "fullForm": "Открыть полную форму →"
+    "fullForm": "Открыть полную форму →",
+    "quickAddInstagram": "Добавить лид из Instagram",
+    "pastePhone": "вставьте из чата",
+    "reminder": "Напоминание",
+    "note": "Заметка",
+    "viewClient": "Смотреть",
+    "addAnother": "Добавить еще"
   },
   "tariffs": {
     "title": "Тарифы",
