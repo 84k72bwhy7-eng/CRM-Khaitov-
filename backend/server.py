@@ -451,11 +451,106 @@ async def reminder_scheduler_loop():
             print(f"[Reminder Scheduler] Error: {e}")
         await asyncio.sleep(60)
 
+# ==================== EXCHANGE RATE SCHEDULER ====================
+
+async def fetch_exchange_rate_from_cbu():
+    """Fetch USD→UZS rate from Central Bank of Uzbekistan"""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get("https://cbu.uz/uz/arkhiv-kursov-valyut/json/")
+            if response.status_code == 200:
+                data = response.json()
+                # Find USD rate
+                for currency in data:
+                    if currency.get('Ccy') == 'USD':
+                        rate = float(currency.get('Rate', 0))
+                        if rate > 0:
+                            return {
+                                'rate': rate,
+                                'source': 'CBU',
+                                'date': currency.get('Date'),
+                                'nominal': int(currency.get('Nominal', 1))
+                            }
+        return None
+    except Exception as e:
+        print(f"[Exchange Rate] CBU API error: {e}")
+        return None
+
+async def update_exchange_rate():
+    """Fetch and save exchange rate to database"""
+    try:
+        # Fetch from CBU
+        rate_data = await fetch_exchange_rate_from_cbu()
+        
+        if rate_data and rate_data['rate'] > 0:
+            rate = rate_data['rate']
+            
+            # Get current settings
+            settings = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
+            
+            if settings.data:
+                current_settings = settings.data[0].get('value', {})
+                exchange_rates = current_settings.get('exchange_rates', {})
+                exchange_rates['USD'] = rate
+                exchange_rates['last_updated'] = datetime.now(timezone.utc).isoformat()
+                exchange_rates['source'] = rate_data['source']
+                
+                # Update settings
+                supabase.table('settings').update({
+                    'value': {**current_settings, 'exchange_rates': exchange_rates}
+                }).eq('key', 'system').execute()
+                
+                print(f"[Exchange Rate] Updated: 1 USD = {rate} UZS (source: {rate_data['source']})")
+                return rate
+            else:
+                # Create settings if not exists
+                supabase.table('settings').insert({
+                    'id': new_uuid(),
+                    'key': 'system',
+                    'value': {
+                        'currency': 'UZS',
+                        'exchange_rates': {
+                            'USD': rate,
+                            'last_updated': datetime.now(timezone.utc).isoformat(),
+                            'source': rate_data['source']
+                        }
+                    }
+                }).execute()
+                print(f"[Exchange Rate] Created settings with rate: 1 USD = {rate} UZS")
+                return rate
+        else:
+            print("[Exchange Rate] Failed to fetch rate, using last saved rate")
+            return None
+    except Exception as e:
+        print(f"[Exchange Rate] Update error: {e}")
+        return None
+
+exchange_rate_scheduler_running = True
+
+async def exchange_rate_scheduler_loop():
+    """Background task to update exchange rate daily"""
+    print("[Exchange Rate Scheduler] Started")
+    
+    # Initial fetch on startup
+    await asyncio.sleep(5)  # Wait for app to fully start
+    await update_exchange_rate()
+    
+    while exchange_rate_scheduler_running:
+        try:
+            # Wait 24 hours before next update
+            await asyncio.sleep(24 * 60 * 60)  # 24 hours
+            await update_exchange_rate()
+        except Exception as e:
+            print(f"[Exchange Rate Scheduler] Error: {e}")
+            await asyncio.sleep(3600)  # Retry in 1 hour on error
+
 @app.on_event("startup")
 async def startup_event():
     """Start background tasks on app startup"""
     print("[App] Starting reminder scheduler...")
     asyncio.create_task(reminder_scheduler_loop())
+    print("[App] Starting exchange rate scheduler...")
+    asyncio.create_task(exchange_rate_scheduler_loop())
 
 # ==================== TELEGRAM AUTH ====================
 
