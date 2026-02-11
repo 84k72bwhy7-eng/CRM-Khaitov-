@@ -489,15 +489,15 @@ async def fetch_and_save_exchange_rate():
             settings = supabase.table('settings').select('*').eq('key', 'system').limit(1).execute()
             
             if settings.data:
-                current_settings = settings.data[0].get('value', {})
-                exchange_rates = current_settings.get('exchange_rates', {})
+                current_data = settings.data[0].get('data', {})
+                exchange_rates = current_data.get('exchange_rates', {})
                 exchange_rates['USD'] = rate
                 exchange_rates['last_updated'] = datetime.now(timezone.utc).isoformat()
                 exchange_rates['source'] = rate_data['source']
                 
-                # Update settings
+                # Update settings - use 'data' column which is JSONB
                 supabase.table('settings').update({
-                    'value': {**current_settings, 'exchange_rates': exchange_rates}
+                    'data': {**current_data, 'exchange_rates': exchange_rates}
                 }).eq('key', 'system').execute()
                 
                 print(f"[Exchange Rate] Updated: 1 USD = {rate} UZS (source: {rate_data['source']})")
@@ -507,8 +507,8 @@ async def fetch_and_save_exchange_rate():
                 supabase.table('settings').insert({
                     'id': new_uuid(),
                     'key': 'system',
-                    'value': {
-                        'currency': 'UZS',
+                    'currency': 'UZS',
+                    'data': {
                         'exchange_rates': {
                             'USD': rate,
                             'last_updated': datetime.now(timezone.utc).isoformat(),
