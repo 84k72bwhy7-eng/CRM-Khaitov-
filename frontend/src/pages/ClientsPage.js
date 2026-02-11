@@ -80,7 +80,6 @@ export default function ClientsPage() {
   // Load clients when filters change or on initial load
   useEffect(() => {
     let isMounted = true;
-    const controller = new AbortController();
     
     const fetchClients = async () => {
       setClientsLoading(true);
@@ -93,8 +92,7 @@ export default function ClientsPage() {
         if (groupFilter) params.group_id = groupFilter;
         
         const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-          signal: controller.signal
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
         
         if (!response.ok) {
@@ -105,16 +103,12 @@ export default function ClientsPage() {
         
         if (isMounted) {
           setClients(Array.isArray(clientsData) ? clientsData : []);
+          setClientsLoading(false);
         }
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Failed to load clients:', error);
-          if (isMounted) {
-            setClients([]);
-          }
-        }
-      } finally {
+        console.error('Failed to load clients:', error);
         if (isMounted) {
+          setClients([]);
           setClientsLoading(false);
         }
       }
@@ -124,7 +118,6 @@ export default function ClientsPage() {
     
     return () => {
       isMounted = false;
-      controller.abort();
     };
   }, [search, statusFilter, groupFilter, showArchived]);
 
