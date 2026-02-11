@@ -198,6 +198,11 @@ class GroupUpdate(BaseModel):
 
 class SettingsUpdate(BaseModel):
     currency: Optional[str] = None
+    exchange_rates: Optional[dict] = None  # e.g., {"USD": 12500, "EUR": 13500}
+
+class ExchangeRateUpdate(BaseModel):
+    currency_code: str  # e.g., "USD"
+    rate_to_uzs: float  # e.g., 12500 (1 USD = 12500 UZS)
 
 class TelegramAuthRequest(BaseModel):
     initData: str
