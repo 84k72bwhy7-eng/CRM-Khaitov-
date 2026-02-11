@@ -387,7 +387,7 @@ export default function ClientsPage() {
       try {
         await del(`/api/clients/${client.id}`);
         toast.success(t.clients.clientDeleted);
-        loadClients();
+        refreshClients();
       } catch (error) {
         toast.error(t.common.error);
       }
