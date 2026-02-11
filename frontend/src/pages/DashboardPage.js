@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function DashboardPage() {
   const { t } = useLanguage();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentClients, setRecentClients] = useState([]);
@@ -18,8 +18,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Don't fetch if user is not loaded yet
-    if (!user) return;
+    // Wait for auth to complete first
+    if (authLoading) return;
+    
+    // If no user after auth completes, don't fetch
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     
     const controller = new AbortController();
     
@@ -29,44 +35,50 @@ export default function DashboardPage() {
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       try {
-        // Load basic dashboard data
-        const [statsRes, clientsRes, notesRes, remindersRes] = await Promise.all([
+        // Load all data in parallel - admin-specific data included if isAdmin
+        const fetchPromises = [
           fetch(`${API_URL}/api/dashboard/stats`, { headers, signal: controller.signal }),
           fetch(`${API_URL}/api/dashboard/recent-clients`, { headers, signal: controller.signal }),
           fetch(`${API_URL}/api/dashboard/recent-notes`, { headers, signal: controller.signal }),
           fetch(`${API_URL}/api/reminders/overdue`, { headers, signal: controller.signal })
-        ]);
+        ];
         
-        if (statsRes.ok) {
-          const data = await statsRes.json();
+        // Add admin-only fetches
+        if (isAdmin) {
+          fetchPromises.push(
+            fetch(`${API_URL}/api/dashboard/manager-stats`, { headers, signal: controller.signal }),
+            fetch(`${API_URL}/api/dashboard/analytics`, { headers, signal: controller.signal })
+          );
+        }
+        
+        const responses = await Promise.all(fetchPromises);
+        
+        // Process basic data
+        if (responses[0].ok) {
+          const data = await responses[0].json();
           setStats(data);
         }
-        if (clientsRes.ok) {
-          const data = await clientsRes.json();
+        if (responses[1].ok) {
+          const data = await responses[1].json();
           setRecentClients(Array.isArray(data) ? data : []);
         }
-        if (notesRes.ok) {
-          const data = await notesRes.json();
+        if (responses[2].ok) {
+          const data = await responses[2].json();
           setRecentNotes(Array.isArray(data) ? data : []);
         }
-        if (remindersRes.ok) {
-          const data = await remindersRes.json();
+        if (responses[3].ok) {
+          const data = await responses[3].json();
           setOverdueReminders(Array.isArray(data) ? data : []);
         }
         
-        // Load admin-only data
-        if (isAdmin) {
-          const [managerRes, analyticsRes] = await Promise.all([
-            fetch(`${API_URL}/api/dashboard/manager-stats`, { headers, signal: controller.signal }),
-            fetch(`${API_URL}/api/dashboard/analytics`, { headers, signal: controller.signal })
-          ]);
-          
-          if (managerRes.ok) {
-            const data = await managerRes.json();
+        // Process admin-only data
+        if (isAdmin && responses.length > 4) {
+          if (responses[4].ok) {
+            const data = await responses[4].json();
             setManagerStats(Array.isArray(data) ? data : []);
           }
-          if (analyticsRes.ok) {
-            const data = await analyticsRes.json();
+          if (responses[5].ok) {
+            const data = await responses[5].json();
             setAnalytics(data);
           }
         }
@@ -84,7 +96,7 @@ export default function DashboardPage() {
     loadDashboardData();
     
     return () => controller.abort();
-  }, [user, isAdmin]);
+  }, [authLoading, user, isAdmin]);
 
   const formatCurrency = (amount, currency = 'USD') => {
     if (currency === 'USD') {
