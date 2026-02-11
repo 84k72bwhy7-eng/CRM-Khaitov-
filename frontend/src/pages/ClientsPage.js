@@ -214,6 +214,7 @@ export default function ClientsPage() {
   // Quick Add - minimal form for fast client creation (Instagram optimized)
   const handleQuickAdd = async (e) => {
     e.preventDefault();
+    triggerHaptic('light'); // Feedback on submit tap
     try {
       const createData = {
         name: formData.name,
@@ -229,10 +230,8 @@ export default function ClientsPage() {
       };
       const response = await post('/api/clients', createData);
       
-      // Haptic feedback in Telegram
-      if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-      }
+      // Strong success haptic feedback
+      triggerHaptic('success');
       
       // Show success state with action buttons
       setQuickAddSuccess({
@@ -257,6 +256,7 @@ export default function ClientsPage() {
       refreshClients();
       
     } catch (error) {
+      triggerHaptic('error');
       if (error?.response?.status === 400) {
         toast.error(t.clients.duplicatePhone);
       } else {
