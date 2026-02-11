@@ -85,6 +85,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Telegram Reminder Notifications**: Automatic sending of due reminders via Telegram bot
 - [x] **Notification Status UI**: Admin dashboard in Settings showing notification stats
 - [x] **Instagram Lead Workflow**: Quick add with Instagram default, success actions (Call/Reminder/Note)
+- [x] **Mini App Deep Linking**: Reminder buttons now use `web_app` type to open CRM inside Telegram (2026-02-11)
 
 ### Phase 5 - Database Migration (2026-02-11)
 - [x] **Supabase Migration**: Complete migration from MongoDB to Supabase PostgreSQL
