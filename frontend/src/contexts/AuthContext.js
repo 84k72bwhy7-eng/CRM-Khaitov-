@@ -28,12 +28,55 @@ export const AuthProvider = ({ children }) => {
     const tg = getTelegramWebApp();
     if (tg && isTelegramWebApp()) {
       setIsTelegram(true);
+      
+      // Signal that the Mini App is ready
       tg.ready();
+      
+      // Expand to fullscreen mode
       tg.expand();
       
+      // Request fullscreen mode (for "Add to Home Screen" support)
+      if (tg.requestFullscreen) {
+        tg.requestFullscreen();
+      }
+      
+      // Enable closing confirmation if user has unsaved changes
+      tg.enableClosingConfirmation();
+      
+      // Set header and background colors to match app theme
+      if (tg.setHeaderColor) {
+        tg.setHeaderColor('#1a1a1a');
+      }
+      if (tg.setBackgroundColor) {
+        tg.setBackgroundColor('#1a1a1a');
+      }
+      
+      // Set bottom bar color (for devices with gesture navigation)
+      if (tg.setBottomBarColor) {
+        tg.setBottomBarColor('#1a1a1a');
+      }
+      
       // Apply Telegram theme
-      document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-      document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+      document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#1a1a1a');
+      document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#ffffff');
+      document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
+      document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#FACC15');
+      document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#FACC15');
+      document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#1a1a1a');
+      
+      // Listen for theme changes
+      tg.onEvent('themeChanged', () => {
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#1a1a1a');
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#ffffff');
+      });
+      
+      // Listen for viewport changes
+      tg.onEvent('viewportChanged', (event) => {
+        if (event.isStateStable) {
+          // Viewport is stable, app is fully expanded
+          console.log('Telegram Mini App viewport stable, height:', tg.viewportHeight);
+        }
+      });
     }
   }, []);
 
