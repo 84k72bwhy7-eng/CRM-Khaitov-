@@ -13,6 +13,10 @@ import os
 import io
 import csv
 import json
+import hmac
+import hashlib
+from urllib.parse import parse_qs
+import time
 
 # App initialization
 app = FastAPI(title="SchoolCRM API", version="3.0.0")
