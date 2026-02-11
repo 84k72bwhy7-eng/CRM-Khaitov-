@@ -37,14 +37,40 @@ export default function SettingsPage() {
   const [systemSettings, setSystemSettings] = useState({ currency: 'USD' });
   const [savingCurrency, setSavingCurrency] = useState(false);
 
+  // Telegram Notification Status
+  const [telegramStatus, setTelegramStatus] = useState(null);
+  const [sendingTestNotification, setSendingTestNotification] = useState(false);
+
   useEffect(() => {
     if (isAdmin) {
       loadStatuses();
       loadTariffs();
       loadGroups();
       loadSettings();
+      loadTelegramStatus();
     }
   }, [isAdmin]);
+
+  const loadTelegramStatus = async () => {
+    try {
+      const data = await get('/api/notifications/telegram-status');
+      setTelegramStatus(data);
+    } catch (error) {
+      console.error('Failed to load Telegram status:', error);
+    }
+  };
+
+  const sendTestNotification = async () => {
+    setSendingTestNotification(true);
+    try {
+      await post('/api/notifications/test-telegram');
+      toast.success(t.settings?.testNotificationSent || 'Test notification sent!');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t.common.error);
+    } finally {
+      setSendingTestNotification(false);
+    }
+  };
 
   const loadStatuses = async () => {
     try {
