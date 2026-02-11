@@ -498,6 +498,30 @@ async def health_check():
         "seed_disabled": DISABLE_SEED
     }
 
+@app.get("/api/admin/database-status")
+async def database_status(current_user: dict = Depends(get_current_user)):
+    """Admin: Get database status and stats (for deployment verification)"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    return {
+        "environment": APP_ENV,
+        "is_production": IS_PRODUCTION,
+        "database_name": DB_NAME,
+        "seed_disabled": DISABLE_SEED,
+        "collections": {
+            "users": users_collection.count_documents({}),
+            "clients": clients_collection.count_documents({}),
+            "payments": payments_collection.count_documents({}),
+            "reminders": reminders_collection.count_documents({}),
+            "notes": notes_collection.count_documents({}),
+            "statuses": statuses_collection.count_documents({}),
+            "groups": groups_collection.count_documents({}),
+            "tariffs": tariffs_collection.count_documents({})
+        },
+        "protection_status": "ENABLED" if DISABLE_SEED else "DISABLED - Seeds can run"
+    }
+
 # ==================== AUTH ENDPOINTS ====================
 
 @app.post("/api/auth/login")
