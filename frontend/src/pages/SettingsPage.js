@@ -45,11 +45,14 @@ export default function SettingsPage() {
 
   // Load admin data - use isMounted flag to prevent state updates after unmount
   useEffect(() => {
+    console.log('[SettingsPage] useEffect triggered, isAdmin:', isAdmin);
     if (!isAdmin) return;
     
     let isMounted = true;
     const API_URL = process.env.REACT_APP_BACKEND_URL;
     const token = localStorage.getItem('crm_token');
+    console.log('[SettingsPage] Loading admin data, token exists:', !!token);
+    
     const headers = { 
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -57,16 +60,24 @@ export default function SettingsPage() {
     
     // Load statuses
     fetch(`${API_URL}/api/statuses`, { headers })
-      .then(res => res.ok ? res.json() : [])
+      .then(res => {
+        console.log('[SettingsPage] statuses response:', res.status);
+        return res.ok ? res.json() : [];
+      })
       .then(data => {
+        console.log('[SettingsPage] statuses data:', data);
         if (isMounted) setStatuses(Array.isArray(data) ? data : []);
       })
       .catch(err => console.error('Failed to load statuses:', err));
     
     // Load tariffs
     fetch(`${API_URL}/api/tariffs`, { headers })
-      .then(res => res.ok ? res.json() : [])
+      .then(res => {
+        console.log('[SettingsPage] tariffs response:', res.status);
+        return res.ok ? res.json() : [];
+      })
       .then(data => {
+        console.log('[SettingsPage] tariffs data:', data);
         if (isMounted) setTariffs(Array.isArray(data) ? data : []);
       })
       .catch(err => console.error('Failed to load tariffs:', err));
@@ -83,6 +94,7 @@ export default function SettingsPage() {
     fetch(`${API_URL}/api/settings`, { headers })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
+        console.log('[SettingsPage] settings data:', data);
         if (isMounted && data) {
           setSystemSettings({ 
             currency: data.currency || 'USD',
@@ -102,6 +114,7 @@ export default function SettingsPage() {
       .catch(err => console.error('Failed to load telegram status:', err));
     
     return () => {
+      console.log('[SettingsPage] cleanup, setting isMounted = false');
       isMounted = false;
     };
   }, [isAdmin]);
