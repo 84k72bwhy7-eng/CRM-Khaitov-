@@ -211,7 +211,15 @@
     "groupManagement": "Управление группами",
     "currencySettings": "Настройки валюты",
     "selectCurrency": "Выберите валюту",
-    "currencyUpdated": "Валюта обновлена"
+    "currencyUpdated": "Валюта обновлена",
+    "telegramNotifications": "Уведомления Telegram",
+    "usersWithTelegram": "Привязанные пользователи",
+    "notificationsSent": "Отправлено",
+    "pendingReminders": "Ожидает",
+    "schedulerStatus": "Планировщик",
+    "sendTestNotification": "Отправить тест",
+    "testNotificationSent": "Тестовое сообщение отправлено!",
+    "linkTelegramFirst": "Привяжите Telegram для теста"
   },
   "groups": {
     "title": "Группы",
