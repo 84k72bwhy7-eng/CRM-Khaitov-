@@ -58,6 +58,33 @@ export default function ClientsPage() {
   // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  // Haptic feedback helper
+  const triggerHaptic = (type = 'impact') => {
+    try {
+      if (window.Telegram?.WebApp?.HapticFeedback) {
+        if (type === 'success') {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        } else if (type === 'error') {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        } else if (type === 'warning') {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+        } else if (type === 'light') {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        } else if (type === 'medium') {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        } else if (type === 'heavy') {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+        } else if (type === 'selection') {
+          window.Telegram.WebApp.HapticFeedback.selectionChanged();
+        } else {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+      }
+    } catch (e) {
+      // Haptic not available
+    }
+  };
+
   // Load reference data (statuses, tariffs, groups, users) once on mount
   useEffect(() => {
     const controller = new AbortController();
