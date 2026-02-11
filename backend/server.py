@@ -476,7 +476,7 @@ async def fetch_exchange_rate_from_cbu():
         print(f"[Exchange Rate] CBU API error: {e}")
         return None
 
-async def update_exchange_rate():
+async def fetch_and_save_exchange_rate():
     """Fetch and save exchange rate to database"""
     try:
         # Fetch from CBU
