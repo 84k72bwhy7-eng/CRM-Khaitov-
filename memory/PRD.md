@@ -119,8 +119,13 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 ## Bug Fixes (2026-02-11)
 - **[P0] ClientsPage Rendering Bug**: Fixed critical bug where clients list showed "Loading..." indefinitely
   - **Root Cause**: Race condition in React StrictMode where cleanup function invalidated state updates
-  - **Fix**: Implemented AbortController pattern for proper fetch cancellation
+  - **Fix**: Implemented proper isMounted pattern for data fetching
   - **File**: `/app/frontend/src/pages/ClientsPage.js`
+
+- **[P1] DashboardPage Analytics Not Loading**: Fixed issue where analytics charts weren't displayed
+  - **Root Cause**: Same StrictMode race condition as ClientsPage
+  - **Fix**: Separated data loading into two useEffect hooks (basic data + admin-only data)
+  - **File**: `/app/frontend/src/pages/DashboardPage.js`
 
 ## Prioritized Backlog
 
