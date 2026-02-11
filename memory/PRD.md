@@ -86,19 +86,27 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Notification Status UI**: Admin dashboard in Settings showing notification stats
 - [x] **Instagram Lead Workflow**: Quick add with Instagram default, success actions (Call/Reminder/Note)
 
-### Database Schema
-**Collections:**
-- `users`: id, name, email, phone, password, role, created_at, **telegram_id**, **telegram_username**, **telegram_linked_at**
-- `clients`: id, name, phone, source, manager_id, status, is_lead, is_archived, archived_at, tariff_id, created_at
-- `notes`: id, client_id, text, author_id, author_name, created_at
-- `payments`: id, client_id, amount, currency, status, date, created_at
-- `reminders`: id, client_id, user_id, text, remind_at, is_completed, notified, created_at
-- `statuses`: id, name, color, order, is_default, created_at
-- `tariffs`: id, name, price, currency, description, created_at
-- `settings`: id, key, currency, created_at
-- `notifications`: id, user_id, title, message, type, entity_id, is_read, created_at
-- `activity_log`: id, user_id, user_name, action, entity_type, entity_id, details, created_at
-- `audio_files`: id, client_id, filename, original_name, content_type, size, uploader_id, uploader_name, created_at
+### Phase 5 - Database Migration (2026-02-11)
+- [x] **Supabase Migration**: Complete migration from MongoDB to Supabase PostgreSQL
+- [x] **Data Migration**: All existing data migrated (users, clients, payments, reminders, notes, statuses, groups, tariffs, settings, activity_log, audio_files)
+- [x] **Backend Refactor**: Complete rewrite of server.py to use supabase-py client instead of pymongo
+- [x] **UUID IDs**: Switched from MongoDB ObjectIds to PostgreSQL UUIDs
+- [x] **Frontend API Hook Fix**: Updated useApi hook to properly include auth headers
+
+### Database Schema (PostgreSQL)
+**Tables:**
+- `users`: id (uuid), name, email, phone, password, role, telegram_id, telegram_username, telegram_first_name, telegram_linked_at, created_at
+- `clients`: id (uuid), mongo_id, name, phone, source, manager_id (fk), status, is_lead, archived, archived_at, tariff_id (fk), group_id (fk), created_at
+- `notes`: id (uuid), client_id (fk), user_id (fk), text, created_at
+- `payments`: id (uuid), client_id (fk), user_id (fk), amount, currency, status, payment_date, comment, created_at
+- `reminders`: id (uuid), client_id (fk), user_id (fk), text, remind_at, is_completed, notified, telegram_sent, telegram_sent_at, telegram_success, created_at
+- `statuses`: id (uuid), name, color, sort_order, is_default, created_at
+- `tariffs`: id (uuid), name, price, currency, description, created_at
+- `groups`: id (uuid), name, color, description, created_at
+- `settings`: id (uuid), key, currency, data (jsonb), created_at
+- `notifications`: id (uuid), user_id (fk), title, message, type, entity_type, entity_id, is_read, created_at
+- `activity_log`: id (uuid), user_id, user_name, action, entity_type, entity_id, details (jsonb), created_at
+- `audio_files`: id (uuid), client_id (fk), user_id (fk), filename, original_name, content_type, created_at
 
 ## Testing Status
 - Phase 1 & 2: 100% pass
