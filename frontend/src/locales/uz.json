@@ -39,7 +39,12 @@
     "password": "Parol",
     "loginButton": "Tizimga kirish",
     "loginError": "Email yoki parol noto'g'ri",
-    "welcome": "Xush kelibsiz"
+    "welcome": "Xush kelibsiz",
+    "telegramLinkTitle": "Telegram hisobingizni ulang",
+    "telegramLinkDesc": "CRM ma'lumotlaringizni kiriting va Telegram hisobingizni ulang",
+    "linkAccount": "Hisobni ulash",
+    "telegramLinked": "Telegram hisobi muvaffaqiyatli ulandi!",
+    "openedViaTelegram": "Telegram orqali ochildi"
   },
   "dashboard": {
     "title": "Bosh sahifa",
