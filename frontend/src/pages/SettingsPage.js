@@ -194,7 +194,7 @@ export default function SettingsPage() {
       setShowStatusModal(false);
       setEditingStatus(null);
       setStatusForm({ name: '', color: '#3B82F6', order: 0 });
-      loadStatuses();
+      reloadStatuses();
     } catch (error) {
       toast.error(error.response?.data?.detail || t.common.error);
     }
@@ -218,7 +218,7 @@ export default function SettingsPage() {
     try {
       await del(`/api/statuses/${status.id}`);
       toast.success(t.statuses.statusDeleted);
-      loadStatuses();
+      reloadStatuses();
     } catch (error) {
       toast.error(error.response?.data?.detail || t.common.error);
     }
@@ -238,7 +238,7 @@ export default function SettingsPage() {
       setShowTariffModal(false);
       setEditingTariff(null);
       setTariffForm({ name: '', price: 0, currency: 'USD', description: '' });
-      loadTariffs();
+      reloadTariffs();
     } catch (error) {
       toast.error(error.response?.data?.detail || t.common.error);
     }
@@ -259,7 +259,7 @@ export default function SettingsPage() {
     try {
       await del(`/api/tariffs/${tariff.id}`);
       toast.success(t.tariffs.tariffDeleted);
-      loadTariffs();
+      reloadTariffs();
     } catch (error) {
       toast.error(error.response?.data?.detail || t.tariffs.tariffInUse);
     }
@@ -299,7 +299,7 @@ export default function SettingsPage() {
       });
       toast.success(t.settings?.rateUpdated || 'Valyuta kursi yangilandi');
       // Reload tariffs to get updated UZS prices
-      loadTariffs();
+      reloadTariffs();
     } catch (error) {
       toast.error(t.common.error);
     } finally {
@@ -324,7 +324,7 @@ export default function SettingsPage() {
           }
         });
         toast.success(`Kurs yangilandi: 1 USD = ${Math.round(response.rate).toLocaleString()} UZS`);
-        loadTariffs();
+        reloadTariffs();
       }
     } catch (error) {
       toast.error(t.common.error);
@@ -347,7 +347,7 @@ export default function SettingsPage() {
       setShowGroupModal(false);
       setEditingGroup(null);
       setGroupForm({ name: '', color: '#6B7280', description: '' });
-      loadGroups();
+      reloadGroups();
     } catch (error) {
       toast.error(error.response?.data?.detail || t.common.error);
     }
@@ -367,7 +367,7 @@ export default function SettingsPage() {
     try {
       await del(`/api/groups/${group.id}`);
       toast.success(t.groups.groupDeleted);
-      loadGroups();
+      reloadGroups();
     } catch (error) {
       toast.error(error.response?.data?.detail || t.groups.groupInUse);
     }
