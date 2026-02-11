@@ -580,35 +580,72 @@ export default function SettingsPage() {
                 {t.settings.currencySettings}
               </h2>
             </div>
-            <div className="p-4 lg:p-6">
-              <label className="block text-sm font-medium text-text-primary mb-3">{t.settings.selectCurrency}</label>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => handleCurrencyChange('USD')}
-                  disabled={savingCurrency}
-                  className={`flex-1 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                    systemSettings.currency === 'USD'
-                      ? 'bg-primary text-black'
-                      : 'bg-background-subtle text-text-secondary hover:bg-gray-100'
-                  }`}
-                  data-testid="currency-usd-button"
-                >
-                  {savingCurrency && systemSettings.currency !== 'USD' && <Loader2 size={18} className="animate-spin" />}
-                  $ USD
-                </button>
-                <button
-                  onClick={() => handleCurrencyChange('UZS')}
-                  disabled={savingCurrency}
-                  className={`flex-1 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                    systemSettings.currency === 'UZS'
-                      ? 'bg-primary text-black'
-                      : 'bg-background-subtle text-text-secondary hover:bg-gray-100'
-                  }`}
-                  data-testid="currency-uzs-button"
-                >
-                  {savingCurrency && systemSettings.currency !== 'UZS' && <Loader2 size={18} className="animate-spin" />}
-                  UZS
-                </button>
+            <div className="p-4 lg:p-6 space-y-6">
+              {/* Exchange Rate Input */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  {t.settings?.exchangeRate || 'USD → UZS kursi'}
+                </label>
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">1 USD =</span>
+                    <input
+                      type="number"
+                      value={exchangeRateInput}
+                      onChange={(e) => setExchangeRateInput(e.target.value)}
+                      className="input pl-20 pr-16 text-right font-semibold"
+                      placeholder="12500"
+                      min="1"
+                      data-testid="exchange-rate-input"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">UZS</span>
+                  </div>
+                  <button
+                    onClick={handleExchangeRateUpdate}
+                    disabled={savingRate}
+                    className="btn-primary px-6 flex items-center gap-2"
+                    data-testid="save-exchange-rate"
+                  >
+                    {savingRate && <Loader2 size={16} className="animate-spin" />}
+                    {t.common?.save || 'Saqlash'}
+                  </button>
+                </div>
+                <p className="text-sm text-text-muted mt-2">
+                  {t.settings?.exchangeRateHint || 'USD narxli tariflar avtomatik UZS ga o\'tkaziladi'}
+                </p>
+              </div>
+
+              {/* Currency Selection */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-3">{t.settings.selectCurrency}</label>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => handleCurrencyChange('USD')}
+                    disabled={savingCurrency}
+                    className={`flex-1 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                      systemSettings.currency === 'USD'
+                        ? 'bg-primary text-black'
+                        : 'bg-background-subtle text-text-secondary hover:bg-gray-100'
+                    }`}
+                    data-testid="currency-usd-button"
+                  >
+                    {savingCurrency && systemSettings.currency !== 'USD' && <Loader2 size={18} className="animate-spin" />}
+                    $ USD
+                  </button>
+                  <button
+                    onClick={() => handleCurrencyChange('UZS')}
+                    disabled={savingCurrency}
+                    className={`flex-1 py-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                      systemSettings.currency === 'UZS'
+                        ? 'bg-primary text-black'
+                        : 'bg-background-subtle text-text-secondary hover:bg-gray-100'
+                    }`}
+                    data-testid="currency-uzs-button"
+                  >
+                    {savingCurrency && systemSettings.currency !== 'UZS' && <Loader2 size={18} className="animate-spin" />}
+                    UZS
+                  </button>
+                </div>
               </div>
             </div>
           </div>
