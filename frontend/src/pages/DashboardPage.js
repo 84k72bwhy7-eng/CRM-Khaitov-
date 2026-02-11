@@ -20,16 +20,13 @@ export default function DashboardPage() {
   // Load basic dashboard data on mount
   useEffect(() => {
     let isMounted = true;
-    console.log('[Dashboard] useEffect triggered - loading basic data');
     
     const loadBasicData = async () => {
       const token = localStorage.getItem('crm_token');
       const API_URL = process.env.REACT_APP_BACKEND_URL;
-      console.log('[Dashboard] API_URL:', API_URL, 'Token:', token ? 'exists' : 'missing');
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       try {
-        console.log('[Dashboard] Starting fetch...');
         const [statsRes, clientsRes, notesRes, remindersRes] = await Promise.all([
           fetch(`${API_URL}/api/dashboard/stats`, { headers }),
           fetch(`${API_URL}/api/dashboard/recent-clients`, { headers }),
@@ -37,27 +34,21 @@ export default function DashboardPage() {
           fetch(`${API_URL}/api/reminders/overdue`, { headers })
         ]);
         
-        console.log('[Dashboard] Fetch complete, isMounted:', isMounted);
         if (!isMounted) return;
         
         if (statsRes.ok) setStats(await statsRes.json());
         if (clientsRes.ok) setRecentClients(await clientsRes.json() || []);
         if (notesRes.ok) setRecentNotes(await notesRes.json() || []);
         if (remindersRes.ok) setOverdueReminders(await remindersRes.json() || []);
-        console.log('[Dashboard] State updated');
       } catch (error) {
-        console.error('[Dashboard] Failed to load basic data:', error);
+        console.error('Failed to load basic data:', error);
       } finally {
         if (isMounted) setLoading(false);
-        console.log('[Dashboard] Loading finished');
       }
     };
     
     loadBasicData();
-    return () => { 
-      console.log('[Dashboard] Cleanup - setting isMounted to false');
-      isMounted = false; 
-    };
+    return () => { isMounted = false; };
   }, []);
 
   // Load admin-only data when isAdmin changes
