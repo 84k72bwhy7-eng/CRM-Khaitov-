@@ -252,11 +252,37 @@ export default function SettingsPage() {
       });
       setSystemSettings({
         ...systemSettings,
-        exchange_rates: { ...systemSettings.exchange_rates, USD: rate }
+        exchange_rates: { ...systemSettings.exchange_rates, USD: rate, last_updated: new Date().toISOString(), source: 'manual' }
       });
       toast.success(t.settings?.rateUpdated || 'Valyuta kursi yangilandi');
       // Reload tariffs to get updated UZS prices
       loadTariffs();
+    } catch (error) {
+      toast.error(t.common.error);
+    } finally {
+      setSavingRate(false);
+    }
+  };
+
+  // Fetch rate from CBU
+  const handleFetchRate = async () => {
+    setSavingRate(true);
+    try {
+      const response = await post('/api/settings/exchange-rates/refresh', {});
+      if (response.rate) {
+        setExchangeRateInput(String(Math.round(response.rate)));
+        setSystemSettings({
+          ...systemSettings,
+          exchange_rates: { 
+            ...systemSettings.exchange_rates, 
+            USD: response.rate, 
+            last_updated: new Date().toISOString(),
+            source: response.source 
+          }
+        });
+        toast.success(`Kurs yangilandi: 1 USD = ${Math.round(response.rate).toLocaleString()} UZS`);
+        loadTariffs();
+      }
     } catch (error) {
       toast.error(t.common.error);
     } finally {
