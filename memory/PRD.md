@@ -95,6 +95,12 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
   - Enhanced workflow continuity: 4 quick actions after client creation (Call, Reminder, Payment, Note)
   - Haptic feedback for all interactions
   - Optimized quick actions on client cards (Call, Reminder, Pay)
+- [x] **Backend Health Check** (2026-02-11):
+  - Loading screen shows while checking backend status
+  - Automatic retry with exponential backoff (up to 10 attempts)
+  - Prevents app from loading with disconnected backend
+  - User-friendly Uzbek messages during wake-up
+  - Retry button on connection failure
 
 ### Phase 5 - Database Migration (2026-02-11)
 - [x] **Supabase Migration**: Complete migration from MongoDB to Supabase PostgreSQL
