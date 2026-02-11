@@ -58,18 +58,49 @@ export default function ClientsPage() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadAllData = async () => {
       setClientsLoading(true);
-      await Promise.all([
-        loadClients(),
-        loadStatuses(),
-        loadTariffs(),
-        loadGroups(),
-        isAdmin ? loadUsers() : Promise.resolve()
-      ]);
-      setClientsLoading(false);
+      try {
+        // Load clients directly with fetch
+        const token = localStorage.getItem('crm_token');
+        const API_URL = process.env.REACT_APP_BACKEND_URL;
+        const params = { is_archived: showArchived, exclude_sold: true };
+        if (search) params.search = search;
+        if (statusFilter) params.status = statusFilter;
+        if (groupFilter) params.group_id = groupFilter;
+        
+        const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        const clientsData = await response.json();
+        
+        if (isMounted) {
+          setClients(clientsData || []);
+          setClientsLoading(false);
+        }
+        
+        // Load other data in parallel
+        Promise.all([
+          loadStatuses(),
+          loadTariffs(),
+          loadGroups(),
+          isAdmin ? loadUsers() : Promise.resolve()
+        ]);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+        if (isMounted) {
+          setClientsLoading(false);
+        }
+      }
     };
+    
     loadAllData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [search, statusFilter, groupFilter, showArchived, location.key]);
 
   const loadClients = async () => {
