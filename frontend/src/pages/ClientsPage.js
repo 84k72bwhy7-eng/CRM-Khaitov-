@@ -568,7 +568,12 @@ export default function ClientsPage() {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
-        {clients.length === 0 ? (
+        {clientsLoading ? (
+          <div className="text-center py-12">
+            <Loader2 className="animate-spin mx-auto h-8 w-8 text-primary" />
+            <p className="text-text-muted mt-2">{t.common.loading || 'Loading...'}</p>
+          </div>
+        ) : clients.length === 0 ? (
           <div className="text-center py-12 text-text-muted">
             {t.clients.noClients}
           </div>
