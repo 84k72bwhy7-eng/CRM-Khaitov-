@@ -844,15 +844,24 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {/* Floating Add Button - Mobile Only */}
-      <button
-        onClick={() => setShowQuickAdd(true)}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-black rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform"
-        style={{ boxShadow: '0 4px 14px rgba(250, 204, 21, 0.4)' }}
-        data-testid="floating-add-button"
-      >
-        <Plus size={28} strokeWidth={2.5} />
-      </button>
+      {/* Floating Add Button - Always visible on mobile/Telegram, positioned above bottom nav */}
+      {(isMobile || isTelegram) && (
+        <button
+          onClick={() => {
+            triggerHaptic('medium');
+            setShowQuickAdd(true);
+          }}
+          className="fixed w-14 h-14 bg-primary text-black rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform"
+          style={{ 
+            boxShadow: '0 4px 14px rgba(250, 204, 21, 0.4)',
+            bottom: isTelegram ? '5rem' : '1.5rem',
+            right: '1.5rem'
+          }}
+          data-testid="floating-add-button"
+        >
+          <Plus size={28} strokeWidth={2.5} />
+        </button>
+      )}
 
       {/* Quick Add Modal - Instagram Optimized */}
       {showQuickAdd && (
