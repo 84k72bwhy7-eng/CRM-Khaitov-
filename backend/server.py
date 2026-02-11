@@ -919,11 +919,6 @@ async def get_client(client_id: str, current_user: dict = Depends(get_current_us
 
 @app.post("/api/clients")
 async def create_client(data: ClientCreate, current_user: dict = Depends(get_current_user)):
-    # DETAILED LOGGING for debugging sync issues
-    print(f"[CLIENT CREATE] User: {current_user['name']} (ID: {current_user['id']})")
-    print(f"[CLIENT CREATE] Database: Supabase @ {SUPABASE_URL}")
-    print(f"[CLIENT CREATE] Data: name={data.name}, phone={data.phone}, source={data.source}")
-    
     client_id = new_uuid()
     client_doc = {
         'id': client_id,
@@ -939,9 +934,7 @@ async def create_client(data: ClientCreate, current_user: dict = Depends(get_cur
         'created_at': datetime.now(timezone.utc).isoformat()
     }
     
-    print(f"[CLIENT CREATE] Inserting client ID: {client_id} to Supabase...")
-    result = supabase.table('clients').insert(client_doc).execute()
-    print(f"[CLIENT CREATE] Insert result: {len(result.data) if result.data else 0} rows inserted")
+    supabase.table('clients').insert(client_doc).execute()
     
     # Create initial comment
     if data.initial_comment:
