@@ -27,7 +27,7 @@ export default function DashboardPage() {
       return;
     }
     
-    const controller = new AbortController();
+    let isMounted = true;
     
     const loadDashboardData = async () => {
       const token = localStorage.getItem('crm_token');
@@ -35,59 +35,36 @@ export default function DashboardPage() {
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       try {
-        // Load all data in parallel - admin-specific data included if isAdmin
-        const fetchPromises = [
-          fetch(`${API_URL}/api/dashboard/stats`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/dashboard/recent-clients`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/dashboard/recent-notes`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/reminders/overdue`, { headers, signal: controller.signal })
-        ];
+        // Fetch all data
+        const responses = await Promise.all([
+          fetch(`${API_URL}/api/dashboard/stats`, { headers }),
+          fetch(`${API_URL}/api/dashboard/recent-clients`, { headers }),
+          fetch(`${API_URL}/api/dashboard/recent-notes`, { headers }),
+          fetch(`${API_URL}/api/reminders/overdue`, { headers }),
+          ...(isAdmin ? [
+            fetch(`${API_URL}/api/dashboard/manager-stats`, { headers }),
+            fetch(`${API_URL}/api/dashboard/analytics`, { headers })
+          ] : [])
+        ]);
         
-        // Add admin-only fetches
-        if (isAdmin) {
-          fetchPromises.push(
-            fetch(`${API_URL}/api/dashboard/manager-stats`, { headers, signal: controller.signal }),
-            fetch(`${API_URL}/api/dashboard/analytics`, { headers, signal: controller.signal })
-          );
-        }
-        
-        const responses = await Promise.all(fetchPromises);
+        // Only update state if still mounted
+        if (!isMounted) return;
         
         // Process basic data
-        if (responses[0].ok) {
-          const data = await responses[0].json();
-          setStats(data);
-        }
-        if (responses[1].ok) {
-          const data = await responses[1].json();
-          setRecentClients(Array.isArray(data) ? data : []);
-        }
-        if (responses[2].ok) {
-          const data = await responses[2].json();
-          setRecentNotes(Array.isArray(data) ? data : []);
-        }
-        if (responses[3].ok) {
-          const data = await responses[3].json();
-          setOverdueReminders(Array.isArray(data) ? data : []);
-        }
+        if (responses[0].ok) setStats(await responses[0].json());
+        if (responses[1].ok) setRecentClients(await responses[1].json() || []);
+        if (responses[2].ok) setRecentNotes(await responses[2].json() || []);
+        if (responses[3].ok) setOverdueReminders(await responses[3].json() || []);
         
         // Process admin-only data
         if (isAdmin && responses.length > 4) {
-          if (responses[4].ok) {
-            const data = await responses[4].json();
-            setManagerStats(Array.isArray(data) ? data : []);
-          }
-          if (responses[5].ok) {
-            const data = await responses[5].json();
-            setAnalytics(data);
-          }
+          if (responses[4].ok) setManagerStats(await responses[4].json() || []);
+          if (responses[5].ok) setAnalytics(await responses[5].json());
         }
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Failed to load dashboard:', error);
-        }
+        console.error('Failed to load dashboard:', error);
       } finally {
-        if (!controller.signal.aborted) {
+        if (isMounted) {
           setLoading(false);
         }
       }
@@ -95,7 +72,9 @@ export default function DashboardPage() {
     
     loadDashboardData();
     
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+    };
   }, [authLoading, user, isAdmin]);
 
   const formatCurrency = (amount, currency = 'USD') => {
