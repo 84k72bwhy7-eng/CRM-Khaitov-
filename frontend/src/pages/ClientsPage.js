@@ -676,7 +676,14 @@ export default function ClientsPage() {
               </tr>
             </thead>
             <tbody>
-              {clients.length === 0 ? (
+              {clientsLoading ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12">
+                    <Loader2 className="animate-spin mx-auto h-8 w-8 text-primary" />
+                    <p className="text-text-muted mt-2">{t.common.loading || 'Loading...'}</p>
+                  </td>
+                </tr>
+              ) : clients.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-text-muted">
                     {t.clients.noClients}
