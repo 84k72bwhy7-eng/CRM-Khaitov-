@@ -498,7 +498,7 @@ export default function ClientsPage() {
       
       if (result.success > 0) {
         toast.success(`${t.import.importSuccess}: ${result.success} ${t.clients.title.toLowerCase()}`);
-        loadClients();
+        refreshClients();
       }
     } catch (error) {
       toast.error(error.message || t.import.importFailed);
