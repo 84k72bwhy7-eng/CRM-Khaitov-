@@ -52,15 +52,24 @@ export default function ClientsPage() {
   const [groups, setGroups] = useState([]);
   const [groupFilter, setGroupFilter] = useState('');
 
+  const [clientsLoading, setClientsLoading] = useState(true);
+
   // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   useEffect(() => {
-    loadClients();
-    loadStatuses();
-    loadTariffs();
-    loadGroups();
-    if (isAdmin) loadUsers();
+    const loadAllData = async () => {
+      setClientsLoading(true);
+      await Promise.all([
+        loadClients(),
+        loadStatuses(),
+        loadTariffs(),
+        loadGroups(),
+        isAdmin ? loadUsers() : Promise.resolve()
+      ]);
+      setClientsLoading(false);
+    };
+    loadAllData();
   }, [search, statusFilter, groupFilter, showArchived, location.key]);
 
   const loadClients = async () => {
