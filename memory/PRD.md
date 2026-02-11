@@ -1,7 +1,7 @@
 # SchoolCRM - Product Requirements Document
 
 ## Original Problem Statement
-Build a lightweight CRM system for managing course students and leads. Simple, fast, usable by 5 internal users. Extended with 11 new feature modules.
+Build a lightweight CRM system for managing course students and leads. Simple, fast, usable by 5 internal users. Extended with 11 new feature modules. Now also accessible as a Telegram Mini App.
 
 ## Branding
 - **System Name:** SchoolCRM (formerly CourseCRM)
@@ -14,6 +14,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - **Database**: MongoDB
 - **File Storage**: Local (/app/uploads for audio files)
 - **Proxy**: React dev server proxy to backend
+- **Telegram Integration**: Telegram WebApp SDK + Bot API
 
 ## User Personas
 1. **Admin**: Full access - manages users, statuses, tariffs, sees all clients, activity log
