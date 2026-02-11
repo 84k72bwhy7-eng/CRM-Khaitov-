@@ -8,7 +8,7 @@ import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X, DollarSign,
 export default function SettingsPage() {
   const { t, language, switchLanguage } = useLanguage();
   const { user, updateUser, isAdmin } = useAuth();
-  const { get, post, put, del, loading } = useApi();
+  const { post, put, del, loading } = useApi();
 
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
