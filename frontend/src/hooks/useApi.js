@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
+console.log('[useApi] API_URL:', API_URL);
+
 export const useApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,6 +14,7 @@ export const useApi = () => {
     setError(null);
     try {
       const token = localStorage.getItem('crm_token');
+      console.log(`[useApi] ${method} ${endpoint}`, { hasToken: !!token, params });
       const config = { 
         method, 
         url: `${API_URL}${endpoint}`,
@@ -20,8 +23,10 @@ export const useApi = () => {
       if (data) config.data = data;
       if (params) config.params = params;
       const response = await axios(config);
+      console.log(`[useApi] ${method} ${endpoint} -> ${Array.isArray(response.data) ? response.data.length + ' items' : 'object'}`);
       return response.data;
     } catch (err) {
+      console.error(`[useApi] ${method} ${endpoint} ERROR:`, err.message);
       const errorMessage = err.response?.data?.detail || err.message;
       setError(errorMessage);
       throw err;
