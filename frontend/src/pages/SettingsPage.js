@@ -47,35 +47,54 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!isAdmin) return;
     
+    let isMounted = true;
     const controller = new AbortController();
     const API_URL = process.env.REACT_APP_BACKEND_URL;
     
     async function loadAdminData() {
       const token = localStorage.getItem('crm_token');
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
       
       try {
-        const [statusesRes, tariffsRes, groupsRes, settingsRes, telegramRes] = await Promise.all([
-          fetch(`${API_URL}/api/statuses`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/tariffs`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/groups`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/settings`, { headers, signal: controller.signal }),
-          fetch(`${API_URL}/api/notifications/telegram-status`, { headers, signal: controller.signal })
-        ]);
-        
-        if (statusesRes.ok) {
+        // Load statuses
+        const statusesRes = await fetch(`${API_URL}/api/statuses`, { 
+          headers, 
+          signal: controller.signal 
+        });
+        if (isMounted && statusesRes.ok) {
           const data = await statusesRes.json();
           setStatuses(Array.isArray(data) ? data : []);
         }
-        if (tariffsRes.ok) {
+        
+        // Load tariffs
+        const tariffsRes = await fetch(`${API_URL}/api/tariffs`, { 
+          headers, 
+          signal: controller.signal 
+        });
+        if (isMounted && tariffsRes.ok) {
           const data = await tariffsRes.json();
           setTariffs(Array.isArray(data) ? data : []);
         }
-        if (groupsRes.ok) {
+        
+        // Load groups
+        const groupsRes = await fetch(`${API_URL}/api/groups`, { 
+          headers, 
+          signal: controller.signal 
+        });
+        if (isMounted && groupsRes.ok) {
           const data = await groupsRes.json();
           setGroups(Array.isArray(data) ? data : []);
         }
-        if (settingsRes.ok) {
+        
+        // Load settings
+        const settingsRes = await fetch(`${API_URL}/api/settings`, { 
+          headers, 
+          signal: controller.signal 
+        });
+        if (isMounted && settingsRes.ok) {
           const data = await settingsRes.json();
           if (data) {
             setSystemSettings({ 
@@ -85,7 +104,13 @@ export default function SettingsPage() {
             setExchangeRateInput(String(Math.round(data.exchange_rates?.USD || 12500)));
           }
         }
-        if (telegramRes.ok) {
+        
+        // Load telegram status
+        const telegramRes = await fetch(`${API_URL}/api/notifications/telegram-status`, { 
+          headers, 
+          signal: controller.signal 
+        });
+        if (isMounted && telegramRes.ok) {
           const data = await telegramRes.json();
           setTelegramStatus(data);
         }
@@ -98,7 +123,10 @@ export default function SettingsPage() {
     
     loadAdminData();
     
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [isAdmin]);
 
   const sendTestNotification = async () => {
