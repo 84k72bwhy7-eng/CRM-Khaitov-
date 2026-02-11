@@ -9,7 +9,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 export default function DashboardPage() {
   const { t } = useLanguage();
   const { isAdmin } = useAuth();
-  const { get, loading } = useApi();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentClients, setRecentClients] = useState([]);
@@ -17,36 +16,73 @@ export default function DashboardPage() {
   const [overdueReminders, setOverdueReminders] = useState([]);
   const [managerStats, setManagerStats] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
-    try {
-      const [statsData, clientsData, notesData, remindersData] = await Promise.all([
-        get('/api/dashboard/stats'),
-        get('/api/dashboard/recent-clients'),
-        get('/api/dashboard/recent-notes'),
-        get('/api/reminders/overdue')
-      ]);
-      setStats(statsData);
-      setRecentClients(clientsData);
-      setRecentNotes(notesData);
-      setOverdueReminders(remindersData);
-
-      if (isAdmin) {
-        const managerData = await get('/api/dashboard/manager-stats');
-        setManagerStats(managerData);
+    const controller = new AbortController();
+    
+    const loadDashboardData = async () => {
+      const token = localStorage.getItem('crm_token');
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      try {
+        // Load basic dashboard data
+        const [statsRes, clientsRes, notesRes, remindersRes] = await Promise.all([
+          fetch(`${API_URL}/api/dashboard/stats`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/dashboard/recent-clients`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/dashboard/recent-notes`, { headers, signal: controller.signal }),
+          fetch(`${API_URL}/api/reminders/overdue`, { headers, signal: controller.signal })
+        ]);
         
-        // Load analytics data
-        const analyticsData = await get('/api/dashboard/analytics');
-        setAnalytics(analyticsData);
+        if (statsRes.ok) {
+          const data = await statsRes.json();
+          setStats(data);
+        }
+        if (clientsRes.ok) {
+          const data = await clientsRes.json();
+          setRecentClients(Array.isArray(data) ? data : []);
+        }
+        if (notesRes.ok) {
+          const data = await notesRes.json();
+          setRecentNotes(Array.isArray(data) ? data : []);
+        }
+        if (remindersRes.ok) {
+          const data = await remindersRes.json();
+          setOverdueReminders(Array.isArray(data) ? data : []);
+        }
+        
+        // Load admin-only data
+        if (isAdmin) {
+          const [managerRes, analyticsRes] = await Promise.all([
+            fetch(`${API_URL}/api/dashboard/manager-stats`, { headers, signal: controller.signal }),
+            fetch(`${API_URL}/api/dashboard/analytics`, { headers, signal: controller.signal })
+          ]);
+          
+          if (managerRes.ok) {
+            const data = await managerRes.json();
+            setManagerStats(Array.isArray(data) ? data : []);
+          }
+          if (analyticsRes.ok) {
+            const data = await analyticsRes.json();
+            setAnalytics(data);
+          }
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to load dashboard:', error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Failed to load dashboard:', error);
-    }
-  };
+    };
+    
+    loadDashboardData();
+    
+    return () => controller.abort();
+  }, [isAdmin]);
 
   const formatCurrency = (amount, currency = 'USD') => {
     if (currency === 'USD') {
