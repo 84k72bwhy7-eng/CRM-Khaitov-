@@ -11,7 +11,12 @@ export const useApi = () => {
     setLoading(true);
     setError(null);
     try {
-      const config = { method, url: `${API_URL}${endpoint}` };
+      const token = localStorage.getItem('crm_token');
+      const config = { 
+        method, 
+        url: `${API_URL}${endpoint}`,
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      };
       if (data) config.data = data;
       if (params) config.params = params;
       const response = await axios(config);
