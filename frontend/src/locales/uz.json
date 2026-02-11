@@ -100,7 +100,10 @@
     "selectTariff": "Tarifni tanlang",
     "initialComment": "Dastlabki izoh",
     "setReminder": "Eslatma qo'shish",
-    "duplicatePhone": "Bu telefon raqami allaqachon mavjud"
+    "duplicatePhone": "Bu telefon raqami allaqachon mavjud",
+    "call": "Qo'ng'iroq",
+    "quickAdd": "Tez qo'shish",
+    "fullForm": "To'liq formani ochish →"
   },
   "tariffs": {
     "title": "Tariflar",
