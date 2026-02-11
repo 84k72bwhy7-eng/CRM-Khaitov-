@@ -320,6 +320,155 @@ async def update_profile(data: UserUpdate, current_user: dict = Depends(get_curr
     user = users_collection.find_one({"_id": ObjectId(current_user["id"])}, {"password": 0})
     return serialize_doc(user)
 
+# ==================== TELEGRAM AUTH ====================
+
+class TelegramAuthRequest(BaseModel):
+    initData: str
+
+def validate_telegram_init_data(init_data: str, bot_token: str) -> dict:
+    """Validate Telegram WebApp initData and extract user info"""
+    if not bot_token:
+        raise ValueError("TELEGRAM_BOT_TOKEN not configured")
+    
+    # Parse the init data
+    try:
+        parsed = dict(parse_qs(init_data, keep_blank_values=True))
+        parsed = {k: v[0] for k, v in parsed.items()}
+    except Exception:
+        raise ValueError("Invalid initData format")
+    
+    # Extract hash
+    received_hash = parsed.pop('hash', None)
+    if not received_hash:
+        raise ValueError("Hash not found")
+    
+    # Create data check string (sorted alphabetically)
+    data_check_string = '\n'.join(
+        f"{k}={v}" for k, v in sorted(parsed.items())
+    )
+    
+    # Create secret key using HMAC-SHA256
+    secret_key = hmac.new(
+        b"WebAppData",
+        bot_token.encode(),
+        hashlib.sha256
+    ).digest()
+    
+    # Calculate expected hash
+    calculated_hash = hmac.new(
+        secret_key,
+        data_check_string.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    # Validate hash
+    if not hmac.compare_digest(calculated_hash, received_hash):
+        raise ValueError("Invalid hash")
+    
+    # Check auth_date (allow 24 hours)
+    auth_date = int(parsed.get('auth_date', 0))
+    if time.time() - auth_date > 86400:
+        raise ValueError("Auth data expired")
+    
+    # Parse user JSON
+    user_json = parsed.get('user', '{}')
+    try:
+        user_data = json.loads(user_json)
+    except json.JSONDecodeError:
+        raise ValueError("Invalid user data")
+    
+    return user_data
+
+@app.post("/api/auth/telegram")
+async def telegram_auth(data: TelegramAuthRequest):
+    """Authenticate user via Telegram WebApp"""
+    try:
+        tg_user = validate_telegram_init_data(data.initData, TELEGRAM_BOT_TOKEN)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    
+    telegram_id = str(tg_user.get('id'))
+    if not telegram_id:
+        raise HTTPException(status_code=401, detail="No Telegram user ID")
+    
+    # Find user by telegram_id
+    user = users_collection.find_one({"telegram_id": telegram_id})
+    
+    if not user:
+        # User not linked - return info for linking
+        return {
+            "status": "not_linked",
+            "telegram_user": {
+                "id": telegram_id,
+                "first_name": tg_user.get('first_name', ''),
+                "last_name": tg_user.get('last_name', ''),
+                "username": tg_user.get('username', '')
+            },
+            "message": "Telegram account not linked to CRM user"
+        }
+    
+    # User found - create JWT and login
+    token = create_access_token({"sub": str(user["_id"]), "role": user["role"]})
+    user_data = serialize_doc(user)
+    if "password" in user_data:
+        del user_data["password"]
+    
+    return {
+        "status": "success",
+        "token": token,
+        "user": user_data
+    }
+
+class TelegramLinkRequest(BaseModel):
+    email: str
+    password: str
+    initData: str
+
+@app.post("/api/auth/telegram/link")
+async def link_telegram_account(data: TelegramLinkRequest):
+    """Link existing CRM account to Telegram"""
+    # Validate Telegram data
+    try:
+        tg_user = validate_telegram_init_data(data.initData, TELEGRAM_BOT_TOKEN)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=f"Telegram validation failed: {str(e)}")
+    
+    telegram_id = str(tg_user.get('id'))
+    
+    # Verify CRM credentials
+    user = users_collection.find_one({"email": data.email})
+    if not user or not verify_password(data.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Check if Telegram already linked to another account
+    existing = users_collection.find_one({"telegram_id": telegram_id})
+    if existing and str(existing["_id"]) != str(user["_id"]):
+        raise HTTPException(status_code=400, detail="Telegram account already linked to another user")
+    
+    # Link Telegram to this user
+    users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$set": {
+            "telegram_id": telegram_id,
+            "telegram_username": tg_user.get('username', ''),
+            "telegram_first_name": tg_user.get('first_name', ''),
+            "telegram_linked_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Create JWT and return
+    token = create_access_token({"sub": str(user["_id"]), "role": user["role"]})
+    user = users_collection.find_one({"_id": user["_id"]}, {"password": 0})
+    user_data = serialize_doc(user)
+    
+    log_activity(str(user_data["id"]), user_data["name"], "link_telegram", "user", str(user_data["id"]), {"telegram_id": telegram_id})
+    
+    return {
+        "status": "success",
+        "token": token,
+        "user": user_data
+    }
+
 # ==================== USERS ENDPOINTS ====================
 
 @app.get("/api/users")
