@@ -112,19 +112,21 @@ def format_reminder_message(client_name: str, client_phone: str, reminder_text: 
     except:
         formatted_time = remind_at
     
+    # Include phone as clickable text in message (Telegram auto-links phone numbers)
     message = f"""🔔 <b>Eslatma!</b>
 
 👤 <b>Mijoz:</b> {client_name}
-📞 <b>Telefon:</b> {client_phone}
+📞 <b>Telefon:</b> <code>{client_phone}</code>
 📝 <b>Eslatma:</b> {reminder_text}
-⏰ <b>Vaqt:</b> {formatted_time}"""
+⏰ <b>Vaqt:</b> {formatted_time}
+
+<i>Telefon raqamini bosib nusxalang va qo'ng'iroq qiling</i>"""
     
-    # Create inline keyboard with buttons
+    # Create inline keyboard with button to open client in CRM
     reply_markup = {
         "inline_keyboard": [
             [
-                {"text": "📞 Qo'ng'iroq qilish", "url": f"tel:{client_phone.replace(' ', '').replace('-', '')}"},
-                {"text": "👁 Mijozni ochish", "url": f"{WEBAPP_URL}/clients/{client_id}"}
+                {"text": "👁 Mijozni CRM da ochish", "url": f"{WEBAPP_URL}/clients/{client_id}"}
             ]
         ]
     }
