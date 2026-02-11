@@ -77,6 +77,7 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - [x] **Mobile UX Optimization**: Floating add button, quick actions, clickable phones, card layout
 - [x] **Telegram Reminder Notifications**: Automatic sending of due reminders via Telegram bot
 - [x] **Notification Status UI**: Admin dashboard in Settings showing notification stats
+- [x] **Instagram Lead Workflow**: Quick add with Instagram default, success actions (Call/Reminder/Note)
 
 ### Database Schema
 **Collections:**
