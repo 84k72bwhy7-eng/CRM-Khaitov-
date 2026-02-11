@@ -919,10 +919,10 @@ async def get_client(client_id: str, current_user: dict = Depends(get_current_us
 
 @app.post("/api/clients")
 async def create_client(data: ClientCreate, current_user: dict = Depends(get_current_user)):
-    # Check duplicate phone - allow duplicates for now (different from MongoDB version)
-    # existing = supabase.table('clients').select('*').eq('phone', data.phone).limit(1).execute()
-    # if existing.data:
-    #     raise HTTPException(status_code=400, detail="Phone number already exists")
+    # DETAILED LOGGING for debugging sync issues
+    print(f"[CLIENT CREATE] User: {current_user['name']} (ID: {current_user['id']})")
+    print(f"[CLIENT CREATE] Database: Supabase @ {SUPABASE_URL}")
+    print(f"[CLIENT CREATE] Data: name={data.name}, phone={data.phone}, source={data.source}")
     
     client_id = new_uuid()
     client_doc = {
@@ -938,7 +938,10 @@ async def create_client(data: ClientCreate, current_user: dict = Depends(get_cur
         'group_id': data.group_id,
         'created_at': datetime.now(timezone.utc).isoformat()
     }
-    supabase.table('clients').insert(client_doc).execute()
+    
+    print(f"[CLIENT CREATE] Inserting client ID: {client_id} to Supabase...")
+    result = supabase.table('clients').insert(client_doc).execute()
+    print(f"[CLIENT CREATE] Insert result: {len(result.data) if result.data else 0} rows inserted")
     
     # Create initial comment
     if data.initial_comment:
