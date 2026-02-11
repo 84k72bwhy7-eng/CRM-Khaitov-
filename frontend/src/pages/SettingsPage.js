@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X, DollarSign, Tag, Users } from 'lucide-react';
+import { User, Lock, Globe, Loader2, Palette, Plus, Edit, Trash2, X, DollarSign, Tag, Users, RefreshCw } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t, language, switchLanguage } = useLanguage();
