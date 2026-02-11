@@ -113,7 +113,14 @@ Build a lightweight CRM system for managing course students and leads. Simple, f
 - Phase 1 & 2: 100% pass
 - Phase 3 (Completed): 100% pass (iteration_3.json, iteration_4.json)
 - Audio Playback Fix: 100% pass (iteration_7.json)
-- **Supabase Migration: 100% pass (iteration_8.json)** - All 33 backend tests + frontend verification passed
+- Supabase Migration: 100% pass (iteration_8.json) - All 33 backend tests + frontend verification passed
+- **Frontend Bug Fix (ClientsPage): 100% pass (iteration_9.json)** - Fixed React StrictMode race condition in data loading
+
+## Bug Fixes (2026-02-11)
+- **[P0] ClientsPage Rendering Bug**: Fixed critical bug where clients list showed "Loading..." indefinitely
+  - **Root Cause**: Race condition in React StrictMode where cleanup function invalidated state updates
+  - **Fix**: Implemented AbortController pattern for proper fetch cancellation
+  - **File**: `/app/frontend/src/pages/ClientsPage.js`
 
 ## Prioritized Backlog
 
