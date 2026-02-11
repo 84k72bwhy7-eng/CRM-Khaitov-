@@ -39,7 +39,12 @@
     "password": "Пароль",
     "loginButton": "Войти в систему",
     "loginError": "Неверный email или пароль",
-    "welcome": "Добро пожаловать"
+    "welcome": "Добро пожаловать",
+    "telegramLinkTitle": "Привяжите ваш Telegram",
+    "telegramLinkDesc": "Введите данные CRM для привязки Telegram аккаунта",
+    "linkAccount": "Привязать аккаунт",
+    "telegramLinked": "Telegram аккаунт успешно привязан!",
+    "openedViaTelegram": "Открыто через Telegram"
   },
   "dashboard": {
     "title": "Главная",
