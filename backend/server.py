@@ -1497,6 +1497,70 @@ async def check_reminders(current_user: dict = Depends(get_current_user)):
     
     return {"new_notifications": new_notifications}
 
+@app.post("/api/notifications/send-telegram-reminders")
+async def send_telegram_reminders(current_user: dict = Depends(get_current_user)):
+    """Admin: Manually trigger Telegram reminder check and send"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    sent_count = await check_and_send_telegram_reminders()
+    return {"message": f"Sent {sent_count} Telegram reminder(s)", "sent_count": sent_count}
+
+@app.post("/api/notifications/test-telegram")
+async def test_telegram_notification(current_user: dict = Depends(get_current_user)):
+    """Test Telegram notification for current user"""
+    telegram_id = current_user.get("telegram_id")
+    if not telegram_id:
+        raise HTTPException(status_code=400, detail="Your account is not linked to Telegram")
+    
+    test_message = """🧪 <b>Test xabar</b>
+
+Bu test xabar SchoolCRM dan.
+Telegram bildirishnomalar ishlayapti! ✅
+
+<i>Eslatmalar avtomatik ravishda yuboriladi.</i>"""
+    
+    reply_markup = {
+        "inline_keyboard": [
+            [{"text": "📱 CRM ni ochish", "url": WEBAPP_URL}]
+        ]
+    }
+    
+    success = await send_telegram_message(telegram_id, test_message, reply_markup)
+    
+    if success:
+        return {"message": "Test notification sent successfully", "telegram_id": telegram_id}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to send test notification")
+
+@app.get("/api/notifications/telegram-status")
+async def get_telegram_status(current_user: dict = Depends(get_current_user)):
+    """Get Telegram notification status for current user"""
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get stats
+    total_reminders = reminders_collection.count_documents({"is_completed": {"$ne": True}})
+    telegram_sent = reminders_collection.count_documents({"telegram_sent": True})
+    pending = reminders_collection.count_documents({
+        "telegram_sent": {"$ne": True},
+        "is_completed": {"$ne": True}
+    })
+    
+    # Get users with Telegram linked
+    users_with_telegram = users_collection.count_documents({"telegram_id": {"$exists": True, "$ne": ""}})
+    total_users = users_collection.count_documents({})
+    
+    return {
+        "scheduler_running": reminder_scheduler_running,
+        "bot_token_configured": bool(TELEGRAM_BOT_TOKEN),
+        "total_active_reminders": total_reminders,
+        "telegram_sent": telegram_sent,
+        "pending_reminders": pending,
+        "users_with_telegram": users_with_telegram,
+        "total_users": total_users
+    }
+
 # ==================== STATUSES ENDPOINTS ====================
 
 @app.get("/api/statuses")
