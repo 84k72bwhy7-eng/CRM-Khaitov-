@@ -4,11 +4,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
-import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell, Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download, MessageSquare, Bell, Upload, FileSpreadsheet, CheckCircle, AlertCircle, Phone, CreditCard } from 'lucide-react';
 
 export default function ClientsPage() {
   const { t } = useLanguage();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isTelegram } = useAuth();
   const { get, post, put, del, loading } = useApi();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -21,6 +21,7 @@ export default function ClientsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
   const [formData, setFormData] = useState({ 
     name: '', 
@@ -45,6 +46,9 @@ export default function ClientsPage() {
   const [importResult, setImportResult] = useState(null);
   const [groups, setGroups] = useState([]);
   const [groupFilter, setGroupFilter] = useState('');
+
+  // Detect mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   useEffect(() => {
     loadClients();
@@ -103,11 +107,56 @@ export default function ClientsPage() {
     }
   };
 
+  // Quick Add - minimal form for fast client creation
+  const handleQuickAdd = async (e) => {
+    e.preventDefault();
+    try {
+      const createData = {
+        name: formData.name,
+        phone: formData.phone,
+        source: formData.source || '',
+        status: 'new',
+        manager_id: null,
+        tariff_id: null,
+        group_id: null,
+        initial_comment: null,
+        reminder_text: null,
+        reminder_at: null
+      };
+      await post('/api/clients', createData);
+      toast.success(t.clients.clientCreated);
+      setShowQuickAdd(false);
+      setFormData({ 
+        name: '', 
+        phone: '', 
+        source: '', 
+        status: 'new', 
+        manager_id: '',
+        tariff_id: '',
+        group_id: '',
+        initial_comment: '',
+        reminder_text: '',
+        reminder_at: ''
+      });
+      loadClients();
+      
+      // Haptic feedback in Telegram
+      if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+      }
+    } catch (error) {
+      if (error?.response?.status === 400) {
+        toast.error(t.clients.duplicatePhone);
+      } else {
+        toast.error(t.common.error);
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingClient) {
-        // For editing, only send basic fields (no comment/reminder)
         const updateData = {
           name: formData.name,
           phone: formData.phone,
@@ -120,7 +169,6 @@ export default function ClientsPage() {
         await put(`/api/clients/${editingClient.id}`, updateData);
         toast.success(t.clients.clientUpdated);
       } else {
-        // For creating, include comment and reminder
         const createData = {
           name: formData.name,
           phone: formData.phone,
@@ -221,7 +269,6 @@ export default function ClientsPage() {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Validate file type
     const validTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     if (!validTypes.includes(file.type) && !file.name.endsWith('.csv') && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
       toast.error(t.import.selectFile);
@@ -232,7 +279,6 @@ export default function ClientsPage() {
     setImportPreview(null);
     setImportResult(null);
     
-    // Upload and get preview
     const formData = new FormData();
     formData.append('file', file);
     
@@ -270,7 +316,6 @@ export default function ClientsPage() {
     try {
       setImporting(true);
       
-      // Prepare valid rows for import
       const validRows = importPreview.rows.filter(r => r.valid).map(r => ({
         name: r.name,
         phone: r.phone,
@@ -327,13 +372,32 @@ export default function ClientsPage() {
     return status?.color || '#3B82F6';
   };
 
+  // Format phone for tel: link
+  const formatPhoneLink = (phone) => {
+    return phone.replace(/[^+\d]/g, '');
+  };
+
   return (
-    <div className="space-y-6 animate-fadeIn" data-testid="clients-page">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="space-y-4 md:space-y-6 animate-fadeIn pb-20 md:pb-6" data-testid="clients-page">
+      {/* Sticky Search Bar for Mobile */}
+      <div className="sticky top-0 z-20 bg-white -mx-4 px-4 py-3 md:relative md:mx-0 md:px-0 md:py-0 md:bg-transparent border-b md:border-0 border-border">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={20} />
+          <input
+            type="text"
+            placeholder={t.clients.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input-field pl-11 pr-4 py-3 w-full text-base"
+            data-testid="search-input"
+          />
+        </div>
+      </div>
+
+      {/* Header - Desktop */}
+      <div className="hidden md:flex md:items-center md:justify-between gap-4">
         <h1 className="text-2xl lg:text-3xl font-bold text-text-primary">{t.clients.title}</h1>
         <div className="flex flex-wrap gap-2">
-          {/* Import Button - Admin Only */}
           {isAdmin && (
             <button
               onClick={() => setShowImportModal(true)}
@@ -380,78 +444,157 @@ export default function ClientsPage() {
         </div>
       </div>
 
+      {/* Mobile Header */}
+      <div className="flex md:hidden items-center justify-between">
+        <h1 className="text-xl font-bold text-text-primary">{t.clients.title}</h1>
+        <span className="text-sm text-text-muted">{clients.length} {t.clients.title.toLowerCase()}</span>
+      </div>
+
       {/* Filters */}
-      <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-center">
-        {/* Search Field */}
-        <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
-          <input
-            type="text"
-            placeholder={t.clients.searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-10 w-full"
-            data-testid="search-input"
-          />
+      <div className="flex flex-wrap gap-2 md:gap-3">
+        {/* Status Filter */}
+        <div className="relative flex-1 min-w-[120px] md:flex-none">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="input-field pl-3 pr-8 py-2.5 w-full md:w-40 appearance-none bg-white text-sm"
+            data-testid="status-filter"
+          >
+            <option value="">{t.clients.allStatuses}</option>
+            {statuses.map((s) => (
+              <option key={s.id} value={s.name}>{t.statuses[s.name] || s.name}</option>
+            ))}
+          </select>
+          <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
+            <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
         
-        {/* Filter Row - Stack on mobile */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
-          {/* Status Filter */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none z-10" size={18} />
+        {/* Group Filter */}
+        {groups.length > 0 && (
+          <div className="relative flex-1 min-w-[120px] md:flex-none">
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-field pl-10 pr-8 w-full sm:w-44 appearance-none bg-white"
-              data-testid="status-filter"
+              value={groupFilter}
+              onChange={(e) => setGroupFilter(e.target.value)}
+              className="input-field pr-8 py-2.5 w-full md:w-40 appearance-none bg-white text-sm"
+              data-testid="group-filter"
             >
-              <option value="">{t.clients.allStatuses}</option>
-              {statuses.map((s) => (
-                <option key={s.id} value={s.name}>{t.statuses[s.name] || s.name}</option>
+              <option value="">{t.groups?.allGroups || 'All Groups'}</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
             <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
               <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          
-          {/* Group Filter */}
-          {groups.length > 0 && (
-            <div className="relative">
-              <select
-                value={groupFilter}
-                onChange={(e) => setGroupFilter(e.target.value)}
-                className="input-field pr-8 w-full sm:w-44 appearance-none bg-white"
-                data-testid="group-filter"
-              >
-                <option value="">{t.groups?.allGroups || 'All Groups'}</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </select>
-              <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" width="12" height="12" viewBox="0 0 12 12">
-                <path d="M3 5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          )}
-          
-          {/* Archive Toggle */}
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border transition-colors whitespace-nowrap ${
-              showArchived ? 'bg-gray-100 border-gray-300 text-gray-700' : 'border-border hover:bg-gray-50 text-text-secondary'
-            }`}
-            data-testid="archive-toggle"
-          >
-            <Archive size={18} />
-            <span>{t.clients.archived}</span>
-          </button>
-        </div>
+        )}
+        
+        {/* Archive Toggle */}
+        <button
+          onClick={() => setShowArchived(!showArchived)}
+          className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg border transition-colors text-sm whitespace-nowrap ${
+            showArchived ? 'bg-gray-100 border-gray-300 text-gray-700' : 'border-border hover:bg-gray-50 text-text-secondary'
+          }`}
+          data-testid="archive-toggle"
+        >
+          <Archive size={16} />
+          <span className="hidden sm:inline">{t.clients.archived}</span>
+        </button>
       </div>
 
-      {/* Clients Table */}
-      <div className="card overflow-hidden">
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {clients.length === 0 ? (
+          <div className="text-center py-12 text-text-muted">
+            {t.clients.noClients}
+          </div>
+        ) : (
+          clients.map((client) => (
+            <div 
+              key={client.id} 
+              className="card p-4 space-y-3 active:bg-gray-50 transition-colors"
+              data-testid={`client-card-${client.id}`}
+            >
+              {/* Client Name & Status Row */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h3 
+                    className="font-semibold text-text-primary text-base truncate cursor-pointer"
+                    onClick={() => navigate(`/clients/${client.id}`)}
+                  >
+                    {client.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    <span 
+                      className="status-badge text-xs px-2 py-0.5"
+                      style={{ backgroundColor: `${getStatusColor(client.status)}20`, color: getStatusColor(client.status) }}
+                    >
+                      {t.statuses[client.status] || client.status}
+                    </span>
+                    {client.group_name && (
+                      <span 
+                        className="text-xs px-2 py-0.5 rounded"
+                        style={{ backgroundColor: `${client.group_color || '#6B7280'}20`, color: client.group_color || '#6B7280' }}
+                      >
+                        {client.group_name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="text-xs text-text-muted whitespace-nowrap">
+                  {formatDate(client.created_at)}
+                </span>
+              </div>
+
+              {/* Phone Number - Clickable */}
+              <a 
+                href={`tel:${formatPhoneLink(client.phone)}`}
+                className="flex items-center gap-2 text-primary font-medium text-base py-2 -my-1 active:opacity-70"
+                data-testid={`call-client-${client.id}`}
+              >
+                <Phone size={18} />
+                {client.phone}
+              </a>
+
+              {/* Quick Actions */}
+              <div className="flex gap-2 pt-1 border-t border-border">
+                {/* Call Button */}
+                <a 
+                  href={`tel:${formatPhoneLink(client.phone)}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-50 text-green-700 rounded-lg font-medium active:bg-green-100 transition-colors"
+                  data-testid={`quick-call-${client.id}`}
+                >
+                  <Phone size={18} />
+                  {t.clients?.call || 'Call'}
+                </a>
+                
+                {/* Add Payment Button */}
+                <button
+                  onClick={() => navigate(`/clients/${client.id}?tab=payments&action=add`)}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium active:bg-blue-100 transition-colors"
+                  data-testid={`quick-payment-${client.id}`}
+                >
+                  <CreditCard size={18} />
+                  {t.payments?.addPayment || 'Payment'}
+                </button>
+                
+                {/* Edit Button */}
+                <button
+                  onClick={() => handleEdit(client)}
+                  className="flex items-center justify-center p-3 bg-gray-50 text-text-secondary rounded-lg active:bg-gray-100 transition-colors"
+                  data-testid={`quick-edit-${client.id}`}
+                >
+                  <Edit size={18} />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px]" data-testid="clients-table">
             <thead>
@@ -491,7 +634,15 @@ export default function ClientsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="p-3 lg:p-4 text-text-secondary">{client.phone}</td>
+                    <td className="p-3 lg:p-4">
+                      <a 
+                        href={`tel:${formatPhoneLink(client.phone)}`}
+                        className="text-primary hover:underline flex items-center gap-1.5"
+                      >
+                        <Phone size={14} />
+                        {client.phone}
+                      </a>
+                    </td>
                     <td className="p-3 lg:p-4 text-text-secondary hidden sm:table-cell">{client.source || '-'}</td>
                     <td className="p-3 lg:p-4">
                       <span 
@@ -535,7 +686,104 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
+      {/* Floating Add Button - Mobile Only */}
+      <button
+        onClick={() => setShowQuickAdd(true)}
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-black rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform"
+        style={{ boxShadow: '0 4px 14px rgba(250, 204, 21, 0.4)' }}
+        data-testid="floating-add-button"
+      >
+        <Plus size={28} strokeWidth={2.5} />
+      </button>
+
+      {/* Quick Add Modal - Mobile Optimized */}
+      {showQuickAdd && (
+        <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowQuickAdd(false)}>
+          <div 
+            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+            data-testid="quick-add-modal"
+          >
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3" />
+            <div className="p-5">
+              <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+                <Plus size={20} />
+                {t.clients?.quickAdd || 'Quick Add Client'}
+              </h3>
+              <form onSubmit={handleQuickAdd} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t.clients.name} *</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="input-field py-3 text-base"
+                    placeholder="Ism Familiya"
+                    required
+                    autoFocus
+                    data-testid="quick-add-name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">{t.clients.phone} *</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="input-field py-3 text-base"
+                    placeholder="+998 90 123 45 67"
+                    required
+                    data-testid="quick-add-phone"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-1.5">
+                    {t.clients.source} <span className="text-text-muted font-normal">({t.common.optional})</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.source}
+                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                    className="input-field py-3 text-base"
+                    placeholder="Instagram, Telegram..."
+                    data-testid="quick-add-source"
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickAdd(false)}
+                    className="btn-outline flex-1 py-3"
+                  >
+                    {t.common.cancel}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
+                    data-testid="quick-add-submit"
+                  >
+                    {loading && <Loader2 size={18} className="animate-spin" />}
+                    {t.common.save}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowQuickAdd(false);
+                    setShowModal(true);
+                  }}
+                  className="w-full text-center text-sm text-primary py-2"
+                >
+                  {t.clients?.fullForm || 'Open full form →'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} data-testid="client-modal">
@@ -551,7 +799,7 @@ export default function ClientsPage() {
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">{t.clients.name}</label>
                 <input
@@ -615,7 +863,6 @@ export default function ClientsPage() {
                 </div>
               )}
               
-              {/* Tariff Selection */}
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   {t.clients.tariff} <span className="text-text-muted font-normal">({t.common.optional})</span>
@@ -635,7 +882,6 @@ export default function ClientsPage() {
                 </select>
               </div>
 
-              {/* Group Selection */}
               {groups.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">
@@ -657,7 +903,6 @@ export default function ClientsPage() {
                 </div>
               )}
 
-              {/* Initial Comment - Only for new clients */}
               {!editingClient && (
                 <div>
                   <label className="block text-sm font-medium text-text-primary mb-2">
@@ -674,7 +919,6 @@ export default function ClientsPage() {
                 </div>
               )}
 
-              {/* Reminder Toggle - Only for new clients */}
               {!editingClient && (
                 <div className="space-y-3">
                   <button
@@ -747,7 +991,7 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {/* Import Modal */}
+      {/* Import Modal - Keep as is for desktop */}
       {showImportModal && (
         <div className="modal-overlay" onClick={resetImportModal}>
           <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()} data-testid="import-modal">
@@ -766,7 +1010,6 @@ export default function ClientsPage() {
             </div>
             
             <div className="p-4 lg:p-6 space-y-6">
-              {/* File Upload Section */}
               {!importResult && (
                 <div className="space-y-4">
                   <div 
@@ -801,10 +1044,8 @@ export default function ClientsPage() {
                 </div>
               )}
 
-              {/* Preview Section */}
               {importPreview && !importResult && (
                 <div className="space-y-4">
-                  {/* Summary Stats */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-background-subtle p-4 rounded-lg text-center">
                       <p className="text-2xl font-bold text-text-primary">{importPreview.total}</p>
@@ -824,7 +1065,6 @@ export default function ClientsPage() {
                     </div>
                   </div>
                   
-                  {/* Preview Table */}
                   <div className="border border-border rounded-lg overflow-hidden">
                     <div className="overflow-x-auto max-h-64">
                       <table className="w-full text-sm">
@@ -866,7 +1106,6 @@ export default function ClientsPage() {
                     )}
                   </div>
                   
-                  {/* Action Buttons */}
                   <div className="flex gap-3">
                     <button 
                       onClick={resetImportModal}
@@ -887,7 +1126,6 @@ export default function ClientsPage() {
                 </div>
               )}
 
-              {/* Result Section */}
               {importResult && (
                 <div className="space-y-4">
                   <div className="text-center py-6">
@@ -928,6 +1166,21 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
+
+      {/* CSS for slide up animation */}
+      <style>{`
+        @keyframes slideUp {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
