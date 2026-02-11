@@ -79,7 +79,7 @@ export default function ClientsPage() {
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
       
-      // Direct axios call to avoid hook-related issues
+      // Direct fetch call to avoid hook-related issues
       const token = localStorage.getItem('crm_token');
       const API_URL = process.env.REACT_APP_BACKEND_URL;
       const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
@@ -87,8 +87,10 @@ export default function ClientsPage() {
       });
       const data = await response.json();
       setClients(data || []);
+      return data;
     } catch (error) {
       console.error('Failed to load clients:', error);
+      return [];
     }
   };
 
