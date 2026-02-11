@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function DashboardPage() {
   const { t } = useLanguage();
-  const { isAdmin, user, loading: authLoading } = useAuth();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentClients, setRecentClients] = useState([]);
@@ -17,65 +17,69 @@ export default function DashboardPage() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Load basic dashboard data on mount
   useEffect(() => {
-    // Wait for auth to complete first
-    if (authLoading) return;
-    
-    // If no user after auth completes, don't fetch
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    
     let isMounted = true;
     
-    const loadDashboardData = async () => {
+    const loadBasicData = async () => {
       const token = localStorage.getItem('crm_token');
       const API_URL = process.env.REACT_APP_BACKEND_URL;
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       try {
-        // Fetch all data
-        const responses = await Promise.all([
+        const [statsRes, clientsRes, notesRes, remindersRes] = await Promise.all([
           fetch(`${API_URL}/api/dashboard/stats`, { headers }),
           fetch(`${API_URL}/api/dashboard/recent-clients`, { headers }),
           fetch(`${API_URL}/api/dashboard/recent-notes`, { headers }),
-          fetch(`${API_URL}/api/reminders/overdue`, { headers }),
-          ...(isAdmin ? [
-            fetch(`${API_URL}/api/dashboard/manager-stats`, { headers }),
-            fetch(`${API_URL}/api/dashboard/analytics`, { headers })
-          ] : [])
+          fetch(`${API_URL}/api/reminders/overdue`, { headers })
         ]);
         
-        // Only update state if still mounted
         if (!isMounted) return;
         
-        // Process basic data
-        if (responses[0].ok) setStats(await responses[0].json());
-        if (responses[1].ok) setRecentClients(await responses[1].json() || []);
-        if (responses[2].ok) setRecentNotes(await responses[2].json() || []);
-        if (responses[3].ok) setOverdueReminders(await responses[3].json() || []);
-        
-        // Process admin-only data
-        if (isAdmin && responses.length > 4) {
-          if (responses[4].ok) setManagerStats(await responses[4].json() || []);
-          if (responses[5].ok) setAnalytics(await responses[5].json());
-        }
+        if (statsRes.ok) setStats(await statsRes.json());
+        if (clientsRes.ok) setRecentClients(await clientsRes.json() || []);
+        if (notesRes.ok) setRecentNotes(await notesRes.json() || []);
+        if (remindersRes.ok) setOverdueReminders(await remindersRes.json() || []);
       } catch (error) {
-        console.error('Failed to load dashboard:', error);
+        console.error('Failed to load basic data:', error);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
     
-    loadDashboardData();
+    loadBasicData();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Load admin-only data when isAdmin changes
+  useEffect(() => {
+    if (!isAdmin) return;
     
-    return () => {
-      isMounted = false;
+    let isMounted = true;
+    
+    const loadAdminData = async () => {
+      const token = localStorage.getItem('crm_token');
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      try {
+        const [managerRes, analyticsRes] = await Promise.all([
+          fetch(`${API_URL}/api/dashboard/manager-stats`, { headers }),
+          fetch(`${API_URL}/api/dashboard/analytics`, { headers })
+        ]);
+        
+        if (!isMounted) return;
+        
+        if (managerRes.ok) setManagerStats(await managerRes.json() || []);
+        if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
+      } catch (error) {
+        console.error('Failed to load admin data:', error);
+      }
     };
-  }, [authLoading, user, isAdmin]);
+    
+    loadAdminData();
+    return () => { isMounted = false; };
+  }, [isAdmin]);
 
   const formatCurrency = (amount, currency = 'USD') => {
     if (currency === 'USD') {
