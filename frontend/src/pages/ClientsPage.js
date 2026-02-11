@@ -63,15 +63,19 @@ export default function ClientsPage() {
   }, [search, statusFilter, groupFilter, showArchived]);
 
   const loadClients = async () => {
+    console.log('[ClientsPage] loadClients called');
     try {
       const params = { is_archived: showArchived, exclude_sold: true };
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
+      console.log('[ClientsPage] Fetching with params:', params);
       const data = await get('/api/clients', params);
+      console.log('[ClientsPage] Received data:', data ? data.length : 'null');
       setClients(data || []);
+      console.log('[ClientsPage] setClients called');
     } catch (error) {
-      console.error('Failed to load clients:', error);
+      console.error('[ClientsPage] Failed to load clients:', error);
     }
   };
 
