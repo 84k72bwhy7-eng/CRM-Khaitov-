@@ -80,33 +80,44 @@ export default function ClientsPage() {
   // Load clients when filters change or on initial load
   useEffect(() => {
     let isMounted = true;
+    console.log('[ClientsPage] useEffect triggered - loading clients');
     
     const fetchClients = async () => {
+      console.log('[ClientsPage] fetchClients starting...');
       setClientsLoading(true);
       try {
         const token = localStorage.getItem('crm_token');
         const API_URL = process.env.REACT_APP_BACKEND_URL;
+        console.log('[ClientsPage] API_URL:', API_URL, 'Token exists:', !!token);
+        
         const params = { is_archived: showArchived, exclude_sold: true };
         if (search) params.search = search;
         if (statusFilter) params.status = statusFilter;
         if (groupFilter) params.group_id = groupFilter;
         
-        const response = await fetch(`${API_URL}/api/clients?${new URLSearchParams(params)}`, {
+        const url = `${API_URL}/api/clients?${new URLSearchParams(params)}`;
+        console.log('[ClientsPage] Fetching:', url);
+        
+        const response = await fetch(url, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
+        
+        console.log('[ClientsPage] Response status:', response.status);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const clientsData = await response.json();
+        console.log('[ClientsPage] Received', Array.isArray(clientsData) ? clientsData.length : 0, 'clients');
         
         if (isMounted) {
           setClients(Array.isArray(clientsData) ? clientsData : []);
           setClientsLoading(false);
+          console.log('[ClientsPage] State updated, loading complete');
         }
       } catch (error) {
-        console.error('Failed to load clients:', error);
+        console.error('[ClientsPage] Failed to load clients:', error);
         if (isMounted) {
           setClients([]);
           setClientsLoading(false);
@@ -117,6 +128,7 @@ export default function ClientsPage() {
     fetchClients();
     
     return () => {
+      console.log('[ClientsPage] Cleanup - setting isMounted to false');
       isMounted = false;
     };
   }, [search, statusFilter, groupFilter, showArchived]);
