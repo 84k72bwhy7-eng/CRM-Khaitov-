@@ -9,7 +9,7 @@ import { Plus, Search, Filter, Eye, Edit, Trash2, X, Loader2, Archive, Download,
 export default function ClientsPage() {
   const { t } = useLanguage();
   const { isAdmin, isTelegram } = useAuth();
-  const { get, post, put, del, loading } = useApi();
+  const { post, put, del, loading } = useApi();
   const navigate = useNavigate();
   const location = useLocation();
   const fileInputRef = useRef(null);
